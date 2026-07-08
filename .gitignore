@@ -1,0 +1,10 @@
+# Dépendances
+node_modules/
+
+# Build Next.js
+.next/
+
+# Divers
+.DS_Store
+*.log
+.env*.local
