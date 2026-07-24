@@ -14,8 +14,9 @@ export default function Bespoke() {
             <div className="divider" />
             <p className="lead" style={{ marginBottom: '1.5rem' }}>
               Que vous soyez une association, un comité d&apos;entreprise, un
-              organisateur d&apos;événements, un groupe d&apos;amis ou un particulier —
-              des interventions adaptées à vos envies.
+              organisateur d&apos;évènements, un groupe d&apos;amis ou un particulier,
+              nous vous proposons des interventions sur-mesure adaptées à vos
+              envies : yoga, Pilates, marche nordique, massages bien-être.
             </p>
 
             <div className="bespoke-types">
@@ -24,9 +25,15 @@ export default function Bespoke() {
               ))}
             </div>
 
-            <a href="tel:0609316145" className="btn-primary" style={{ display: 'inline-block' }}>
-              Prendre rendez-vous
-            </a>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+              <a href="tel:0609316145" className="btn-primary" style={{ display: 'inline-block' }}>
+                Prendre rendez-vous
+              </a>
+              {/* TODO M'GYM : déposer la plaquette PDF dans /public/documents/Plaquette-MGYM.pdf pour activer ce lien */}
+              <a href="/documents/Plaquette-MGYM.pdf" download className="btn-outline" style={{ display: 'inline-block' }}>
+                Télécharger la plaquette
+              </a>
+            </div>
           </div>
 
           <div className="sr-r">

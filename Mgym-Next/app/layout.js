@@ -25,7 +25,7 @@ const montserrat = Montserrat({
 // metadata = les infos de l'onglet du navigateur et du référencement Google
 export const metadata = {
   title: "M'GYM — Bien-être & Santé · Mirepoix-sur-Tarn",
-  description: "Association sport et bien-être à Mirepoix-sur-Tarn. Pilates, Yoga, Marche Nordique, Gym Bien-être avec Emmanuelle Franc.",
+  description: "Association sport et bien-être à Mirepoix-sur-Tarn. Pilates, Yoga, Yogilates, Gym Bien-être, Forme & Force avec Emmanuelle Franc.",
 }
 
 // RootLayout est la fonction principale : elle reçoit {children} = le contenu de chaque page

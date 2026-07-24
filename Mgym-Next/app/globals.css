@@ -164,6 +164,17 @@ body {
   transition: border-color .25s, background .25s, transform .25s;
 }
 .btn-secondary:hover { border-color: #FFF7F8; background: rgba(255,247,248,.1); transform: translateY(-2px); }
+/* Bouton outline pour usage sur fonds clairs (hors hero) */
+.btn-outline {
+  display: inline-block;
+  border: 1.5px solid #D18B8E; color: #D18B8E;
+  font-family: var(--font-sans),sans-serif; font-size: .85rem;
+  font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+  text-decoration: none;
+  padding: 1.05rem 2.3rem; border-radius: 3rem;
+  transition: background .25s, color .25s, transform .25s;
+}
+.btn-outline:hover { background: #D18B8E; color: #fff; transform: translateY(-2px); }
 /* Animation d'apparition du hero : fade + monte, staggered par élément */
 @keyframes heroFadeUp {
   from { opacity: 0; transform: translateY(30px); }
@@ -254,60 +265,83 @@ body {
 .value-list li { display:flex; align-items:flex-start; gap:.9rem; font-family:var(--font-sans),sans-serif; font-size:1rem; font-weight:400; color:#4A3B42; opacity:.78; line-height:1.6; }
 .value-list li::before { content:'✦'; color:#D18B8E; font-size:.6rem; margin-top:.45rem; flex-shrink:0; }
 
-/* ── ACTIVITÉS ──────────────────────────────────────────────── */
+/* ── ACTIVITÉS : sentier sinueux ───────────────────────────────
+   Un chemin en pointillés qui se trace au scroll et relie les
+   activités en alternance gauche/droite, comme des étapes de
+   promenade. Cliquer une étape déplie sa description complète.
+   estOuvert (clic) et estVisible (scroll) restent deux states React
+   séparés (voir SentierActivites.js) : aucun des deux n'écrase
+   jamais la classe posée par l'autre. */
 #activites { background: #F4E1E6; }
 .acts-header { text-align:center; margin-bottom:4rem; }
 .acts-header .divider { margin:1.5rem auto; }
-.acts-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
-.act-card {
-  background:#fff; border-radius:1.5rem; overflow:hidden;
-  transition: transform .4s cubic-bezier(.16,1,.3,1), box-shadow .4s;
-}
-.act-card:hover { transform:translateY(-6px); box-shadow:0 20px 50px rgba(209,139,142,.18); }
-.act-img-wrap { height:210px; overflow:hidden; position:relative; }
-.act-img-wrap img { width:100%; height:100%; object-fit:cover; transition:transform .7s ease; display:block; }
-.act-card:hover .act-img-wrap img { transform:scale(1.06); }
-.act-fog {
-  position:absolute; inset:0;
-  background:linear-gradient(to top, rgba(74,59,66,.5) 0%, transparent 60%);
-  opacity:0; transition:opacity .4s;
-  display:flex; align-items:flex-end; padding:1.25rem 1.5rem;
-}
-.act-card:hover .act-fog { opacity:1; }
-.act-fog span { font-family:var(--font-sans),sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:#fff; }
-.act-body { padding:1.5rem 1.75rem 1.75rem; }
-.act-name { font-family:var(--font-serif),serif; font-size:1.65rem; font-weight:500; color:#4A3B42; margin-bottom:.5rem; }
-/* LISIBILITÉ : .9rem = 14.4px pour les descriptions de carte */
-.act-desc { font-family:var(--font-sans),sans-serif; font-size:.9rem; color:#4A3B42; opacity:.68; line-height:1.8; margin-bottom:1rem; }
-.act-tags { display:flex; flex-wrap:wrap; gap:.5rem; }
-.tag { font-family:var(--font-sans),sans-serif; font-size:.7rem; font-weight:600; letter-spacing:.08em; background:#F4E1E6; color:#D18B8E; padding:.3rem .8rem; border-radius:2rem; }
-.acts-note { margin-top:2rem; background:#fff; border-radius:1.5rem; padding:2.5rem 3rem; text-align:center; }
-.acts-note-title { font-family:var(--font-serif),serif; font-size:clamp(1.4rem,2.5vw,2rem); font-weight:300; color:#4A3B42; }
-.acts-note-title em { font-style:italic; color:#D18B8E; }
-.acts-note-sub { font-family:var(--font-sans),sans-serif; font-size:.95rem; color:#4A3B42; opacity:.65; margin-top:.6rem; line-height:1.7; }
 
-/* ── MARCHE NORDIQUE ────────────────────────────────────────── */
-#marche { background: #FFF7F8; }
-.marche-grid { display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:center; }
-.marche-img { height:520px; object-fit:cover; border-radius:1.75rem; width:100%; display:block; }
-.level-card { background:#F4E1E6; border-radius:1.25rem; padding:1.4rem 1.75rem; margin-bottom:1rem; }
-.level-title { font-family:var(--font-serif),serif; font-size:1.25rem; font-weight:500; color:#4A3B42; margin-bottom:.4rem; }
-/* LISIBILITÉ : .95rem = 15.2px */
-.level-desc { font-family:var(--font-sans),sans-serif; font-size:.95rem; color:#4A3B42; opacity:.72; line-height:1.75; }
-.perks-grid { display:grid; grid-template-columns:1fr 1fr; gap:.75rem 1.5rem; margin:1.5rem 0; }
-/* LISIBILITÉ : .9rem = 14.4px */
-.perk { display:flex; align-items:center; gap:.6rem; font-family:var(--font-sans),sans-serif; font-size:.9rem; color:#4A3B42; opacity:.78; }
-.perk::before { content:'✦'; color:#D18B8E; font-size:.5rem; flex-shrink:0; }
-.duration-pill {
-  display:inline-flex; align-items:center; gap:1rem;
-  background:rgba(209,139,142,.12); border-radius:1.25rem; padding:1.1rem 1.75rem;
+.activites-sentier { position:relative; max-width:860px; margin:0 auto; }
+
+.sentier-trait { position:absolute; inset:0; width:100%; height:100%; z-index:0; overflow:visible; }
+.sentier-trait path { transition: stroke-dashoffset .1s linear; }
+
+.etape {
+  position:relative; z-index:1;
+  display:flex; align-items:flex-start; gap:1.5rem;
+  max-width:560px; margin-bottom:4.5rem;
+  opacity:0; transform:translateY(28px);
+  transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1);
 }
-.duration-num { font-family:var(--font-serif),serif; font-size:2.8rem; font-weight:300; color:#D18B8E; line-height:1; }
-.duration-label { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:#4A3B42; opacity:.68; line-height:1.5; }
+.etape:last-child { margin-bottom:0; }
+.etape.est-visible { opacity:1; transform:none; }
+
+.etape--gauche { margin-right:auto; }
+.etape--droite { margin-left:auto; flex-direction:row-reverse; text-align:right; }
+
+.etape-media {
+  position:relative; width:130px; height:130px; flex-shrink:0;
+  border-radius:50%; overflow:hidden;
+  box-shadow:0 10px 30px rgba(74,59,66,.18);
+  border:4px solid #FFF7F8;
+}
+.etape-media img { width:100%; height:100%; object-fit:cover; display:block; }
+
+.etape-num { display:block; font-family:var(--font-sans),sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.15em; color:#D18B8E; margin-bottom:.35rem; }
+.etape-contenu h3 { font-family:var(--font-serif),serif; font-weight:500; font-size:1.3rem; color:#4A3B42; margin-bottom:.3rem; }
+/* LISIBILITÉ : .85rem ≈ 13.6px */
+.etape-accroche { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:#4A3B42; opacity:.65; line-height:1.6; margin-bottom:.75rem; }
+
+.etape-toggle {
+  display:inline-flex; align-items:center; gap:.4rem;
+  font-family:var(--font-sans),sans-serif; font-size:.72rem; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:#D18B8E;
+  background:none; border:none; padding:0; cursor:pointer;
+  transition: color .25s;
+}
+.etape--droite .etape-toggle { flex-direction:row-reverse; }
+.etape-toggle:hover { color:#4A3B42; }
+.etape-toggle:focus-visible { outline:2px solid #D18B8E; outline-offset:4px; border-radius:2px; }
+.etape-toggle svg { flex-shrink:0; transition:transform .3s; }
+.etape-toggle[aria-expanded="true"] svg { transform:rotate(180deg); }
+
+.etape-panneau {
+  margin-top:1rem; padding:1.25rem 1.4rem;
+  background:#fff; border-radius:1rem;
+  box-shadow:0 12px 30px rgba(74,59,66,.1);
+  animation: sentier-deplier .35s ease;
+}
+.etape--droite .etape-panneau { text-align:right; }
+/* LISIBILITÉ : .85rem ≈ 13.6px */
+.etape-panneau p { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:#4A3B42; opacity:.75; line-height:1.8; }
+.etape-tags { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.85rem; }
+.etape--droite .etape-tags { justify-content:flex-end; }
+.etape-tag { font-family:var(--font-sans),sans-serif; font-size:.65rem; font-weight:600; letter-spacing:.08em; background:#F4E1E6; color:#D18B8E; padding:.28rem .7rem; border-radius:2rem; }
+.etape-lien { display:inline-block; margin-top:.9rem; font-family:var(--font-sans),sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#D18B8E; text-decoration:none; }
+.etape-lien:hover { color:#4A3B42; }
+
+@keyframes sentier-deplier {
+  from { opacity:0; transform:translateY(-8px); }
+  to { opacity:1; transform:none; }
+}
 
 /* ── TARIFS ─────────────────────────────────────────────────── */
-#tarifs { background: #F4E1E6; }
-.tarifs-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start; }
+#tarifs { background: #FFF7F8; }
 .price-list { display:flex; flex-direction:column; gap:1rem; }
 .price-row {
   background:#fff; border-radius:1.25rem; padding:1.5rem 1.75rem;
@@ -333,23 +367,14 @@ body {
 .price-row.dark .price-amount { color:#D18B8E; }
 /* LISIBILITÉ : .85rem = 13.6px pour les notes */
 .price-note { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:#4A3B42; opacity:.55; font-style:italic; margin-top:.5rem; padding:0 .5rem; line-height:1.65; }
-.schedule-box { background:#fff; border-radius:1.5rem; padding:2.25rem 2.5rem; }
-.schedule-title { font-family:var(--font-serif),serif; font-size:1.65rem; font-weight:500; color:#4A3B42; margin-bottom:1.75rem; }
-.schedule-row { display:flex; justify-content:space-between; align-items:center; padding:1rem 0; border-bottom:1px solid #F4E1E6; }
-.schedule-row:last-of-type { border-bottom:none; }
-.schedule-day { display:flex; align-items:center; gap:.75rem; font-family:var(--font-serif),serif; font-size:1.2rem; color:#4A3B42; }
-.dot { width:.5rem; height:.5rem; border-radius:50%; background:#D18B8E; animation:pulse 2.2s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
-/* LISIBILITÉ : .9rem = 14.4px pour les horaires */
-.schedule-time { font-family:var(--font-sans),sans-serif; font-size:.9rem; font-weight:700; color:#D18B8E; }
-.equipment-block { margin-top:1.75rem; padding-top:1.5rem; border-top:1px solid #F4E1E6; }
-.equip-label { font-family:var(--font-sans),sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:#D18B8E; margin-bottom:.9rem; }
-/* LISIBILITÉ : .9rem = 14.4px */
-.equip-list { list-style:none; display:flex; flex-direction:column; gap:.6rem; }
-.equip-list li { font-family:var(--font-sans),sans-serif; font-size:.9rem; color:#4A3B42; opacity:.72; line-height:1.55; display:flex; align-items:flex-start; gap:.6rem; }
-.equip-list li::before { content:'✦'; color:#D18B8E; font-size:.5rem; margin-top:.4rem; flex-shrink:0; }
 .tarif-img { width:100%; border-radius:1.5rem; margin-top:1.25rem; display:block; }
-.planning-img { width:100%; border-radius:1.5rem; margin-top:1.25rem; display:block; }
+
+/* ── PLANNING ───────────────────────────────────────────────── */
+#planning { background: #F4E1E6; }
+.planning-img { width:100%; border-radius:1.5rem; display:block; box-shadow:0 12px 40px rgba(74,59,66,.1); }
+
+/* ── RÉSEAUX ────────────────────────────────────────────────── */
+#reseaux { background: #FFF7F8; }
 
 /* ── PRESTATIONS ────────────────────────────────────────────── */
 #bespoke { background: #FFF7F8; }
@@ -378,7 +403,7 @@ body {
 .cert-item.full { grid-column:1/-1; }
 
 /* ── CONTACT ────────────────────────────────────────────────── */
-#contact { background:#FFF7F8; }
+#contact { background:#F4E1E6; }
 .contact-header { text-align:center; margin-bottom:3.5rem; }
 .contact-header .divider { margin:1.5rem auto; }
 .contact-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; max-width:860px; margin:0 auto 3.5rem; }
@@ -431,16 +456,25 @@ footer { background:#4A3B42; padding:3.5rem 5rem; }
   #nav { padding:1rem 2rem; }
   .section-pad { padding:5rem 2.5rem; }
   .hero-text { padding:7rem 2rem 4rem; }
-  .about-grid,.marche-grid,.bespoke-grid,.coach-grid,.tarifs-grid { grid-template-columns:1fr; gap:2.5rem; }
-  .about-img-wrap img,.marche-img,.bespoke-img,.coach-img-wrap img { height:340px; }
-  .acts-grid { grid-template-columns:1fr 1fr; }
+  .about-grid,.bespoke-grid,.coach-grid { grid-template-columns:1fr; gap:2.5rem; }
+  .about-img-wrap img,.bespoke-img,.coach-img-wrap img { height:340px; }
   .footer-inner { grid-template-columns:1fr; text-align:center; }
   .footer-right { align-items:center; }
   footer { padding:3rem 2rem; }
   .manifesto { padding:3rem 2rem; }
 }
 @media (max-width: 700px) {
-  .acts-grid { grid-template-columns:1fr; }
+  /* Sentier : une seule colonne, mais on garde un léger zigzag
+     (décalage horizontal alterné) pour ne pas perdre l'esprit sinueux. */
+  .activites-sentier { max-width:320px; }
+  .etape { max-width:none; gap:1rem; transform:translateY(28px) translateX(var(--sway, 0)); }
+  .etape.est-visible { transform:translateX(var(--sway, 0)); }
+  .etape--gauche { margin-right:0; --sway:-12px; }
+  .etape--droite { margin-left:0; --sway:12px; flex-direction:row; text-align:left; }
+  .etape--droite .etape-toggle { flex-direction:row; }
+  .etape--droite .etape-panneau { text-align:left; }
+  .etape--droite .etape-tags { justify-content:flex-start; }
+  .etape-media { width:90px; height:90px; }
   .contact-cards { grid-template-columns:1fr; }
   .cert-grid { grid-template-columns:1fr; }
   .bespoke-types { grid-template-columns:1fr; }
@@ -454,4 +488,13 @@ footer { background:#4A3B42; padding:3.5rem 5rem; }
   footer { padding:2.5rem 1.5rem; }
   .manifesto { padding:2.5rem 1.5rem; }
   .contact-cta { padding:2rem 1.5rem; }
+}
+
+/* Toujours en dernier dans la cascade : doit l'emporter sur les
+   media queries de largeur ci-dessus (mobile inclus), pas seulement
+   sur le style desktop du sentier. */
+@media (prefers-reduced-motion: reduce) {
+  .etape { opacity:1; transform:none; transition:none; }
+  .sentier-trait path { transition:none; }
+  .etape-panneau { animation:none; }
 }

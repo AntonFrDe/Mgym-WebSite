@@ -1,7 +1,10 @@
 const navLinks = [
   { href: '#about',     label: 'À propos'  },
   { href: '#activites', label: 'Activités' },
+  { href: '#coach',     label: 'Coach'     },
   { href: '#tarifs',    label: 'Tarifs'    },
+  { href: '#planning',  label: 'Planning'  },
+  { href: '#reseaux',   label: 'Réseaux'   },
   { href: '#contact',   label: 'Contact'   },
 ]
 

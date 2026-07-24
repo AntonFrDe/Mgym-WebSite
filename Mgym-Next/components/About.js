@@ -21,30 +21,35 @@ export default function About() {
             </h2>
             <div className="divider" />
             <p className="lead" style={{ marginBottom: '1rem' }}>
-              Présente à Mirepoix-sur-Tarn depuis les années 80, M&apos;GYM accompagne
-              ses adhérents dans une activité physique adaptée à la santé et au
-              bien-être. Dès sa création, l&apos;association offrait aux femmes du
-              village la gymnastique d&apos;entretien.
-            </p>
-            <p className="lead">
-              Avec le temps, M&apos;GYM a conservé ses valeurs essentielles :{' '}
-              <strong style={{ color: '#D18B8E', fontWeight: 600 }}>
-                convivialité et lien social
-              </strong>
-              . Aujourd&apos;hui, des cours accessibles favorisant le mouvement et
-              le bien-être, dans une ambiance motivante.
+              Depuis les années 80, M&apos;GYM fait bouger Mirepoix-sur-Tarn en
+              plaçant la santé, le bien-être et la convivialité au cœur de ses
+              activités. À ses débuts, l&apos;association proposait des cours de
+              gymnastique d&apos;entretien aux femmes du village. Aujourd&apos;hui,
+              elle accueille tous ceux qui souhaitent pratiquer une activité
+              physique dans une ambiance chaleureuse et motivante.
             </p>
 
             <h3 className="serif" style={{ fontSize: '1.35rem', fontWeight: 500, color: '#4A3B42', margin: '2rem 0 .5rem' }}>
-              Adhérer à M&apos;GYM, c&apos;est choisir :
+              Rejoindre M&apos;GYM, c&apos;est profiter :
             </h3>
             <ul className="value-list">
-              <li>une activité physique bénéfique pour la santé</li>
-              <li>un accompagnement professionnel</li>
-              <li>une ambiance conviviale</li>
-              <li>un lieu de lien social</li>
-              <li>la motivation d&apos;un groupe</li>
+              <li>d&apos;une activité physique bénéfique pour la santé</li>
+              <li>d&apos;un accompagnement professionnel et personnalisé</li>
+              <li>de cours accessibles à tous les niveaux</li>
+              <li>d&apos;une ambiance conviviale et bienveillante</li>
+              <li>d&apos;un véritable lieu de partage et de lien social</li>
             </ul>
+
+            <p className="lead" style={{ marginTop: '1.5rem' }}>
+              Coach sportive diplômée d&apos;État,{' '}
+              <strong style={{ color: '#D18B8E', fontWeight: 600 }}>
+                Emmanuelle Franc
+              </strong>{' '}
+              vous accompagne avec passion pour vous aider à bouger, progresser
+              et prendre soin de vous, à votre rythme. Chez M&apos;GYM, le
+              bien-être se vit autant dans le mouvement que dans le plaisir de
+              partager.
+            </p>
           </div>
 
         </div>
