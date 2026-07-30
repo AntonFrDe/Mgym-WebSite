@@ -67,6 +67,68 @@ const inlineJs = `
   setTimeout(function(){
     document.querySelectorAll('.sr, .sr-l, .sr-r').forEach(function(el){ el.classList.add('on'); });
   }, 3000);
+
+  // Carrousel des activités — équivalent inline de CarrouselActivites.js.
+  // Obligatoire ici : l'assemblage retire TOUS les <script> de Next, donc
+  // sans ce bloc la piste (dont la barre de défilement est masquée en CSS)
+  // serait impossible à parcourir dans le fichier autonome.
+  var carrousel = document.querySelector('.carrousel');
+  var piste = carrousel && carrousel.querySelector('.carrousel-piste');
+  if (piste) {
+    var TOL = 2;
+    var jauge = carrousel.querySelector('.carrousel-jauge');
+    var compteur = carrousel.querySelector('.carrousel-compteur');
+    var indice = carrousel.querySelector('.carrousel-indice');
+    var fleches = carrousel.querySelectorAll('.carrousel-fleche'); // [précédent, suivant]
+    var cartes = piste.querySelectorAll('.carte-act');
+    var deuxChiffres = function(n){ return String(n).padStart(2, '0'); };
+    var pas = function(){
+      if (!cartes.length) return piste.clientWidth;
+      var espace = parseFloat(getComputedStyle(piste).columnGap) || 0;
+      return cartes[0].offsetWidth + espace;
+    };
+    var index = 0;
+    var maj = function(){
+      var max = piste.scrollWidth - piste.clientWidth;
+      index = Math.min(cartes.length - 1, Math.round(piste.scrollLeft / pas()));
+      if (jauge) jauge.style.transform = 'scaleX(' + Math.max(max > 0 ? piste.scrollLeft / max : 0, 0.06) + ')';
+      if (compteur) compteur.innerHTML = '<strong>' + deuxChiffres(index + 1) + '</strong> / ' + deuxChiffres(cartes.length);
+      var debut = piste.scrollLeft <= TOL, fin = piste.scrollLeft >= max - TOL;
+      carrousel.classList.toggle('est-au-debut', debut);
+      carrousel.classList.toggle('est-a-la-fin', fin);
+      if (fleches[0]) fleches[0].disabled = debut;
+      if (fleches[1]) fleches[1].disabled = fin;
+    };
+    var interagi = function(){ if (indice) indice.classList.add('est-masque'); };
+    var allerA = function(cible){
+      var borne = Math.max(0, Math.min(cartes.length - 1, cible));
+      var doux = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      piste.scrollTo({ left: borne * pas(), behavior: doux ? 'smooth' : 'auto' });
+      interagi();
+    };
+    piste.addEventListener('wheel', function(e){
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      var max = piste.scrollWidth - piste.clientWidth;
+      if (max <= 0) return;
+      // On rend la main au défilement vertical de la page une fois en bout
+      if (e.deltaY > 0 ? piste.scrollLeft >= max - TOL : piste.scrollLeft <= TOL) return;
+      e.preventDefault();
+      piste.scrollLeft += e.deltaMode === 1 ? e.deltaY * 32 : e.deltaY;
+      interagi();
+    }, { passive: false });
+    piste.addEventListener('scroll', maj, { passive: true });
+    piste.addEventListener('pointerdown', interagi);
+    piste.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight') { e.preventDefault(); allerA(index + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); allerA(index - 1); }
+      else if (e.key === 'Home') { e.preventDefault(); allerA(0); }
+      else if (e.key === 'End') { e.preventDefault(); allerA(cartes.length - 1); }
+    });
+    if (fleches[0]) fleches[0].addEventListener('click', function(){ allerA(index - 1); });
+    if (fleches[1]) fleches[1].addEventListener('click', function(){ allerA(index + 1); });
+    window.addEventListener('resize', maj);
+    maj();
+  }
 `
 
 // 5) Assemblage final

@@ -340,6 +340,133 @@ body {
   to { opacity:1; transform:none; }
 }
 
+/* ── ACTIVITÉS : carrousel horizontal (branche teste-template) ──
+   Variante testée du bloc « Activités » : les 8 activités deviennent
+   des cartes qui défilent latéralement (molette, doigt, flèches).
+   Trois affordances CSS complètent le JS de CarrouselActivites.js :
+     · la piste est plus large que l'écran → une carte est toujours
+       coupée à droite, ce qui annonce la suite ;
+     · des dégradés sur les bords s'estompent quand on atteint un bout ;
+     · la barre .carrousel-jauge indique la position dans la série.
+   La barre de défilement native est masquée (elle jurerait avec la
+   maquette) MAIS la piste reste focusable au clavier et pilotable
+   aux flèches : on ne perd aucune accessibilité au passage. */
+.carrousel-scene { position:relative; }
+
+.carrousel-piste {
+  display:flex; align-items:stretch;
+  gap:1.5rem;                     /* lu par le JS pour calculer un « pas » */
+  overflow-x:auto; overflow-y:hidden;
+  /* 'proximity' et non 'mandatory' : avec mandatory, l'alignement forcé
+     se bat avec le défilement pixel par pixel de la molette et donne une
+     sensation d'à-coups. Ici la piste glisse librement à la molette et
+     s'aligne quand même sur une carte en fin de geste et via les flèches. */
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain; /* pas de navigation « retour » par geste */
+  padding:1rem .25rem 2rem;       /* laisse respirer les ombres des cartes */
+  scrollbar-width:none;           /* Firefox */
+}
+.carrousel-piste::-webkit-scrollbar { display:none; }
+.carrousel-piste:focus-visible { outline:2px solid #D18B8E; outline-offset:6px; border-radius:1.5rem; }
+
+/* Dégradés de bord : signalent qu'il reste du contenu de ce côté. */
+.carrousel-scene::before, .carrousel-scene::after {
+  content:''; position:absolute; top:0; bottom:0; width:5rem;
+  pointer-events:none; z-index:2; transition:opacity .35s ease;
+}
+.carrousel-scene::before { left:-.25rem;  background:linear-gradient(90deg, #F4E1E6 15%, rgba(244,225,230,0)); }
+.carrousel-scene::after  { right:-.25rem; background:linear-gradient(270deg, #F4E1E6 15%, rgba(244,225,230,0)); }
+.carrousel.est-au-debut .carrousel-scene::before { opacity:0; }
+.carrousel.est-a-la-fin  .carrousel-scene::after  { opacity:0; }
+
+.carte-act {
+  flex:0 0 auto; width:320px;
+  scroll-snap-align:start;
+  display:flex; flex-direction:column;
+  background:#fff; border-radius:1.5rem; overflow:hidden;
+  box-shadow:0 10px 30px rgba(74,59,66,.10);
+  transition:transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s ease;
+}
+.carte-act:hover { transform:translateY(-6px); box-shadow:0 18px 44px rgba(74,59,66,.16); }
+
+.carte-act-media { position:relative; height:200px; flex-shrink:0; }
+.carte-act-media img { width:100%; height:100%; object-fit:cover; display:block; }
+.carte-act-num {
+  position:absolute; left:1.1rem; bottom:-1.1rem;
+  width:2.6rem; height:2.6rem; border-radius:50%;
+  background:#fff; color:#D18B8E;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-sans),sans-serif; font-size:.8rem; font-weight:700; letter-spacing:.05em;
+  box-shadow:0 6px 18px rgba(74,59,66,.14);
+}
+
+.carte-act-corps { display:flex; flex-direction:column; flex:1; padding:2rem 1.5rem 1.5rem; }
+.carte-act-corps h3 {
+  font-family:var(--font-serif),serif; font-weight:500; font-size:1.35rem;
+  line-height:1.25; color:#4A3B42; margin-bottom:.35rem;
+}
+/* LISIBILITÉ : .85rem ≈ 13.6px, comme le reste du site */
+.carte-act-accroche {
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:600;
+  color:#D18B8E; line-height:1.6; margin-bottom:.85rem;
+}
+.carte-act-desc {
+  font-family:var(--font-sans),sans-serif; font-size:.85rem;
+  color:#4A3B42; opacity:.75; line-height:1.8;
+}
+/* margin-top:auto → tags et lien restent collés en bas, quelle que
+   soit la longueur de la description : les cartes s'alignent. */
+.carte-act-bas { margin-top:auto; padding-top:1.25rem; }
+.carte-act-tags { display:flex; flex-wrap:wrap; gap:.4rem; }
+.carte-act-bas .etape-lien { margin-top:.85rem; }
+
+/* Indice de départ — masqué dès la première interaction (JS). */
+.carrousel-indice {
+  display:flex; align-items:center; justify-content:center; gap:.6rem;
+  font-family:var(--font-sans),sans-serif; font-size:.75rem; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; color:#4A3B42; opacity:.5;
+  margin-bottom:1.25rem;
+  transition:opacity .4s ease, transform .4s ease;
+}
+.carrousel-indice.est-masque { opacity:0; transform:translateY(-4px); pointer-events:none; }
+.carrousel-indice-molette {
+  width:15px; height:23px; flex-shrink:0;
+  border:1.5px solid #D18B8E; border-radius:8px; position:relative;
+}
+.carrousel-indice-molette::after {
+  content:''; position:absolute; left:50%; top:4px; margin-left:-1px;
+  width:2px; height:5px; border-radius:1px; background:#D18B8E;
+  animation: molette-descend 1.6s ease-in-out infinite;
+}
+@keyframes molette-descend {
+  0%, 100% { transform:translateY(0); opacity:1; }
+  60%      { transform:translateY(7px); opacity:.2; }
+}
+
+.carrousel-commandes { display:flex; align-items:center; gap:1.5rem; }
+.carrousel-rail { flex:1; height:2px; background:rgba(74,59,66,.12); border-radius:2px; overflow:hidden; }
+.carrousel-jauge {
+  display:block; width:100%; height:100%; background:#D18B8E;
+  transform-origin:left center;   /* scaleX piloté en JS = pas de reflow */
+  transition:transform .15s linear;
+}
+.carrousel-compteur {
+  font-family:var(--font-sans),sans-serif; font-size:.8rem; font-weight:500;
+  letter-spacing:.12em; color:#4A3B42; opacity:.5; white-space:nowrap;
+}
+.carrousel-compteur strong { color:#D18B8E; font-weight:700; }
+.carrousel-fleches { display:flex; gap:.5rem; }
+.carrousel-fleche {
+  width:2.6rem; height:2.6rem; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:#fff; color:#D18B8E; border:none; cursor:pointer;
+  box-shadow:0 4px 16px rgba(74,59,66,.10);
+  transition:background .25s, color .25s, transform .25s, opacity .25s;
+}
+.carrousel-fleche:hover:not(:disabled) { background:#D18B8E; color:#fff; transform:translateY(-2px); }
+.carrousel-fleche:focus-visible { outline:2px solid #D18B8E; outline-offset:3px; }
+.carrousel-fleche:disabled { opacity:.3; cursor:default; }
+
 /* ── TARIFS ─────────────────────────────────────────────────── */
 #tarifs { background: #FFF7F8; }
 .price-list { display:flex; flex-direction:column; gap:1rem; }
@@ -475,6 +602,14 @@ footer { background:#4A3B42; padding:3.5rem 5rem; }
   .etape--droite .etape-panneau { text-align:left; }
   .etape--droite .etape-tags { justify-content:flex-start; }
   .etape-media { width:90px; height:90px; }
+  /* Carrousel : cartes plus étroites que l'écran pour que la suivante
+     dépasse toujours du bord droit (l'affordance principale). */
+  .carte-act { width:min(78vw, 300px); }
+  .carte-act-media { height:170px; }
+  .carrousel-piste { gap:1rem; }
+  .carrousel-commandes { gap:1rem; }
+  .carrousel-scene::before, .carrousel-scene::after { width:2.5rem; }
+  .carrousel-indice { font-size:.68rem; letter-spacing:.08em; }
   .contact-cards { grid-template-columns:1fr; }
   .cert-grid { grid-template-columns:1fr; }
   .bespoke-types { grid-template-columns:1fr; }
@@ -497,4 +632,11 @@ footer { background:#4A3B42; padding:3.5rem 5rem; }
   .etape { opacity:1; transform:none; transition:none; }
   .sentier-trait path { transition:none; }
   .etape-panneau { animation:none; }
+  /* Carrousel : on garde l'information (jauge, dégradés) mais on
+     supprime tout mouvement décoratif. Le défilement lui-même passe en
+     'auto' côté JS (voir prefereMoinsAnimation dans CarrouselActivites). */
+  .carte-act { transition:none; }
+  .carte-act:hover { transform:none; }
+  .carrousel-jauge { transition:none; }
+  .carrousel-indice-molette::after { animation:none; }
 }

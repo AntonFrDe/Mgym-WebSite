@@ -3,10 +3,14 @@
 // Chaque composant = une section du site, dans son propre fichier.
 // C'est la grande différence avec un seul fichier HTML : ici tout est organisé.
 
-import Hero             from '../components/Hero'
-import Manifesto        from '../components/Manifesto'
-import About            from '../components/About'
-import SentierActivites from '../components/SentierActivites'
+import Hero              from '../components/Hero'
+import Manifesto         from '../components/Manifesto'
+import About             from '../components/About'
+// Branche teste-template : le bloc « Activités » est affiché en
+// CARROUSEL HORIZONTAL au lieu du sentier vertical. Pour revenir au
+// sentier, remettre <SentierActivites /> ci-dessous — les deux
+// composants lisent les mêmes données (components/activitesData.js).
+import CarrouselActivites from '../components/CarrouselActivites'
 import Bespoke          from '../components/Bespoke'
 import Coach            from '../components/Coach'
 import Pricing          from '../components/Pricing'
@@ -21,7 +25,7 @@ export default function Home() {
       <Hero />
       <Manifesto />
       <About />
-      <SentierActivites />
+      <CarrouselActivites />
       <Bespoke />
       <Coach />
       <Pricing />
