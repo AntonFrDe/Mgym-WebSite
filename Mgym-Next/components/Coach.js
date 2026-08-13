@@ -47,7 +47,7 @@ export default function Coach() {
 
             <p className="lead" style={{ marginBottom: '1.5rem' }}>
               Avec son énergie, Emmanuelle vous accompagne dans votre pratique avec
-              des conseils personnalisés. M&apos;GYM est un espace de rencontre et de
+              des conseils personnalisés. M&apos;GYM est un espace de convivialité et de
               bien-être où prendre soin de soi est un plaisir.
             </p>
 

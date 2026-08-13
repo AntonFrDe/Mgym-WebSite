@@ -1,4 +1,7 @@
-const types = ['Yoga', 'Pilates', 'Marche Nordique', 'Massages bien-être']
+// À qui s'adressent ces interventions, plutôt que ce qu'elles contiennent :
+// les activités proposées sont déjà énumérées dans le paragraphe juste
+// au-dessus, les répéter en pastilles n'apportait rien.
+const types = ['Particulier', 'Association', 'Entreprise', 'Massage']
 
 export default function Bespoke() {
   return (

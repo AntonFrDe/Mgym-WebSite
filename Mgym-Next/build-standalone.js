@@ -1,7 +1,21 @@
-// build-standalone.js — assemble un fichier HTML AUTONOME depuis l'export Next (out/)
-// Résultat : un seul fichier "Site-MGYM.html" avec CSS + images intégrés (base64),
-// polices Google, et les animations/menu reproduits en JS inline.
-// => la cliente n'a qu'à double-cliquer le fichier.
+// build-standalone.js — assemble le site depuis l'export Next (out/)
+//
+// Deux formats de sortie, au choix :
+//
+//   node build-standalone.js --variant=sentier
+//     → UN SEUL FICHIER "Site-MGYM-sentier.html" (~6 Mo), images intégrées en
+//       base64. Pratique à envoyer par mail, mais lourd.
+//
+//   node build-standalone.js --variant=sentier --dossier
+//     → dépose la page dans LE dossier unique "Livraison-MGYM/", aux côtés
+//       du dossier Images/, du fond et d'un LISEZ-MOI. Lancé une fois par
+//       variante (npm run livraison), on obtient un seul dossier contenant
+//       les DEUX versions du site qui partagent les mêmes photos. Plus léger
+//       que le fichier unique, et les photos restent visibles et
+//       remplaçables. C'est le format à déposer sur Google Drive.
+//
+// Dans les deux cas : CSS intégré, polices Google, et les animations/menu
+// reproduits en JS inline (l'assemblage retire tous les <script> de Next).
 
 const fs = require('fs')
 const path = require('path')
@@ -20,7 +34,10 @@ body = body.replace(/<!--[\s\S]*?-->/g, '')
 // 2) CSS global du site
 let css = fs.readFileSync(path.join(ROOT, 'app', 'globals.css'), 'utf8')
 
-// 3) Table des images -> data URI base64
+// 3) Traitement des images
+// Toutes les références du site sont absolues ("/Images/xxx", "/fond1.jpg").
+// Selon le format demandé on les transforme en data URI (fichier unique) ou
+// en chemin relatif ("Images/xxx", à côté du index.html).
 const mime = { '.avif': 'image/avif', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml' }
 const dataUri = (file) => {
   const ext = path.extname(file).toLowerCase()
@@ -28,15 +45,18 @@ const dataUri = (file) => {
   return `data:${mime[ext] || 'application/octet-stream'};base64,${b64}`
 }
 
-// Remplace toute référence "/Images/xxx" ou "/fond1.jpg" (avec ' " ou )) par le data URI
-const replaceAssets = (str) => str.replace(/\/(Images\/[^\s"')]+|fond1\.jpg)/g, (m, rel) => {
+// `transforme` reçoit le chemin relatif de l'image et renvoie ce qu'il faut
+// écrire à sa place dans le HTML / le CSS.
+const remplaceImages = (str, transforme) => str.replace(/\/(Images\/[^\s"')]+|fond1\.jpg)/g, (m, rel) => {
   const abs = path.join(OUT, rel)
   if (!fs.existsSync(abs)) { console.warn('!! image introuvable :', rel); return m }
-  return dataUri(abs)
+  return transforme(rel, abs)
 })
 
-body = replaceAssets(body)
-css = replaceAssets(css)
+const variantArg = process.argv.reduce((value, arg) => arg.startsWith('--variant=') ? arg.split('=')[1] : value, 'carousel')
+const variant = process.env.MGYM_VARIANT === 'sentier' ? 'sentier' : variantArg === 'sentier' ? 'sentier' : 'carousel'
+const fileSuffix = variant === 'sentier' ? 'sentier' : 'carousel'
+const enDossier = process.argv.includes('--dossier')
 
 // 4) Script inline : défilement nav + menu mobile + apparition au défilement
 const inlineJs = `
@@ -63,10 +83,70 @@ const inlineJs = `
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
   document.querySelectorAll('.sr, .sr-l, .sr-r').forEach(function(el){ io.observe(el); });
+
+  // Étapes du sentier : même principe, mais la classe attendue par le CSS
+  // est .est-visible (elle vient d'un state React, pas de .sr). Sans ce
+  // second observateur, les 8 activités resteraient en opacity:0 dans le
+  // fichier autonome — la section entière apparaîtrait vide.
+  var ioEtapes = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){ e.target.classList.add('est-visible'); ioEtapes.unobserve(e.target); }
+    });
+  }, { threshold: 0.25, rootMargin: '0px 0px -60px 0px' });
+  document.querySelectorAll('.etape').forEach(function(el){ ioEtapes.observe(el); });
+
   // Filet de sécurité : si JS lent/désactivé sur certains éléments, tout devient visible après 3s
   setTimeout(function(){
     document.querySelectorAll('.sr, .sr-l, .sr-r').forEach(function(el){ el.classList.add('on'); });
+    document.querySelectorAll('.etape').forEach(function(el){ el.classList.add('est-visible'); });
   }, 3000);
+
+  // Sentier des activités : le trait qui se dessine au défilement —
+  // équivalent inline du hook useTraceAuScroll de SentierActivites.js.
+  // Sans lui le chemin s'affiche d'emblée en entier : le fichier autonome
+  // serait moins vivant que le site servi par Next.
+  var traitSentier = document.querySelector('.sentier-trait path');
+  var cadreSentier = document.querySelector('.activites-sentier');
+  if (traitSentier && cadreSentier) {
+    var longueurTrait = traitSentier.getTotalLength();
+    traitSentier.style.strokeDasharray = String(longueurTrait);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      traitSentier.style.strokeDashoffset = '0';
+    } else {
+      traitSentier.style.strokeDashoffset = String(longueurTrait);
+      var enAttente = false;
+      var majTrait = function(){
+        enAttente = false;
+        var zone = cadreSentier.getBoundingClientRect();
+        var avancement = Math.min(Math.max(
+          (window.innerHeight - zone.top) / (zone.height + window.innerHeight), 0), 1);
+        traitSentier.style.strokeDashoffset = String(longueurTrait * (1 - avancement));
+      };
+      window.addEventListener('scroll', function(){
+        if (!enAttente) { enAttente = true; requestAnimationFrame(majTrait); }
+      }, { passive: true });
+      majTrait();
+    }
+  }
+
+  // Sentier des activités : bouton « En savoir plus » — équivalent inline de
+  // SentierActivites.js. Même raison que le carrousel plus bas : l'assemblage
+  // retire TOUS les <script> de Next, donc sans ce bloc le bouton serait mort
+  // et les descriptions des activités invisibles dans le fichier livré.
+  // Le panneau est déjà dans le HTML, masqué par l'attribut hidden : React
+  // et ce script basculent exactement le même attribut, aucun contenu n'est
+  // reconstruit ici.
+  document.querySelectorAll('.etape-toggle').forEach(function(bouton){
+    var panneau = document.getElementById(bouton.getAttribute('aria-controls'));
+    if (!panneau) return;
+    var libelle = bouton.querySelector('.etape-toggle-libelle');
+    bouton.addEventListener('click', function(){
+      var etaitOuvert = bouton.getAttribute('aria-expanded') === 'true';
+      bouton.setAttribute('aria-expanded', etaitOuvert ? 'false' : 'true');
+      panneau.hidden = etaitOuvert;
+      if (libelle) libelle.textContent = etaitOuvert ? 'En savoir plus' : 'Réduire';
+    });
+  });
 
   // Carrousel des activités — équivalent inline de CarrouselActivites.js.
   // Obligatoire ici : l'assemblage retire TOUS les <script> de Next, donc
@@ -132,6 +212,13 @@ const inlineJs = `
 `
 
 // 5) Assemblage final
+// Les images sont résolues ici, différemment selon le format demandé.
+const transformeImage = enDossier
+  ? (rel) => rel                    // "Images/xxx" : fichier voisin du index.html
+  : (rel, abs) => dataUri(abs)      // data:image/... : tout dans un seul fichier
+const corps = remplaceImages(body, transformeImage)
+const styles = remplaceImages(css, transformeImage)
+
 const html = `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -144,11 +231,11 @@ const html = `<!DOCTYPE html>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root { --font-serif: 'Cormorant Garamond'; --font-sans: 'Montserrat'; }
-${css}
+${styles}
 </style>
 </head>
 <body>
-${body}
+${corps}
 <script>
 document.addEventListener('DOMContentLoaded', function(){
 ${inlineJs}
@@ -157,7 +244,101 @@ ${inlineJs}
 </body>
 </html>`
 
-const dest = path.join(ROOT, 'Site-MGYM.html')
-fs.writeFileSync(dest, html)
-const kb = (fs.statSync(dest).size / 1024).toFixed(0)
-console.log('OK ->', dest, '(' + kb + ' Ko)')
+// 6) Écriture
+// Un SEUL dossier de livraison contient les deux versions du site : elles
+// partagent le même dossier Images/, le même fond et le même LISEZ-MOI.
+// Chaque variante n'y dépose que sa page HTML — d'où le nom de fichier
+// explicite plutôt qu'un « index.html » qui serait écrasé par l'autre.
+const DOSSIER_LIVRAISON = 'Livraison-MGYM'
+const nomPage = {
+  carousel: 'Site-MGYM-activites-en-cartes.html',
+  sentier: 'Site-MGYM-activites-en-chemin.html',
+}
+
+// Note glissée dans le dossier, à destination de la cliente (pas d'un
+// développeur) : elle doit pouvoir ouvrir le site sans rien installer.
+const lisezMoi = `SITE M'GYM — Bien-être & Santé
+Mirepoix-sur-Tarn
+
+DEUX VERSIONS À COMPARER
+------------------------
+Ce dossier contient le même site, présenté de deux façons. Seule
+la partie "Nos activités" change ; tout le reste est identique.
+
+  ${nomPage.carousel}
+      Les activités sont des cartes qui défilent de gauche à droite.
+
+  ${nomPage.sentier}
+      Les activités jalonnent un chemin qui descend dans la page.
+
+Ouvrez les deux, puis dites-nous celle que vous préférez.
+
+COMMENT OUVRIR LE SITE
+----------------------
+Double-cliquez sur l'un des deux fichiers .html ci-dessus.
+Le site s'ouvre dans votre navigateur habituel (Chrome, Firefox, Edge,
+Safari). Aucune installation n'est nécessaire.
+
+Si vous avez téléchargé ce dossier depuis Google Drive sous forme de
+fichier .zip : décompressez-le d'abord (clic droit > Extraire tout),
+puis ouvrez le fichier .html dans le dossier obtenu.
+
+IMPORTANT
+---------
+Gardez toujours les fichiers .html, le dossier "Images" et "fond1.jpg"
+ENSEMBLE dans le même dossier. Si vous déplacez une page .html toute
+seule ailleurs, les photos ne s'afficheront plus.
+
+Les textes du site s'affichent avec leurs vraies polices si vous êtes
+connecté à Internet. Hors connexion le site reste parfaitement lisible,
+simplement avec des polices de remplacement.
+
+REMPLACER UNE PHOTO
+-------------------
+Ouvrez le dossier "Images", et remplacez le fichier voulu par le vôtre
+en lui donnant EXACTEMENT le même nom. La photo sera reprise
+automatiquement à la prochaine ouverture du site, dans les deux versions.
+
+Ce dossier est une copie du site à consulter et à faire relire.
+Pour toute modification du contenu, contactez la personne qui gère
+le site.
+`
+
+const poids = (chemin) => (fs.statSync(chemin).size / 1024).toFixed(0) + ' Ko'
+
+// Poids total d'un dossier, pour l'annoncer en fin de build.
+const poidsDossier = (dossier) => {
+  let total = 0
+  for (const entree of fs.readdirSync(dossier, { withFileTypes: true })) {
+    const chemin = path.join(dossier, entree.name)
+    total += entree.isDirectory() ? Number(poidsDossier(chemin)) * 1024 : fs.statSync(chemin).size
+  }
+  return (total / 1024).toFixed(0)
+}
+
+if (!enDossier) {
+  const dest = path.join(ROOT, `Site-MGYM-${fileSuffix}.html`)
+  fs.writeFileSync(dest, html)
+  console.log('OK ->', dest, '(' + poids(dest) + ')')
+} else {
+  // Dossier unique prêt à déposer sur Google Drive.
+  // On ne vide JAMAIS le dossier : les deux variantes s'y écrivent l'une
+  // après l'autre (npm run livraison), et un nettoyage effacerait la page
+  // déposée par le passage précédent. Chaque exécution se contente donc de
+  // réécrire sa propre page et de rafraîchir les fichiers communs.
+  const dossier = path.join(ROOT, DOSSIER_LIVRAISON)
+  fs.mkdirSync(dossier, { recursive: true })
+
+  const page = nomPage[fileSuffix]
+  fs.writeFileSync(path.join(dossier, page), html)
+
+  fs.rmSync(path.join(dossier, 'Images'), { recursive: true, force: true })
+  fs.cpSync(path.join(OUT, 'Images'), path.join(dossier, 'Images'), { recursive: true })
+  fs.copyFileSync(path.join(OUT, 'fond1.jpg'), path.join(dossier, 'fond1.jpg'))
+  fs.writeFileSync(path.join(dossier, 'LISEZ-MOI.txt'), lisezMoi)
+
+  const pagesPresentes = Object.values(nomPage).filter((p) => fs.existsSync(path.join(dossier, p)))
+  console.log('OK ->', dossier + '/ (' + poidsDossier(dossier) + ' Ko)')
+  console.log('     ' + pagesPresentes.join(' + '))
+  console.log('     Images/ + fond1.jpg + LISEZ-MOI.txt')
+}

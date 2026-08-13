@@ -129,12 +129,12 @@ export default function CarrouselActivites() {
 
         <div className="acts-header sr">
           <p className="section-label">Nos pratiques</p>
-          <h2 className="section-title">Méthodes douces &amp; <em>bien-être</em></h2>
+          <h2 className="section-title">Formes &amp; <em>Bien-être</em></h2>
           <div className="divider" />
           <p className="lead" style={{ maxWidth: '540px', margin: '0 auto' }}>
-            Huit façons de prendre soin de vous. Faites défiler les cartes
-            à la molette, au doigt ou avec les flèches pour toutes les
-            découvrir.
+            Renforcez votre corps, libérez les tensions et retrouvez une énergie
+            durable. Faites défiler les cartes à la molette, au doigt ou avec
+            les flèches pour toutes les découvrir.
           </p>
         </div>
 
@@ -177,7 +177,9 @@ export default function CarrouselActivites() {
                         ))}
                       </div>
                       {act.href && (
-                        <a href={act.href} className="etape-lien">Découvrir en détail →</a>
+                        <a href={act.href} className="etape-lien">
+                          {act.lienTexte || 'Découvrir en détail →'}
+                        </a>
                       )}
                     </div>
                   </div>

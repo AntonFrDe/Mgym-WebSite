@@ -1,3 +1,5 @@
+import { LIEN_INSCRIPTION, attributsLienExterne } from './liens'
+
 // Les icônes SVG sont intégrées directement en JSX (pas besoin de bibliothèque)
 const contactCards = [
   {
@@ -53,15 +55,31 @@ export default function Contact() {
         </div>
 
         <div className="contact-cta sr">
+          {/* « Prête à commencer ? » ne s'adressait qu'aux femmes. Le doublet
+              inclut tout le monde sans changer le ton de la phrase. */}
           <div className="contact-cta-title">
-            Prête à <em>commencer</em> ?
+            Prêtes et prêts à <em>commencer</em> ?
           </div>
           <p className="contact-cta-sub">
             Première séance d&apos;essai ou inscription directe —<br />
             Emmanuelle vous accueille avec plaisir.
           </p>
           <div className="cta-btns">
-            <a href="tel:0609316145"               className="cta-btn-rose">Appeler</a>
+            {/* L'inscription en ligne passe en premier : c'est l'action que
+                l'on souhaite voir aboutir. Appeler et écrire restent offerts
+                à celles et ceux qui préfèrent la voix ou le courriel.
+                Ici, pas de repli vers #contact comme ailleurs : on y est déjà.
+                Sans adresse de formulaire, le bouton n'apparaît donc pas. */}
+            {LIEN_INSCRIPTION && (
+              <a
+                href={LIEN_INSCRIPTION}
+                className="cta-btn-rose"
+                {...attributsLienExterne(LIEN_INSCRIPTION)}
+              >
+                S&apos;inscrire en ligne
+              </a>
+            )}
+            <a href="tel:0609316145"                className="cta-btn-rose">Appeler</a>
             <a href="mailto:gym.mirepoix@gmail.com" className="cta-btn-outline">Nous écrire</a>
           </div>
         </div>

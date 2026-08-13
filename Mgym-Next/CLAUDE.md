@@ -43,6 +43,7 @@ components/
   activitesData.js       # SOURCE UNIQUE des 8 activités
   SentierActivites.js    # affichage « sentier » vertical ('use client')
   CarrouselActivites.js  # affichage « cartes horizontales » ('use client')
+  Outdoor.js             # « Explorez aussi » : marche nordique & outdoor
   Bespoke.js Coach.js Pricing.js Planning.js Reseaux.js Contact.js Footer.js
   ClientLayout.js # IntersectionObserver global pour les animations .sr
 public/Images/   # toutes les photos, en .avif (sauf CoachPhoto.webp)
@@ -110,10 +111,12 @@ Toute animation doit être neutralisée dans le bloc
 
 ## Le bloc « Activités » — deux affichages
 
-Les 8 activités (Pilates, Yoga, Yogilates, Gym Bien-être, Forme & Force,
-Prestations sur mesure, Yin Yoga, Accompagnement sur mesure) vivent dans
-**`components/activitesData.js`**. Deux composants les affichent
-différemment ; `app/page.js` en choisit un :
+Les 8 activités vivent dans **`components/activitesData.js`**, classées de la
+plus douce à la plus intense (Yin Yoga, Yoga, Yogilates, Pilates, Gym
+Bien-être, Forme & Force), les deux offres sur mesure fermant la marche
+(Ateliers thématiques, Prestations sur mesure). **L'ordre du tableau est
+l'ordre affiché** : déplacer une ligne change le classement partout.
+Deux composants les affichent différemment ; `app/page.js` en choisit un :
 
 | Composant | Principe | Branche |
 |---|---|---|
@@ -138,22 +141,64 @@ Pour changer d'affichage : un seul import à modifier dans `app/page.js`.
   **mesure** dans le DOM (`pasDeDefilement`). Ne pas coder de largeur en dur
   dans le composant.
 
-## Livraison au client — `Site-MGYM.html`
+## Livraison au client — `Site-MGYM-{sentier,carousel}.html`
 
-`node build-standalone.js` assemble un **fichier HTML unique** (~6 Mo, images
-en base64) que la cliente ouvre par double-clic, sans serveur.
+`build-standalone.js` produit, depuis `out/`, une copie du site qui s'ouvre par
+double-clic sans serveur. **Deux formats**, selon l'usage :
+
+```bash
+# Fichier unique (~6 Mo, images en base64) — pratique à envoyer par mail
+npm run build:html:sentier    # Site-MGYM-sentier.html
+npm run build:html:carousel   # Site-MGYM-carousel.html
+npm run build:html:all        # les deux
+
+# Dossier unique (~5 Mo, photos en fichiers séparés) — à déposer sur Drive
+npm run livraison             # les deux versions dans Livraison-MGYM/
+npm run livraison:carousel    # n'y dépose que la page « cartes »
+npm run livraison:sentier     # n'y dépose que la page « chemin »
+```
+
+`Livraison-MGYM/` est **un seul dossier** contenant les deux versions du site :
+
+```
+Livraison-MGYM/
+  Site-MGYM-activites-en-cartes.html   # variante carrousel
+  Site-MGYM-activites-en-chemin.html   # variante sentier
+  Images/          # partagé par les deux pages
+  fond1.jpg
+  LISEZ-MOI.txt    # écrit pour la cliente, pas pour un développeur
+```
+
+Les photos restent des fichiers visibles : les remplacer par un fichier de
+même nom met à jour les deux pages d'un coup. Le mode `--dossier` **ne vide
+jamais** `Livraison-MGYM/` : les deux variantes s'y écrivent l'une après
+l'autre, un nettoyage effacerait la page du passage précédent.
+
+Les deux formats (fichier unique / dossier) partagent tout le reste — seul le
+traitement des images diffère (`transformeImage` dans `build-standalone.js`).
 
 Pièges à connaître :
 
 - Le script **retire tous les `<script>` de Next**. Aucune interactivité React
   ne survit. Toute interaction nouvelle doit être **réécrite en JS vanilla**
   dans la constante `inlineJs` de `build-standalone.js` (c'est déjà le cas pour
-  la nav, le menu mobile, les animations `.sr` et le carrousel).
-- Le script lit le dossier **`out/`**, produit par un export statique.
-  État actuel : `next.config.js` ne contient **pas** `output: 'export'` et le
-  dossier `out/` est obsolète (antérieur au sentier d'activités). Le HTML
-  autonome doit donc être régénéré — ajouter `output: 'export'` avant de
-  relancer `next build` puis `node build-standalone.js`.
+  la nav, le menu mobile, les animations `.sr`, le carrousel, et pour le
+  sentier : révélation des étapes, tracé du chemin au défilement, bouton
+  « En savoir plus »).
+- Les liens vers les images doivent rester **absolus** dans le code source
+  (`/Images/xxx`) : c'est ce que `build-standalone.js` détecte pour les
+  transformer, en base64 ou en chemin relatif selon le format.
+- **Un state React invisible à l'export est un contenu perdu.** Un bloc rendu
+  conditionnellement (`{estOuvert && …}`) est simplement absent du HTML
+  produit. C'est ce qui rendait les descriptions d'activités introuvables dans
+  le fichier livré. Règle : rendre le contenu **toujours**, et le masquer avec
+  l'attribut `hidden` que React et le JS inline basculent tous les deux.
+- De même, une classe posée par un state React (`est-visible` sur `.etape`) ne
+  sera jamais posée dans le fichier autonome : il faut son équivalent dans
+  `inlineJs`, sinon la section reste en `opacity:0`.
+- Le script lit le dossier **`out/`**, produit par l'export statique
+  (`output: 'export'` est bien présent dans `next.config.js`). Toujours
+  relancer un build avant `node build-standalone.js`.
 
 ## Ce qu'il ne faut pas faire
 

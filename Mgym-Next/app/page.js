@@ -6,18 +6,21 @@
 import Hero              from '../components/Hero'
 import Manifesto         from '../components/Manifesto'
 import About             from '../components/About'
-// Branche teste-template : le bloc « Activités » est affiché en
-// CARROUSEL HORIZONTAL au lieu du sentier vertical. Pour revenir au
-// sentier, remettre <SentierActivites /> ci-dessous — les deux
-// composants lisent les mêmes données (components/activitesData.js).
+// Les deux versions du site utilisent les mêmes données d'activités.
+// `MGYM_VARIANT=sentier` permet de générer la version verticale.
 import CarrouselActivites from '../components/CarrouselActivites'
-import Bespoke          from '../components/Bespoke'
-import Coach            from '../components/Coach'
-import Pricing          from '../components/Pricing'
-import Planning         from '../components/Planning'
-import Reseaux          from '../components/Reseaux'
-import Contact          from '../components/Contact'
-import Footer           from '../components/Footer'
+import SentierActivites   from '../components/SentierActivites'
+import Outdoor            from '../components/Outdoor'
+import Bespoke            from '../components/Bespoke'
+import Coach              from '../components/Coach'
+import Pricing            from '../components/Pricing'
+import Planning           from '../components/Planning'
+import Reseaux            from '../components/Reseaux'
+import Contact            from '../components/Contact'
+import Footer             from '../components/Footer'
+
+const isSentier = process.env.MGYM_VARIANT === 'sentier'
+const ActivitesSection = isSentier ? SentierActivites : CarrouselActivites
 
 export default function Home() {
   return (
@@ -25,7 +28,10 @@ export default function Home() {
       <Hero />
       <Manifesto />
       <About />
-      <CarrouselActivites />
+      <ActivitesSection />
+      {/* Outdoor prolonge la section Activités (même fond rose) : l'alternance
+          crème/rose reprend normalement à partir de Bespoke. */}
+      <Outdoor />
       <Bespoke />
       <Coach />
       <Pricing />

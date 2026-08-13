@@ -1,0 +1,45 @@
+SITE M'GYM — Bien-être & Santé
+Mirepoix-sur-Tarn
+
+DEUX VERSIONS À COMPARER
+------------------------
+Ce dossier contient le même site, présenté de deux façons. Seule
+la partie "Nos activités" change ; tout le reste est identique.
+
+  Site-MGYM-activites-en-cartes.html
+      Les activités sont des cartes qui défilent de gauche à droite.
+
+  Site-MGYM-activites-en-chemin.html
+      Les activités jalonnent un chemin qui descend dans la page.
+
+Ouvrez les deux, puis dites-nous celle que vous préférez.
+
+COMMENT OUVRIR LE SITE
+----------------------
+Double-cliquez sur l'un des deux fichiers .html ci-dessus.
+Le site s'ouvre dans votre navigateur habituel (Chrome, Firefox, Edge,
+Safari). Aucune installation n'est nécessaire.
+
+Si vous avez téléchargé ce dossier depuis Google Drive sous forme de
+fichier .zip : décompressez-le d'abord (clic droit > Extraire tout),
+puis ouvrez le fichier .html dans le dossier obtenu.
+
+IMPORTANT
+---------
+Gardez toujours les fichiers .html, le dossier "Images" et "fond1.jpg"
+ENSEMBLE dans le même dossier. Si vous déplacez une page .html toute
+seule ailleurs, les photos ne s'afficheront plus.
+
+Les textes du site s'affichent avec leurs vraies polices si vous êtes
+connecté à Internet. Hors connexion le site reste parfaitement lisible,
+simplement avec des polices de remplacement.
+
+REMPLACER UNE PHOTO
+-------------------
+Ouvrez le dossier "Images", et remplacez le fichier voulu par le vôtre
+en lui donnant EXACTEMENT le même nom. La photo sera reprise
+automatiquement à la prochaine ouverture du site, dans les deux versions.
+
+Ce dossier est une copie du site à consulter et à faire relire.
+Pour toute modification du contenu, contactez la personne qui gère
+le site.

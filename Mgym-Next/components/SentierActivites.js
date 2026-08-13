@@ -126,25 +126,36 @@ function Etape({ activite, index }) {
           aria-controls={panneauId}
           onClick={() => setEstOuvert((v) => !v)}
         >
-          {estOuvert ? 'Réduire' : 'En savoir plus'}
+          {/* Le libellé est dans un <span> identifiable : le JS du fichier
+              autonome (build-standalone.js) doit pouvoir le réécrire sans
+              toucher au <svg> voisin. */}
+          <span className="etape-toggle-libelle">
+            {estOuvert ? 'Réduire' : 'En savoir plus'}
+          </span>
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
             <path d="M1 3.5L5 7.5L9 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
 
-        {estOuvert && (
-          <div id={panneauId} className="etape-panneau">
-            <p>{activite.desc}</p>
-            <div className="etape-tags">
-              {activite.tags.map((tag) => (
-                <span key={tag} className="etape-tag">{tag}</span>
-              ))}
-            </div>
-            {activite.href && (
-              <a href={activite.href} className="etape-lien">Découvrir en détail →</a>
-            )}
+        {/* Le panneau est TOUJOURS dans le HTML, simplement masqué par
+            l'attribut `hidden`. On ne le monte pas conditionnellement, sinon
+            il serait absent du HTML exporté (où estOuvert vaut false), et la
+            version autonome livrée à la cliente n'aurait aucune description
+            d'activité — bouton « En savoir plus » sans contenu derrière.
+            React et le JS inline basculent donc exactement le même attribut. */}
+        <div id={panneauId} className="etape-panneau" hidden={!estOuvert}>
+          <p>{activite.desc}</p>
+          <div className="etape-tags">
+            {activite.tags.map((tag) => (
+              <span key={tag} className="etape-tag">{tag}</span>
+            ))}
           </div>
-        )}
+          {activite.href && (
+            <a href={activite.href} className="etape-lien">
+              {activite.lienTexte || 'Découvrir en détail →'}
+            </a>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -161,11 +172,11 @@ export default function SentierActivites() {
 
         <div className="acts-header sr">
           <p className="section-label">Nos pratiques</p>
-          <h2 className="section-title">Méthodes douces &amp; <em>bien-être</em></h2>
+          <h2 className="section-title">Formes &amp; <em>Bien-être</em></h2>
           <div className="divider" />
           <p className="lead" style={{ maxWidth: '520px', margin: '0 auto' }}>
-            Suivez le chemin, une activité à la fois. Cliquez sur une étape pour
-            en découvrir tous les bienfaits.
+            Renforcez votre corps, libérez les tensions et retrouvez une énergie
+            durable. Cliquez sur une étape pour en découvrir tous les bienfaits.
           </p>
         </div>
 
