@@ -6,8 +6,12 @@
 #   1. Vérifie que Node.js et npm sont installés
 #   2. Installe les dépendances si nécessaire
 #   3. Build le site (échoue ici si le code ne compile pas)
-#   4. Lance le serveur de production
+#   4. Sert les pages exportées dans out/ (voir serve.js)
 #   5. Attend que le site réponde (health check HTTP) avant de rendre la main
+#
+# Note : le site est exporté en pages statiques, il n'y a donc pas de serveur
+# Next à lancer. `npm start` appelle serve.js, un petit serveur de fichiers
+# écrit avec le module http de Node — aucune dépendance supplémentaire.
 #
 # Usage :
 #   ./launch.sh           # build + lance en production (port 3000)
@@ -66,6 +70,8 @@ if [ "$MODE" = "prod" ]; then
     exit 1
   fi
   info "Build réussi."
+  # serve.js lit --port / --hostname, comme le faisait `next start` avant
+  # le passage à l'export statique.
   START_CMD=(npm run start -- --port "$PORT" --hostname "$HOST")
 else
   START_CMD=(npm run dev -- --port "$PORT" --hostname "$HOST")
