@@ -1,7 +1,7 @@
 // Hero épuré : H1 + CTAs uniquement.
 // Les activités sont communiquées via la bande frosted-glass en bas de l'image.
 
-const activities = ['Pilates', 'Yoga', 'Yogilate', 'Gym Bien-Être', 'Renforcement Musculaire']
+const activities = ['Pilates', 'Yoga', 'Prestation sur mesure', 'Gym Bien-Être', 'Renforcement Musculaire']
 
 export default function Hero() {
   return (
