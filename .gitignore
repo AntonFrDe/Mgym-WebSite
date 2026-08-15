@@ -4,6 +4,15 @@ node_modules/
 # Build Next.js
 .next/
 
+# Export statique : régénéré par `npm run build`, ne doit jamais être commité.
+out/
+
+# Fichiers produits par build-standalone.js (voir CLAUDE.md, section
+# « Livraison »). Ils pèsent ~6 Mo pièce et sont reconstruits à la demande :
+# les suivre dans git ferait grossir le dépôt à chaque livraison.
+Livraison-MGYM/
+Site-MGYM*.html
+
 # Divers
 .DS_Store
 *.log
