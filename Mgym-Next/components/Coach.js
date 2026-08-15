@@ -1,3 +1,10 @@
+// Coach.js — la présentation d'Emmanuelle Franc.
+//
+// Les diplômes sont listés ci-dessous plutôt qu'écrits dans le JSX : en
+// ajouter un se fait en recopiant une ligne, sans toucher à la mise en page.
+// `full: true` fait occuper toute la largeur à la pastille — utile pour la
+// dernière quand leur nombre est impair, sinon elle reste seule dans sa
+// colonne et la grille paraît bancale.
 const certifications = [
   { text: 'Diplômée des métiers de la forme', full: false },
   { text: 'Professeure certifiée Pilates',    full: false },
@@ -12,18 +19,17 @@ export default function Coach() {
       <div className="section-max">
         <div className="coach-grid">
 
-          <div className="coach-img-wrap sr-l">
+          <div className="coach-img-wrap apparition-gauche">
             <img
               src="/Images/CoachPhoto.webp"
               alt="Emmanuelle Franc — coach M'GYM"
-              style={{ objectPosition: 'center 15%' }}
             />
             <div className="coach-deco" />
           </div>
 
-          <div className="sr-r">
+          <div className="apparition-droite">
             <p className="section-label">Votre coach</p>
-            <h2 className="section-title" style={{ lineHeight: 1 }}>
+            <h2 className="section-title coach-titre">
               Emmanuelle<br /><em>Franc</em>
             </h2>
             <div className="divider" />
@@ -45,7 +51,7 @@ export default function Coach() {
               </div>
             </div>
 
-            <p className="lead" style={{ marginBottom: '1.5rem' }}>
+            <p className="lead coach-texte">
               Avec son énergie, Emmanuelle vous accompagne dans votre pratique avec
               des conseils personnalisés. M&apos;GYM est un espace de convivialité et de
               bien-être où prendre soin de soi est un plaisir.

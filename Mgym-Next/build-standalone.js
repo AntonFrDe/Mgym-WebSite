@@ -35,7 +35,7 @@ body = body.replace(/<!--[\s\S]*?-->/g, '')
 let css = fs.readFileSync(path.join(ROOT, 'app', 'globals.css'), 'utf8')
 
 // 3) Traitement des images
-// Toutes les références du site sont absolues ("/Images/xxx", "/fond1.jpg").
+// Toutes les références du site sont absolues ("/Images/xxx", "/fond1.avif").
 // Selon le format demandé on les transforme en data URI (fichier unique) ou
 // en chemin relatif ("Images/xxx", à côté du index.html).
 const mime = { '.avif': 'image/avif', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml' }
@@ -47,7 +47,7 @@ const dataUri = (file) => {
 
 // `transforme` reçoit le chemin relatif de l'image et renvoie ce qu'il faut
 // écrire à sa place dans le HTML / le CSS.
-const remplaceImages = (str, transforme) => str.replace(/\/(Images\/[^\s"')]+|fond1\.jpg)/g, (m, rel) => {
+const remplaceImages = (str, transforme) => str.replace(/\/(Images\/[^\s"')]+|fond1\.avif)/g, (m, rel) => {
   const abs = path.join(OUT, rel)
   if (!fs.existsSync(abs)) { console.warn('!! image introuvable :', rel); return m }
   return transforme(rel, abs)
@@ -79,13 +79,13 @@ const inlineJs = `
   // Apparition en fondu (comme ClientLayout)
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(e){
-      if (e.isIntersecting){ e.target.classList.add('on'); io.unobserve(e.target); }
+      if (e.isIntersecting){ e.target.classList.add('est-apparu'); io.unobserve(e.target); }
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-  document.querySelectorAll('.sr, .sr-l, .sr-r').forEach(function(el){ io.observe(el); });
+  document.querySelectorAll('.apparition, .apparition-gauche, .apparition-droite').forEach(function(el){ io.observe(el); });
 
   // Étapes du sentier : même principe, mais la classe attendue par le CSS
-  // est .est-visible (elle vient d'un state React, pas de .sr). Sans ce
+  // est .est-visible (elle vient d'un state React, pas de .apparition). Sans ce
   // second observateur, les 8 activités resteraient en opacity:0 dans le
   // fichier autonome — la section entière apparaîtrait vide.
   var ioEtapes = new IntersectionObserver(function(entries){
@@ -97,7 +97,7 @@ const inlineJs = `
 
   // Filet de sécurité : si JS lent/désactivé sur certains éléments, tout devient visible après 3s
   setTimeout(function(){
-    document.querySelectorAll('.sr, .sr-l, .sr-r').forEach(function(el){ el.classList.add('on'); });
+    document.querySelectorAll('.apparition, .apparition-gauche, .apparition-droite').forEach(function(el){ el.classList.add('est-apparu'); });
     document.querySelectorAll('.etape').forEach(function(el){ el.classList.add('est-visible'); });
   }, 3000);
 
@@ -285,7 +285,7 @@ puis ouvrez le fichier .html dans le dossier obtenu.
 
 IMPORTANT
 ---------
-Gardez toujours les fichiers .html, le dossier "Images" et "fond1.jpg"
+Gardez toujours les fichiers .html, le dossier "Images" et "fond1.avif"
 ENSEMBLE dans le même dossier. Si vous déplacez une page .html toute
 seule ailleurs, les photos ne s'afficheront plus.
 
@@ -334,11 +334,11 @@ if (!enDossier) {
 
   fs.rmSync(path.join(dossier, 'Images'), { recursive: true, force: true })
   fs.cpSync(path.join(OUT, 'Images'), path.join(dossier, 'Images'), { recursive: true })
-  fs.copyFileSync(path.join(OUT, 'fond1.jpg'), path.join(dossier, 'fond1.jpg'))
+  fs.copyFileSync(path.join(OUT, 'fond1.avif'), path.join(dossier, 'fond1.avif'))
   fs.writeFileSync(path.join(dossier, 'LISEZ-MOI.txt'), lisezMoi)
 
   const pagesPresentes = Object.values(nomPage).filter((p) => fs.existsSync(path.join(dossier, p)))
   console.log('OK ->', dossier + '/ (' + poidsDossier(dossier) + ' Ko)')
   console.log('     ' + pagesPresentes.join(' + '))
-  console.log('     Images/ + fond1.jpg + LISEZ-MOI.txt')
+  console.log('     Images/ + fond1.avif + LISEZ-MOI.txt')
 }

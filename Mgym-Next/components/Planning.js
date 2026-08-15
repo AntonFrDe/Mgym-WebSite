@@ -66,11 +66,11 @@ export default function Planning() {
     <section id="planning" className="section-pad">
       <div className="section-max">
 
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }} className="sr">
+        <div className="planning-entete apparition">
           <p className="section-label">Horaires des cours</p>
           <h2 className="section-title">Notre <em>Planning</em></h2>
-          <div className="divider" style={{ margin: '1.5rem auto' }} />
-          <p className="lead" style={{ maxWidth: '560px', margin: '0 auto' }}>
+          <div className="divider" />
+          <p className="lead">
             Retrouvez ci-dessous l&apos;ensemble des créneaux de la saison. Pour
             toute question sur un cours en particulier, l&apos;équipe M&apos;GYM se
             tient à votre disposition.
@@ -84,7 +84,7 @@ export default function Planning() {
             Le titre de saison et l'indice de défilement sont volontairement
             HORS du conteneur qui défile : sinon ils disparaissent dès que
             l'on fait glisser le tableau. */}
-        <div className="sr">
+        <div className="apparition">
           <p className="planning-saison">{SAISON}</p>
           <p className="planning-indice" aria-hidden="true">
             Faites glisser le tableau pour voir tous les jours →
@@ -96,7 +96,7 @@ export default function Planning() {
                 <tr>
                   {/* Coin haut-gauche : le libellé n'a pas d'intérêt visuel
                       mais il est lu par les lecteurs d'écran. Attention : la
-                      classe .sr du projet sert aux animations, pas au
+                      classe .apparition du projet sert aux animations, pas au
                       masquage — d'où .visuellement-masque, sans ambiguïté. */}
                   <th scope="col">
                     <span className="visuellement-masque">Moment de la journée</span>
@@ -131,7 +131,7 @@ export default function Planning() {
         </div>
 
         {stages.length > 0 && (
-          <div className="sr planning-stages">
+          <div className="apparition planning-stages">
             <h3 className="planning-stages-titre">Stages &amp; ateliers</h3>
             <ul className="planning-stages-liste">
               {stages.map((stage) => (
@@ -154,7 +154,7 @@ export default function Planning() {
           </div>
         )}
 
-        <div className="sr" style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+        <div className="planning-cta apparition">
           <a href="#contact" className="btn-primary">Une question sur les horaires ?</a>
         </div>
 

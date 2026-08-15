@@ -23,6 +23,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { activites } from './activitesData'
+import EnteteActivites from './EnteteActivites'
 
 // deltaMode === 1 : la molette envoie des LIGNES et non des pixels
 // (Firefox surtout). 32px ≈ une ligne, valeur usuelle.
@@ -127,16 +128,7 @@ export default function CarrouselActivites() {
     <section id="activites" className="section-pad">
       <div className="section-max">
 
-        <div className="acts-header sr">
-          <p className="section-label">Nos pratiques</p>
-          <h2 className="section-title">Formes &amp; <em>Bien-être</em></h2>
-          <div className="divider" />
-          <p className="lead" style={{ maxWidth: '540px', margin: '0 auto' }}>
-            Renforcez votre corps, libérez les tensions et retrouvez une énergie
-            durable. Faites défiler les cartes à la molette, au doigt ou avec
-            les flèches pour toutes les découvrir.
-          </p>
-        </div>
+        <EnteteActivites instruction="Faites défiler les cartes à la molette, au doigt ou avec les flèches pour toutes les découvrir." />
 
         <div className={`carrousel${auDebut ? ' est-au-debut' : ''}${aLaFin ? ' est-a-la-fin' : ''}`}>
 

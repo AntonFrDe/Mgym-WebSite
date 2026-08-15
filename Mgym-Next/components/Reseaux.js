@@ -1,16 +1,26 @@
+// Reseaux.js — la section « Suivez-nous ».
+//
+// Un seul réseau pour l'instant (Facebook). La carte réutilise les styles
+// de la section Contact (.contact-card) plutôt que d'en créer de nouveaux :
+// c'est la même forme, le même rôle. Seule la largeur change, réglée par
+// #reseaux .contact-cards dans globals.css.
+//
+// POUR AJOUTER UN RÉSEAU : recopier le bloc .contact-card ci-dessous et
+// retirer la règle #reseaux .contact-cards du CSS pour repasser sur
+// plusieurs colonnes.
 export default function Reseaux() {
   return (
     <section id="reseaux" className="section-pad">
       <div className="section-max">
 
-        <div className="contact-header sr">
+        <div className="contact-header apparition">
           <p className="section-label">Suivez-nous</p>
           <h2 className="section-title">Nos <em>Réseaux</em></h2>
           <div className="divider" />
         </div>
 
-        <div className="contact-cards" style={{ maxWidth: '320px', gridTemplateColumns: '1fr' }}>
-          <div className="contact-card sr">
+        <div className="contact-cards">
+          <div className="contact-card apparition">
             <div className="contact-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />

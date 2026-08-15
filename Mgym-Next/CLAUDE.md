@@ -16,17 +16,24 @@ La lisibilité et la simplicité priment sur l'effet technique.
 
 ```bash
 npm run dev            # développement, http://localhost:3000
-npm run build          # build de production (doit toujours passer avant de livrer)
-npm start              # serveur de production
+npm run build          # export statique dans out/ (doit passer avant de livrer)
+npm start              # sert out/ via serve.js (nécessite un build préalable)
 ./launch.sh            # build + start + health check HTTP (usage courant)
 ./launch.sh --dev      # mode dev sans build
 PORT=4000 ./launch.sh  # autre port
-node build-standalone.js   # génère Site-MGYM.html (voir « Livraison » plus bas)
+node build-standalone.js   # copie autonome du site (voir « Livraison » plus bas)
 ```
 
 Il n'y a **pas** de suite de tests ni de commande de lint dans ce projet.
 La vérification de référence est `npm run build` (elle échoue sur toute erreur
 de compilation ou de type inféré).
+
+`next start` **ne fonctionne pas** ici : avec `output: 'export'` il n'y a plus
+de serveur Next à lancer, seulement des fichiers. C'est `serve.js` — 80 lignes
+sur le module `http` de Node, sans dépendance — qui sert `out/`. Toute
+modification de `next.config.js` doit s'accompagner d'un essai réel de
+`./launch.sh` : c'est exactement ce qui a cassé la commande en silence par le
+passé.
 
 ## Architecture
 
@@ -41,12 +48,16 @@ components/
   Manifesto.js   # citation sur bandeau sombre
   About.js       # histoire de l'association
   activitesData.js       # SOURCE UNIQUE des 8 activités
+  EnteteActivites.js     # titre + chapô, partagés par les deux affichages
   SentierActivites.js    # affichage « sentier » vertical ('use client')
   CarrouselActivites.js  # affichage « cartes horizontales » ('use client')
   Outdoor.js             # « Explorez aussi » : marche nordique & outdoor
+  liens.js               # adresses des formulaires en ligne (un seul endroit)
   Bespoke.js Coach.js Pricing.js Planning.js Reseaux.js Contact.js Footer.js
-  ClientLayout.js # IntersectionObserver global pour les animations .sr
+  ClientLayout.js # IntersectionObserver global pour les classes .apparition
 public/Images/   # toutes les photos, en .avif (sauf CoachPhoto.webp)
+public/fond1.avif # fond du hero
+serve.js         # sert out/ en local, sans dépendance (cf. « Commandes »)
 ```
 
 Le site est **une seule route** : toute la navigation se fait par ancres
@@ -72,18 +83,31 @@ Le site est **une seule route** : toute la navigation se fait par ancres
 - **CSS** : ajouter les styles dans `globals.css`, dans la section commentée
   correspondante (`/* ── ACTIVITÉS ── */`, `/* ── TARIFS ── */`…), pas en
   vrac à la fin.
+- **Aucun `style={{ }}` dans le JSX**, aucune couleur en dur dans un
+  composant. La seule exception admise est une valeur *calculée à l'exécution*
+  (la jauge du carrousel, dont la largeur dépend du défilement). Tout le reste
+  est une classe dans `globals.css`.
 
-## Design system (valeurs en dur, pas de variables CSS)
+## Design system
 
-| Rôle | Valeur |
-|---|---|
-| Rose principal | `#D18B8E` |
-| Rose foncé (hover) | `#B8737A` |
-| Rose clair (fonds alternés) | `#F4E1E6` |
-| Fond crème | `#FFF7F8` |
-| Prune (texte, bandeaux sombres) | `#4A3B42` |
+Les couleurs sont des **variables CSS**, déclarées une seule fois dans le bloc
+`:root` en haut de `globals.css`. Ne jamais réécrire un code hexadécimal
+ailleurs : `var(--rose)`, pas `#D18B8E`.
 
-- Les sections **alternent** `#FFF7F8` et `#F4E1E6`. En insérant une section,
+| Rôle | Variable | Valeur |
+|---|---|---|
+| Rose principal | `--rose` | `#D18B8E` |
+| Rose foncé (hover) | `--rose-fonce` | `#B8737A` |
+| Rose clair (fonds alternés) | `--rose-clair` | `#F4E1E6` |
+| Rose pâle (italique du hero) | `--rose-pale` | `#F4C4C7` |
+| Fond crème | `--creme` | `#FFF7F8` |
+| Prune (texte, bandeaux sombres) | `--prune` | `#4A3B42` |
+| Blanc (texte sur fond coloré) | `--blanc` | `#fff` |
+
+Pour une transparence, utiliser la variante `-rgb` :
+`rgba(var(--prune-rgb), .12)` — `rgba()` ne sait pas lire un hexadécimal.
+
+- Les sections **alternent** `var(--creme)` et `var(--rose-clair)`. En insérant une section,
   vérifier que l'alternance tient encore.
 - **Lisibilité : ne jamais descendre sous `.85rem` (≈13.6 px)** pour du texte
   courant. Les commentaires `/* LISIBILITÉ : ... */` dans `globals.css` marquent
@@ -95,11 +119,16 @@ Le site est **une seule route** : toute la navigation se fait par ancres
 
 Deux mécanismes, à ne pas confondre :
 
-1. **`.sr` / `.sr-l` / `.sr-r`** — apparition en fondu au défilement. La classe
-   `.on` est posée par l'`IntersectionObserver` de `ClientLayout.js`, qui
-   requête le DOM **une seule fois au montage**. Un élément `.sr` rendu plus
-   tard (après un clic, un filtre…) ne sera jamais révélé : dans ce cas, gérer
-   la visibilité dans le composant lui-même.
+1. **`.apparition` / `.apparition-gauche` / `.apparition-droite`** — apparition
+   en fondu au défilement. La classe `.est-apparu` est posée par
+   l'`IntersectionObserver` de `ClientLayout.js`, qui requête le DOM **une
+   seule fois au montage**. Un élément `.apparition` rendu plus tard (après un
+   clic, un filtre…) ne sera jamais révélé : dans ce cas, gérer la visibilité
+   dans le composant lui-même.
+   Le décalage entre éléments voisins se règle avec `.retard-1` … `.retard-6`.
+   *Ces classes s'appelaient `.sr` / `.on` / `.d1`. « sr » veut dire* screen
+   reader *partout ailleurs dans le métier : ne pas revenir à ce nom. Le vrai
+   masquage accessible du projet est `.visuellement-masque`.*
 2. **États locaux des composants d'activités** (`estVisible`, `estOuvert`) —
    chacun a sa propre source (l'observer / le clic) et **ne doit jamais
    réinitialiser l'autre**. Un bug déjà rencontré sur l'ancien accordéon venait
@@ -118,13 +147,19 @@ Bien-être, Forme & Force), les deux offres sur mesure fermant la marche
 l'ordre affiché** : déplacer une ligne change le classement partout.
 Deux composants les affichent différemment ; `app/page.js` en choisit un :
 
-| Composant | Principe | Branche |
+| Composant | Principe | `MGYM_VARIANT` |
 |---|---|---|
-| `SentierActivites.js` | chemin sinueux vertical tracé au défilement (SVG `stroke-dashoffset`), étapes alternées gauche/droite, panneau dépliable | `main` / branches de prod |
-| `CarrouselActivites.js` | 8 cartes qui défilent à l'horizontale à la molette, au doigt, aux flèches | `teste-template` |
+| `CarrouselActivites.js` | 8 cartes qui défilent à l'horizontale à la molette, au doigt, aux flèches | *(vide)* — affichage par défaut |
+| `SentierActivites.js` | chemin sinueux vertical tracé au défilement (SVG `stroke-dashoffset`), étapes alternées gauche/droite, panneau dépliable | `sentier` |
 
-Pour changer d'affichage : un seul import à modifier dans `app/page.js`.
-**Ne jamais dupliquer le tableau d'activités** dans un composant.
+Le choix se fait par la variable d'environnement `MGYM_VARIANT` dans
+`app/page.js` (`MGYM_VARIANT=sentier npm run build`), sans toucher au code.
+
+**Ne jamais dupliquer les activités** dans un composant : ni le tableau de
+données (`activitesData.js`), ni l'en-tête de la section
+(`EnteteActivites.js`, dont seule la phrase d'instruction change d'un
+affichage à l'autre). Cette en-tête a longtemps été recopiée dans les deux
+fichiers, et une correction sur deux se perdait.
 
 ### Règles du carrousel horizontal
 
@@ -147,12 +182,12 @@ Pour changer d'affichage : un seul import à modifier dans `app/page.js`.
 double-clic sans serveur. **Deux formats**, selon l'usage :
 
 ```bash
-# Fichier unique (~6 Mo, images en base64) — pratique à envoyer par mail
+# Fichier unique (~1,6 Mo, images en base64) — pratique à envoyer par mail
 npm run build:html:sentier    # Site-MGYM-sentier.html
 npm run build:html:carousel   # Site-MGYM-carousel.html
 npm run build:html:all        # les deux
 
-# Dossier unique (~5 Mo, photos en fichiers séparés) — à déposer sur Drive
+# Dossier unique (~1,4 Mo, photos en fichiers séparés) — à déposer sur Drive
 npm run livraison             # les deux versions dans Livraison-MGYM/
 npm run livraison:carousel    # n'y dépose que la page « cartes »
 npm run livraison:sentier     # n'y dépose que la page « chemin »
@@ -165,7 +200,7 @@ Livraison-MGYM/
   Site-MGYM-activites-en-cartes.html   # variante carrousel
   Site-MGYM-activites-en-chemin.html   # variante sentier
   Images/          # partagé par les deux pages
-  fond1.jpg
+  fond1.avif
   LISEZ-MOI.txt    # écrit pour la cliente, pas pour un développeur
 ```
 
@@ -182,9 +217,10 @@ Pièges à connaître :
 - Le script **retire tous les `<script>` de Next**. Aucune interactivité React
   ne survit. Toute interaction nouvelle doit être **réécrite en JS vanilla**
   dans la constante `inlineJs` de `build-standalone.js` (c'est déjà le cas pour
-  la nav, le menu mobile, les animations `.sr`, le carrousel, et pour le
+  la nav, le menu mobile, les classes `.apparition`, le carrousel, et pour le
   sentier : révélation des étapes, tracé du chemin au défilement, bouton
-  « En savoir plus »).
+  « En savoir plus »). **Renommer une classe utilisée par ce script sans le
+  mettre à jour casse silencieusement le fichier livré, jamais le site Next.**
 - Les liens vers les images doivent rester **absolus** dans le code source
   (`/Images/xxx`) : c'est ce que `build-standalone.js` détecte pour les
   transformer, en base64 ou en chemin relatif selon le format.
@@ -199,6 +235,25 @@ Pièges à connaître :
 - Le script lit le dossier **`out/`**, produit par l'export statique
   (`output: 'export'` est bien présent dans `next.config.js`). Toujours
   relancer un build avant `node build-standalone.js`.
+
+## Hygiène du dépôt
+
+Rien de ce que produit une commande ne doit être commité. `out/`,
+`Livraison-MGYM/` et les `Site-MGYM*.html` sont dans `.gitignore` : ils se
+régénèrent en une commande et pèsent plusieurs mégaoctets chacun. Avant de
+committer, vérifier que `git status` ne liste que des fichiers écrits à la
+main.
+
+Les photos non référencées sont à supprimer : `build-standalone.js` copie
+**tout** `public/Images/` dans le dossier de livraison, une image inutilisée
+part donc chez la cliente. Pour lister les orphelines :
+
+```bash
+for img in public/Images/*; do
+  b=$(basename "$img")
+  grep -qr "$b" components/ app/ || echo "orpheline : $b"
+done
+```
 
 ## Ce qu'il ne faut pas faire
 

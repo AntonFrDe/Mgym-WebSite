@@ -38,7 +38,7 @@ export default function Contact() {
     <section id="contact" className="section-pad">
       <div className="section-max">
 
-        <div className="contact-header sr">
+        <div className="contact-header apparition">
           <p className="section-label">Nous trouver</p>
           <h2 className="section-title">Contacts &amp; <em>Accès</em></h2>
           <div className="divider" />
@@ -46,7 +46,7 @@ export default function Contact() {
 
         <div className="contact-cards">
           {contactCards.map((card, i) => (
-            <div key={card.label} className={`contact-card sr d${i + 1}`}>
+            <div key={card.label} className={`contact-card apparition retard-${i + 1}`}>
               <div className="contact-icon">{card.icon}</div>
               <div className="contact-label">{card.label}</div>
               {card.content}
@@ -54,7 +54,7 @@ export default function Contact() {
           ))}
         </div>
 
-        <div className="contact-cta sr">
+        <div className="contact-cta apparition">
           {/* « Prête à commencer ? » ne s'adressait qu'aux femmes. Le doublet
               inclut tout le monde sans changer le ton de la phrase. */}
           <div className="contact-cta-title">

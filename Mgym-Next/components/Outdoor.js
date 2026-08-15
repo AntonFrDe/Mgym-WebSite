@@ -6,7 +6,7 @@
 // 9e activité de ce tableau, c'est une invitation à côté. En faire une
 // section indépendante évite de la dupliquer dans les deux affichages.
 //
-// Le fond est volontairement le même rose (#F4E1E6) que #activites : les deux
+// Le fond est volontairement le même rose (var(--rose-clair)) que #activites : les deux
 // blocs se lisent comme un seul, et surtout l'alternance crème/rose des
 // sections suivantes (Prestations, Coach, Tarifs…) reste intacte.
 
@@ -27,7 +27,7 @@ export default function Outdoor() {
       <div className="section-max">
         <div className="outdoor-grid">
 
-          <div className="sr-l">
+          <div className="apparition-gauche">
             <img
               src="/Images/MarcheNordique.avif"
               alt="Sortie marche nordique M'GYM"
@@ -36,14 +36,14 @@ export default function Outdoor() {
             />
           </div>
 
-          <div className="sr-r">
+          <div className="apparition-droite">
             <p className="section-label">Explorez aussi</p>
             <h2 className="section-title">
               Marche nordique &amp;<br />
               activités <em>outdoor</em>
             </h2>
             <div className="divider" />
-            <p className="lead" style={{ marginBottom: '1.5rem' }}>
+            <p className="lead outdoor-texte">
               Respirez, bougez et ressourcez-vous en pleine nature. Nos séances
               associent marche nordique, cardio, renforcement musculaire, yoga
               en extérieur, étirements, marche afghane et découverte du

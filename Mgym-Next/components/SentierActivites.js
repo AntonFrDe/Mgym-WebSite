@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { activites as activities } from './activitesData'
+import EnteteActivites from './EnteteActivites'
 
 // Les données vivent dans activitesData.js : le sentier et le carrousel
 // affichent exactement les mêmes 8 activités.
@@ -170,15 +171,7 @@ export default function SentierActivites() {
     <section id="activites" className="section-pad">
       <div className="section-max">
 
-        <div className="acts-header sr">
-          <p className="section-label">Nos pratiques</p>
-          <h2 className="section-title">Formes &amp; <em>Bien-être</em></h2>
-          <div className="divider" />
-          <p className="lead" style={{ maxWidth: '520px', margin: '0 auto' }}>
-            Renforcez votre corps, libérez les tensions et retrouvez une énergie
-            durable. Cliquez sur une étape pour en découvrir tous les bienfaits.
-          </p>
-        </div>
+        <EnteteActivites instruction="Cliquez sur une étape pour en découvrir tous les bienfaits." />
 
         <div className="activites-sentier" ref={wrapRef}>
           <svg
@@ -187,11 +180,12 @@ export default function SentierActivites() {
             preserveAspectRatio="none"
             aria-hidden="true"
           >
+            {/* La couleur du trait est en CSS (.sentier-trait path) et non
+                ici : un attribut SVG ne sait pas lire var(--rose). */}
             <path
               ref={pathRef}
               d={SENTIER.d}
               fill="none"
-              stroke="#D18B8E"
               strokeWidth="2"
               strokeLinecap="round"
             />

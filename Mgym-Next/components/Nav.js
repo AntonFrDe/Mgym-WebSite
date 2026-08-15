@@ -58,7 +58,7 @@ export default function Nav() {
           <li><a href="#tarifs"    onClick={closeMenu}>Tarifs</a></li>
           <li><a href="#planning"  onClick={closeMenu}>Planning</a></li>
           <li><a href="#reseaux"   onClick={closeMenu}>Réseaux</a></li>
-          <li><a href="#contact"   onClick={closeMenu} style={{ color: '#D18B8E' }}>Contact</a></li>
+          <li><a href="#contact"   onClick={closeMenu} className="mob-contact">Contact</a></li>
         </ul>
       </div>
     </nav>

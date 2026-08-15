@@ -84,15 +84,15 @@ export default function Pricing() {
     <section id="tarifs" className="section-pad">
       <div className="section-max">
 
-        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }} className="sr">
+        <div className="tarifs-entete apparition">
           <p className="section-label">Tarifs</p>
           <h2 className="section-title">Des formules <em>accessibles</em></h2>
-          <div className="divider" style={{ margin: '1.5rem auto' }} />
+          <div className="divider" />
         </div>
 
         <div className="tarifs">
 
-          <div className="tarif-adhesion sr">
+          <div className="tarif-adhesion apparition">
             <div>
               <p className="tarif-adhesion-nom">{adhesion.nom}</p>
               <p className="tarif-adhesion-detail">{adhesion.detail}</p>
@@ -100,7 +100,7 @@ export default function Pricing() {
             <p className="tarif-adhesion-prix">{adhesion.prix}</p>
           </div>
 
-          <div className="sr">
+          <div className="apparition">
             <h3 className="tarif-groupe">À la carte</h3>
             <div className="tarif-vignettes">
               {carte.map((tarif) => (
@@ -110,7 +110,7 @@ export default function Pricing() {
             <p className="tarif-note">{carteNote}</p>
           </div>
 
-          <div className="sr">
+          <div className="apparition">
             <h3 className="tarif-groupe">À la saison</h3>
 
             {/* Un vrai tableau : les en-têtes « Une personne » / « Famille »
@@ -151,7 +151,7 @@ export default function Pricing() {
             </div>
           </div>
 
-          <p className="tarif-sur-mesure sr">
+          <p className="tarif-sur-mesure apparition">
             Besoin d&apos;une formule pour une association, un comité
             d&apos;entreprise, une collectivité ou un événement ?{' '}
             <a href="#bespoke" className="price-lien">
@@ -161,7 +161,7 @@ export default function Pricing() {
           </p>
         </div>
 
-        <div className="inscription sr">
+        <div className="inscription apparition">
           <p className="inscription-titre">Envie de nous <em>rejoindre</em> ?</p>
           <p className="inscription-sous-titre">
             Remplissez le formulaire d&apos;inscription en ligne, il ne prend

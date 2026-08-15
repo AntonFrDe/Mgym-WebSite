@@ -1,3 +1,9 @@
+// Footer.js — le pied de page.
+//
+// Les liens reprennent EXACTEMENT les ancres de Nav.js. Si l'identifiant
+// d'une section change dans app/page.js, il faut le corriger aux deux
+// endroits — c'est le prix du doublon, assumé ici : un pied de page et un
+// menu n'ont pas forcément vocation à lister les mêmes entrées.
 const navLinks = [
   { href: '#about',     label: 'À propos'  },
   { href: '#activites', label: 'Activités' },

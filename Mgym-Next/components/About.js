@@ -1,10 +1,18 @@
+// About.js — « Notre histoire », la première section après le manifeste.
+//
+// Le texte est fourni par la cliente : le modifier ici se fait directement
+// dans le JSX, il n'y a pas de tableau de données à tenir. Les seules
+// subtilités sont typographiques :
+//   · &apos; pour l'apostrophe (le JSX refuse l'apostrophe droite nue) ;
+//   · {' '} pour garder l'espace avant un mot mis en avant, sinon JSX
+//     recolle les mots quand la balise passe à la ligne suivante.
 export default function About() {
   return (
     <section id="about" className="section-pad">
       <div className="section-max">
         <div className="about-grid">
 
-          <div className="about-img-wrap sr-l">
+          <div className="about-img-wrap apparition-gauche">
             <img src="/Images/coachHelpingChienTTenHauyt.avif" alt="Cours collectif M'GYM" />
             <div className="about-deco" />
             <div className="about-badge">
@@ -13,14 +21,14 @@ export default function About() {
             </div>
           </div>
 
-          <div className="sr-r">
+          <div className="apparition-droite">
             <p className="section-label">Notre histoire</p>
             <h2 className="section-title">
               Une association<br />
               <em>ancrée</em> dans le village
             </h2>
             <div className="divider" />
-            <p className="lead" style={{ marginBottom: '1rem' }}>
+            <p className="lead about-intro">
               Depuis les années 80, M&apos;GYM fait bouger Mirepoix-sur-Tarn en
               plaçant la santé, le bien-être et la convivialité au cœur de ses
               activités. À ses débuts, l&apos;association proposait des cours de
@@ -29,7 +37,7 @@ export default function About() {
               une activité physique dans une ambiance chaleureuse et motivante.
             </p>
 
-            <h3 className="serif" style={{ fontSize: '1.35rem', fontWeight: 500, color: '#4A3B42', margin: '2rem 0 .5rem' }}>
+            <h3 className="about-sous-titre">
               Rejoindre M&apos;GYM, c&apos;est profiter :
             </h3>
             <ul className="value-list">
@@ -43,7 +51,7 @@ export default function About() {
             {/* Les mots mis en avant en rose (.accent) sont ceux que la
                 cliente veut voir ressortir : ce que l'on ressent, pas le nom
                 de la coach — elle a déjà sa propre section plus bas. */}
-            <p className="lead" style={{ marginTop: '1.5rem' }}>
+            <p className="lead about-conclusion">
               Coach sportive diplômée d&apos;État, Emmanuelle Franc vous
               accompagne avec <strong className="accent">passion</strong> pour
               vous aider à bouger, progresser et{' '}
