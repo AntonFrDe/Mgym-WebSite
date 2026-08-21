@@ -10,7 +10,7 @@
 // visage ne sera pas coupé parce que le cadre est carré.
 
 import imageUrlBuilder from '@sanity/image-url'
-import { dataset, projectId } from './env'
+import { dataset, projectId } from './env.js'
 
 const fabrique = imageUrlBuilder({ projectId, dataset })
 

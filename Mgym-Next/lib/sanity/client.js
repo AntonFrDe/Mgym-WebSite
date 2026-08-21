@@ -20,7 +20,7 @@
 
 import 'server-only'
 import { createClient } from 'next-sanity'
-import { apiVersion, dataset, projectId } from './env'
+import { apiVersion, dataset, projectId } from './env.js'
 
 // Réglages communs. `useCdn: true` sert le contenu publié depuis le cache
 // de Sanity : plus rapide et moins coûteux en quota d'API.

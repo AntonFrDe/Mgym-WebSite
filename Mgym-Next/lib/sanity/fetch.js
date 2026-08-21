@@ -1,0 +1,59 @@
+// fetch.js — le SEUL endroit du projet qui parle à Sanity.
+//
+// Tout passe par `interroger()`. Aucune requête GROQ n'est écrite dans un
+// composant : les composants reçoivent des données déjà prêtes, ils ne
+// savent pas d'où elles viennent.
+//
+// DEUX GARANTIES PORTÉES ICI :
+//
+// 1. PARAMÈTRES. Les valeurs variables (un slug d'URL, une date) sont
+//    passées séparément de la requête, jamais collées dedans. Une requête
+//    construite par concaténation serait exploitable exactement comme une
+//    injection SQL.
+//
+// 2. LE SITE NE TOMBE PAS SI SANITY TOMBE. Une panne de Sanity renvoie
+//    `null` et laisse le composant afficher son état vide, plutôt que de
+//    faire échouer le rendu de toute la page.
+
+import 'server-only'
+import { clientPour } from './client.js'
+
+// Au-delà, on considère que Sanity ne répondra pas. Sans cette borne, un
+// build peut rester bloqué indéfiniment sur une requête.
+const DELAI_MAX_MS = 10_000
+
+/**
+ * @template T
+ * @param {object} options
+ * @param {string} options.requete       la requête GROQ
+ * @param {Record<string, unknown>} [options.parametres]  valeurs variables
+ * @param {boolean} [options.preview]    true = lire les brouillons
+ * @param {T} [options.siEchec]          valeur renvoyée en cas de panne
+ * @returns {Promise<T>}
+ */
+export async function interroger({
+  requete,
+  parametres = {},
+  preview = false,
+  siEchec = null,
+}) {
+  const client = clientPour(preview)
+
+  try {
+    return await client.fetch(requete, parametres, {
+      signal: AbortSignal.timeout(DELAI_MAX_MS),
+      // En prévisualisation, jamais de cache : la cliente doit voir sa
+      // saisie de l'instant, pas celle d'il y a trois minutes.
+      cache: preview ? 'no-store' : 'force-cache',
+      next: preview ? undefined : { tags: ['sanity'] },
+    })
+  } catch (erreur) {
+    // Le message part dans les journaux du serveur, jamais vers le
+    // navigateur : il peut contenir des détails d'infrastructure.
+    console.error(
+      '[sanity] requête en échec :',
+      erreur instanceof Error ? erreur.message : String(erreur)
+    )
+    return siEchec
+  }
+}
