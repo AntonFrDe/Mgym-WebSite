@@ -10,7 +10,10 @@ La lisibilité et la simplicité priment sur l'effet technique.
 - **JavaScript pur** — pas de TypeScript, pas de tests, pas de linter configuré
 - **CSS global unique** : `app/globals.css` (pas de Tailwind, pas de CSS Modules)
 - Polices via `next/font/google` : Cormorant Garamond (serif) + Montserrat (sans)
-- Aucune dépendance en dehors de `next`, `react`, `react-dom` — **garder cet état**
+- **Aucune dépendance INUTILE.** La règle n'est plus « exactement trois
+  dépendances » : Sanity en a ajouté sept, toutes nécessaires. Toute
+  nouvelle dépendance doit être justifiée, maintenue et auditée.
+- **Node 20.19 minimum** — tous les paquets Sanity l'exigent (voir `.nvmrc`)
 
 ## Commandes
 
@@ -236,6 +239,35 @@ Pièges à connaître :
   (`output: 'export'` est bien présent dans `next.config.js`). Toujours
   relancer un build avant `node build-standalone.js`.
 
+## Le CMS — ce qu'il faut savoir avant d'y toucher
+
+Le contenu vient de Sanity, avec un **repli** sur `lib/contenu/defaut.js`.
+Sans projet configuré, le site affiche exactement ce qu'il affichait avant.
+Ce n'est pas une panne : c'est l'état initial, et le filet de sécurité en cas
+de panne du CMS.
+
+**Trois fichiers décrivent les mêmes champs** et rien ne les relie
+automatiquement :
+
+```
+sanity/schemaTypes/siteContent.js   ce que la cliente peut remplir
+lib/sanity/queries/groq.js          ce que le site va chercher
+lib/contenu/source-historique.mjs   ce qu'il affiche à défaut
+```
+
+Ajouter un champ dans l'un sans les autres donne un champ rempli pour rien,
+ou un texte non modifiable. `npm test` le détecte — l'oubli s'est produit
+deux fois pendant le développement.
+
+Vérifications avant de livrer :
+
+```bash
+npm run verifier   # schémas + requêtes + 67 tests + build
+```
+
+Documentation complète dans `docs/` : SECURITY, ROLLBACK, SANITY-SCHEMAS,
+GUIDE-CLIENTE, FINAL-BACKEND-AUDIT.
+
 ## Hygiène du dépôt
 
 Rien de ce que produit une commande ne doit être commité. `out/`,
@@ -258,8 +290,15 @@ done
 ## Ce qu'il ne faut pas faire
 
 - Ajouter une dépendance npm pour un besoin réalisable en CSS ou en 30 lignes.
-- Introduire TypeScript, Tailwind, ou un système de composants — le projet est
-  volontairement lisible par une personne débutante.
+- Introduire Tailwind ou un système de composants — le projet est
+  volontairement lisible par une personne débutante. TypeScript reste écarté
+  au profit de JSDoc, mais ce n'est plus un interdit absolu : ce serait une
+  décision explicite, pas un effet de bord.
+- **Appeler Sanity depuis un composant.** Les composants reçoivent des
+  props. `app/page.js` récupère le contenu une fois et le distribue.
+- **Récupérer du contenu dans un `useEffect`.** Les données doivent être
+  présentes au premier rendu, sinon les animations se remontent.
+- **Utiliser le titre comme clé React** (`key={act.titre}`). Toujours `_id`.
 - Réduire la taille du texte ou le contraste pour un gain esthétique.
 - Rendre une interaction indispensable sans alternative clavier et tactile.
 - Laisser un texte anglais dans l'interface : le site est intégralement en
