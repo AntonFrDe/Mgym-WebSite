@@ -4,6 +4,11 @@ node_modules/
 # Build Next.js
 .next/
 
+# Build et cache du Studio Sanity
+studio/
+dist/
+.sanity/
+
 # Export statique : régénéré par `npm run build`, ne doit jamais être commité.
 out/
 
@@ -13,7 +18,12 @@ out/
 Livraison-MGYM/
 Site-MGYM*.html
 
+# Secrets — .env*.local ne suffisait pas : un simple .env ou un
+# .env.production serait passé au travers.
+.env
+.env.*
+!.env.example
+
 # Divers
 .DS_Store
 *.log
-.env*.local

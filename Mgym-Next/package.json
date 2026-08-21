@@ -3,25 +3,36 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
     "build:carousel": "MGYM_VARIANT=carousel npm run build",
-    "build:sentier": "MGYM_VARIANT=sentier npm run build",
+    "build:html:all": "npm run build:html:carousel && npm run build:html:sentier",
     "build:html:carousel": "npm run build:carousel && node build-standalone.js --variant=carousel",
     "build:html:sentier": "npm run build:sentier && node build-standalone.js --variant=sentier",
-    "build:html:all": "npm run build:html:carousel && npm run build:html:sentier",
+    "build:sentier": "MGYM_VARIANT=sentier npm run build",
+    "dev": "next dev",
+    "livraison": "npm run livraison:carousel && npm run livraison:sentier",
     "livraison:carousel": "npm run build:carousel && node build-standalone.js --variant=carousel --dossier",
     "livraison:sentier": "npm run build:sentier && node build-standalone.js --variant=sentier --dossier",
-    "livraison": "npm run livraison:carousel && npm run livraison:sentier",
-    "start": "node serve.js"
+    "start": "node serve.js",
+    "studio:build": "sanity build studio -y",
+    "studio:deploy": "sanity deploy",
+    "studio:dev": "sanity dev --port 3333"
   },
   "dependencies": {
+    "@sanity/client": "^7.26.2",
+    "@sanity/image-url": "^2.1.1",
+    "@sanity/vision": "^4.22.1",
     "next": "^15.5.23",
+    "next-sanity": "^11.6.13",
     "react": "^18.3.0",
-    "react-dom": "^18.3.0"
+    "react-dom": "^18.3.0",
+    "sanity": "^4.22.1",
+    "styled-components": "^6.5.3"
   },
   "overrides": {
     "postcss": "^8.5.23",
-    "sharp": "^0.35.0"
+    "sharp": "^0.35.0",
+    "adm-zip": "^0.6.0",
+    "@sanity/uuid": "^3.0.3"
   }
 }
