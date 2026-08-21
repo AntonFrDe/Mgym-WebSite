@@ -520,7 +520,7 @@ body.en-preview { padding-top: 2.6rem; }
 .carrousel-indice {
   display:flex; align-items:center; justify-content:center; gap:.6rem;
   font-family:var(--font-sans),sans-serif; font-size:.75rem; font-weight:600;
-  letter-spacing:.12em; text-transform:uppercase; color:var(--prune); opacity:.5;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--prune); opacity:.85;
   margin-bottom:1.25rem;
   transition:opacity .4s ease, transform .4s ease;
 }
@@ -548,7 +548,7 @@ body.en-preview { padding-top: 2.6rem; }
 }
 .carrousel-compteur {
   font-family:var(--font-sans),sans-serif; font-size:.8rem; font-weight:500;
-  letter-spacing:.12em; color:var(--prune); opacity:.5; white-space:nowrap;
+  letter-spacing:.12em; color:var(--prune); opacity:.85; white-space:nowrap;
 }
 .carrousel-compteur strong { color:var(--rose); font-weight:700; }
 .carrousel-fleches { display:flex; gap:.5rem; }
@@ -647,7 +647,8 @@ body.en-preview { padding-top: 2.6rem; }
 
 /* LISIBILITÉ : .85rem = 13.6px pour les notes */
 .tarif-note { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--prune); opacity:.7; font-style:italic; text-align:center; margin-top:1rem; line-height:1.65; }
-.tarif-sur-mesure { font-family:var(--font-sans),sans-serif; font-size:.95rem; color:var(--prune); opacity:.8; text-align:center; line-height:1.8; }
+.tarif-sur-mesure a { opacity:1; }
+.tarif-sur-mesure { font-family:var(--font-sans),sans-serif; font-size:.95rem; color:var(--prune); opacity:.85; text-align:center; line-height:1.8; }
 .price-lien,
 .tarif-sur-mesure a,
 .lead a,
@@ -866,7 +867,7 @@ body.en-preview { padding-top: 2.6rem; }
    reste largement au-dessus du seuil de contraste. */
 .cta-btns-aide {
   font-family:var(--font-sans),sans-serif; font-size:.85rem; line-height:1.7;
-  color:rgba(var(--blanc-rgb),.55); margin-top:1.25rem;
+  color:rgba(var(--blanc-rgb),.68); margin-top:1.25rem;
 }
 
 /* ── FOOTER ─────────────────────────────────────────────────── */
@@ -875,9 +876,9 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
 .footer-brand { display:flex; align-items:center; gap:.75rem; }
 .footer-brand img { height:2.2rem; width:2.2rem; border-radius:50%; object-fit:cover; }
 .footer-brand-name { font-family:var(--font-serif),serif; font-size:1.4rem; font-weight:300; color:var(--blanc); }
-.footer-brand-sub { font-family:var(--font-sans),sans-serif; font-size:.7rem; font-style:italic; color:rgba(var(--blanc-rgb),.38); margin-top:.1rem; }
+.footer-brand-sub { font-family:var(--font-sans),sans-serif; font-size:.7rem; font-style:italic; color:rgba(var(--blanc-rgb),.6); margin-top:.1rem; }
 .footer-tagline { font-family:var(--font-serif),serif; font-size:1.2rem; font-style:italic; color:var(--rose); text-align:center; }
-.footer-tagline small { display:block; font-family:var(--font-sans),sans-serif; font-size:.65rem; font-style:normal; color:rgba(var(--blanc-rgb),.3); margin-top:.25rem; letter-spacing:.1em; }
+.footer-tagline small { display:block; font-family:var(--font-sans),sans-serif; font-size:.65rem; font-style:normal; color:rgba(var(--blanc-rgb),.68); margin-top:.25rem; letter-spacing:.1em; }
 .footer-right { display:flex; flex-direction:column; align-items:flex-end; gap:1rem; }
 /* Huit liens ne tiennent plus toujours sur une ligne. `nowrap` empêche
    qu'un libellé se coupe en deux (« À / PROPOS ») ; `wrap` sur le
@@ -885,12 +886,12 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
    se lit. Le `gap` vertical gère l'espacement dans ce cas. */
 .footer-nav { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.6rem 1.5rem; }
 /* LISIBILITÉ : .78rem = 12.5px pour les liens du footer */
-.footer-nav a { white-space:nowrap; font-family:var(--font-sans),sans-serif; font-size:.78rem; font-weight:600; letter-spacing:.15em; text-transform:uppercase; color:rgba(var(--blanc-rgb),.4); text-decoration:none; transition:color .25s; }
+.footer-nav a { white-space:nowrap; font-family:var(--font-sans),sans-serif; font-size:.78rem; font-weight:600; letter-spacing:.15em; text-transform:uppercase; color:rgba(var(--blanc-rgb),.72); text-decoration:none; transition:color .25s; }
 .footer-nav a:hover { color:var(--rose); }
 .footer-socials { display:flex; gap:.75rem; }
-.footer-socials a { color:rgba(var(--blanc-rgb),.38); transition:color .25s; }
+.footer-socials a { color:rgba(var(--blanc-rgb),.7); transition:color .25s; }
 .footer-socials a:hover { color:var(--rose); }
-.footer-bottom { border-top:1px solid rgba(var(--blanc-rgb),.07); padding-top:2rem; margin-top:2rem; text-align:center; font-family:var(--font-sans),sans-serif; font-size:.72rem; color:rgba(var(--blanc-rgb),.22); max-width:1400px; margin-left:auto; margin-right:auto; }
+.footer-bottom { border-top:1px solid rgba(var(--blanc-rgb),.07); padding-top:2rem; margin-top:2rem; text-align:center; font-family:var(--font-sans),sans-serif; font-size:.72rem; color:rgba(var(--blanc-rgb),.68); max-width:1400px; margin-left:auto; margin-right:auto; }
 
 /* ── BLOG ───────────────────────────────────────────────────────
    La seule route du site en dehors de la page d'accueil. Elle réutilise

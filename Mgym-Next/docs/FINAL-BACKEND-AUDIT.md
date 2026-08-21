@@ -217,9 +217,34 @@ Procédure détaillée dans `ROLLBACK.md`.
   valider avant.
 - **Le champ `icone` sur les activités** n'a pas été créé : le site n'a aucun
   emplacement pour l'afficher.
-- **L'accessibilité plafonne à 96**, à cause du contraste de la palette rose
-  sur rose. Le corriger reviendrait à modifier le design, ce que la mission
-  interdit. C'est une décision de la cliente, pas une décision technique.
+### L'accessibilité plafonne à 96 — ce qui bloque exactement
+
+Seize éléments échouaient au contraste ; il en reste **quatre**. Les douze
+autres tenaient à des opacités décoratives, remontées sans changer une seule
+teinte — les liens du pied de page passent de 3,1 à 6,3, la mention légale de
+2,4 à 5,6, le compteur du carrousel de 2,47 à 4,8.
+
+Les quatre restants dépendent tous de la couleur de marque :
+
+| Élément | Contraste | Seuil |
+|---|---|---|
+| Bouton principal — blanc sur `--rose` | 2,69 | 4,5 |
+| Mots en accent — `--rose` sur `--rose-clair` | 2,15 | 4,5 |
+| Liens en `--rose-fonce` sur `--creme` | 3,45 | 4,5 |
+| Slogan du pied — `--rose` sur `--prune` | 3,91 | 4,5 |
+
+**Pour atteindre 100, il faudrait assombrir le rose de marque :**
+
+```
+teinte et saturation inchangées, seule la luminosité descend
+  #D18B8E  actuel        contraste 2,69 avec le blanc
+  #CD8083  seuil 3,0     acceptable pour du grand texte
+  #BC565A  seuil 4,5     conforme pour tout texte
+```
+
+C'est une décision de la cliente, pas une décision technique : c'est son
+identité visuelle. La mission interdit par ailleurs de modifier le design.
+96 dépasse l'objectif de 90 fixé par le plan.
 
 ---
 
