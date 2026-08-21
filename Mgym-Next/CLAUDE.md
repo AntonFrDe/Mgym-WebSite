@@ -7,7 +7,8 @@ La lisibilité et la simplicité priment sur l'effet technique.
 ## Stack
 
 - **Next.js 15.5** (App Router) + **React 18**
-- **JavaScript pur** — pas de TypeScript, pas de tests, pas de linter configuré
+- **JavaScript pur** — pas de TypeScript, pas de linter. 67 tests via
+  `node --test` (aucune dépendance de test)
 - **CSS global unique** : `app/globals.css` (pas de Tailwind, pas de CSS Modules)
 - Polices via `next/font/google` : Cormorant Garamond (serif) + Montserrat (sans)
 - **Aucune dépendance INUTILE.** La règle n'est plus « exactement trois
@@ -19,24 +20,25 @@ La lisibilité et la simplicité priment sur l'effet technique.
 
 ```bash
 npm run dev            # développement, http://localhost:3000
-npm run build          # export statique dans out/ (doit passer avant de livrer)
-npm start              # sert out/ via serve.js (nécessite un build préalable)
-./launch.sh            # build + start + health check HTTP (usage courant)
+npm run studio:dev     # le back-office,  http://localhost:3333
+npm run verifier       # schémas + requêtes + 67 tests + build
+npm run build          # build du site hébergé
+npm run livraison      # copie hors-ligne (voir « Livraison » plus bas)
 ./launch.sh --dev      # mode dev sans build
 PORT=4000 ./launch.sh  # autre port
 node build-standalone.js   # copie autonome du site (voir « Livraison » plus bas)
 ```
 
-Il n'y a **pas** de suite de tests ni de commande de lint dans ce projet.
-La vérification de référence est `npm run build` (elle échoue sur toute erreur
-de compilation ou de type inféré).
+La vérification de référence est `npm run verifier`. Il n'y a pas de linter.
 
-`next start` **ne fonctionne pas** ici : avec `output: 'export'` il n'y a plus
-de serveur Next à lancer, seulement des fichiers. C'est `serve.js` — 80 lignes
-sur le module `http` de Node, sans dépendance — qui sert `out/`. Toute
-modification de `next.config.js` doit s'accompagner d'un essai réel de
-`./launch.sh` : c'est exactement ce qui a cassé la commande en silence par le
-passé.
+`output: 'export'` **n'est plus le mode par défaut** : la prévisualisation des
+brouillons exige une route serveur, et l'export les interdit — vérifié par un
+build, pas supposé. Le site reste entièrement généré au build et servi par un
+CDN ; seules les deux routes `/api/preview*` sont dynamiques.
+
+La copie hors-ligne survit : `scripts/export-statique.mjs` recopie le projet
+dans un dossier temporaire SANS `app/api/`, y lance un build en mode export et
+rapatrie `out/`. Le projet réel n'est jamais modifié.
 
 ## Architecture
 
@@ -235,9 +237,9 @@ Pièges à connaître :
 - De même, une classe posée par un state React (`est-visible` sur `.etape`) ne
   sera jamais posée dans le fichier autonome : il faut son équivalent dans
   `inlineJs`, sinon la section reste en `opacity:0`.
-- Le script lit le dossier **`out/`**, produit par l'export statique
-  (`output: 'export'` est bien présent dans `next.config.js`). Toujours
-  relancer un build avant `node build-standalone.js`.
+- Le script lit le dossier **`out/`**, produit par `npm run export:carousel`
+  ou `export:sentier` — jamais par `npm run build`, qui ne produit plus
+  d'export. Les scripts `livraison:*` enchaînent les deux.
 
 ## Le CMS — ce qu'il faut savoir avant d'y toucher
 
