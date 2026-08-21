@@ -27,3 +27,4 @@ Site-MGYM*.html
 # Divers
 .DS_Store
 *.log
+.export-tmp/
