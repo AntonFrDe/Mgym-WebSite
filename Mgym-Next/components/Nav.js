@@ -24,7 +24,7 @@ export default function Nav() {
     <nav id="nav" className={scrolled ? 'scrolled' : ''}>
       <div className="nav-inner">
 
-        <a href="#hero" className="nav-logo">
+        <a href="/" className="nav-logo">
           {/* alt vide VOLONTAIREMENT : le nom « M'GYM » est écrit juste à
               côté. Un alt qui le répète le fait lire deux fois par un
               lecteur d'écran. */}
@@ -33,13 +33,13 @@ export default function Nav() {
         </a>
 
         <ul className="nav-links">
-          <li><a href="#about">À propos</a></li>
-          <li><a href="#activites">Activités</a></li>
-          <li><a href="#coach">Coach</a></li>
-          <li><a href="#tarifs">Tarifs</a></li>
-          <li><a href="#planning">Planning</a></li>
-          <li><a href="#reseaux">Réseaux</a></li>
-          <li><a href="#contact" className="btn-contact">Contact</a></li>
+          <li><a href="/#about">À propos</a></li>
+          <li><a href="/#activites">Activités</a></li>
+          <li><a href="/#coach">Coach</a></li>
+          <li><a href="/#tarifs">Tarifs</a></li>
+          <li><a href="/#planning">Planning</a></li>
+          <li><a href="/#reseaux">Réseaux</a></li>
+          <li><a href="/#contact" className="btn-contact">Contact</a></li>
         </ul>
 
         {/* Bouton hamburger pour mobile */}
@@ -55,13 +55,13 @@ export default function Nav() {
       {/* Menu mobile — affiché uniquement si menuOpen est true */}
       <div id="mob-menu" className={menuOpen ? 'open' : ''}>
         <ul>
-          <li><a href="#about"     onClick={closeMenu}>À propos</a></li>
-          <li><a href="#activites" onClick={closeMenu}>Activités</a></li>
-          <li><a href="#coach"     onClick={closeMenu}>Coach</a></li>
-          <li><a href="#tarifs"    onClick={closeMenu}>Tarifs</a></li>
-          <li><a href="#planning"  onClick={closeMenu}>Planning</a></li>
-          <li><a href="#reseaux"   onClick={closeMenu}>Réseaux</a></li>
-          <li><a href="#contact"   onClick={closeMenu} className="mob-contact">Contact</a></li>
+          <li><a href="/#about"     onClick={closeMenu}>À propos</a></li>
+          <li><a href="/#activites" onClick={closeMenu}>Activités</a></li>
+          <li><a href="/#coach"     onClick={closeMenu}>Coach</a></li>
+          <li><a href="/#tarifs"    onClick={closeMenu}>Tarifs</a></li>
+          <li><a href="/#planning"  onClick={closeMenu}>Planning</a></li>
+          <li><a href="/#reseaux"   onClick={closeMenu}>Réseaux</a></li>
+          <li><a href="/#contact"   onClick={closeMenu} className="mob-contact">Contact</a></li>
         </ul>
       </div>
     </nav>

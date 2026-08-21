@@ -879,14 +879,110 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
 .footer-tagline { font-family:var(--font-serif),serif; font-size:1.2rem; font-style:italic; color:var(--rose); text-align:center; }
 .footer-tagline small { display:block; font-family:var(--font-sans),sans-serif; font-size:.65rem; font-style:normal; color:rgba(var(--blanc-rgb),.3); margin-top:.25rem; letter-spacing:.1em; }
 .footer-right { display:flex; flex-direction:column; align-items:flex-end; gap:1rem; }
-.footer-nav { display:flex; gap:1.5rem; }
+/* Huit liens ne tiennent plus toujours sur une ligne. `nowrap` empêche
+   qu'un libellé se coupe en deux (« À / PROPOS ») ; `wrap` sur le
+   conteneur laisse la rangée entière passer à la ligne suivante, ce qui
+   se lit. Le `gap` vertical gère l'espacement dans ce cas. */
+.footer-nav { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.6rem 1.5rem; }
 /* LISIBILITÉ : .78rem = 12.5px pour les liens du footer */
-.footer-nav a { font-family:var(--font-sans),sans-serif; font-size:.78rem; font-weight:600; letter-spacing:.15em; text-transform:uppercase; color:rgba(var(--blanc-rgb),.4); text-decoration:none; transition:color .25s; }
+.footer-nav a { white-space:nowrap; font-family:var(--font-sans),sans-serif; font-size:.78rem; font-weight:600; letter-spacing:.15em; text-transform:uppercase; color:rgba(var(--blanc-rgb),.4); text-decoration:none; transition:color .25s; }
 .footer-nav a:hover { color:var(--rose); }
 .footer-socials { display:flex; gap:.75rem; }
 .footer-socials a { color:rgba(var(--blanc-rgb),.38); transition:color .25s; }
 .footer-socials a:hover { color:var(--rose); }
 .footer-bottom { border-top:1px solid rgba(var(--blanc-rgb),.07); padding-top:2rem; margin-top:2rem; text-align:center; font-family:var(--font-sans),sans-serif; font-size:.72rem; color:rgba(var(--blanc-rgb),.22); max-width:1400px; margin-left:auto; margin-right:auto; }
+
+/* ── BLOG ───────────────────────────────────────────────────────
+   La seule route du site en dehors de la page d'accueil. Elle réutilise
+   les briques existantes — .section-title, .divider, .etape-lien — plutôt
+   que d'inventer une seconde grammaire visuelle.
+   La nav est fixe et fait 2,4rem de haut : sans ce dégagement, le titre
+   passerait dessous. */
+.blog-page { padding-top: 10rem; background: var(--creme); min-height: 100vh; }
+.blog-entete { text-align: center; margin-bottom: 3.5rem; }
+.blog-entete .divider { margin: 1.5rem auto; }
+
+/* LISIBILITÉ : 1rem = 16px, comme le reste du texte courant. */
+.blog-vide {
+  font-family: var(--font-sans), sans-serif; font-size: 1rem;
+  line-height: 2; color: var(--prune); opacity: .75;
+  text-align: center; margin: 4rem auto; max-width: 30rem;
+}
+
+.blog-grille {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem; max-width: 1100px; margin: 0 auto;
+}
+.blog-carte {
+  background: var(--blanc); border-radius: 1.5rem; overflow: hidden;
+  box-shadow: 0 10px 30px rgba(var(--prune-rgb), .10);
+  transition: transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s ease;
+}
+.blog-carte:hover { transform: translateY(-6px); box-shadow: 0 18px 44px rgba(var(--prune-rgb), .16); }
+.blog-carte-lien { display: block; text-decoration: none; color: inherit; }
+.blog-carte-media { height: 200px; }
+.blog-carte-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.blog-carte-corps { padding: 1.75rem 1.5rem; }
+/* LISIBILITÉ : .78rem en capitales espacées — c'est une étiquette. */
+.blog-carte-date {
+  font-family: var(--font-sans), sans-serif; font-size: .78rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--rose);
+  margin-bottom: .5rem;
+}
+.blog-carte-titre {
+  font-family: var(--font-serif), serif; font-size: 1.45rem; font-weight: 500;
+  line-height: 1.25; color: var(--prune); margin-bottom: .6rem;
+}
+/* LISIBILITÉ : .9rem = 14.4px */
+.blog-carte-extrait {
+  font-family: var(--font-sans), sans-serif; font-size: .9rem;
+  line-height: 1.75; color: var(--prune); opacity: .75; margin-bottom: 1rem;
+}
+
+/* L'article lui-même : une colonne étroite. Au-delà de ~34rem, l'œil perd
+   la ligne suivante en revenant à la marge. */
+.blog-article { max-width: 42rem; margin: 0 auto; }
+.blog-retour {
+  display: inline-block; margin-bottom: 1.5rem;
+  font-family: var(--font-sans), sans-serif; font-size: .78rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--rose-fonce); text-decoration: none;
+}
+.blog-retour:hover { color: var(--prune); }
+.blog-article-titre { font-size: clamp(2rem, 4vw, 3rem); }
+/* LISIBILITÉ : .9rem = 14.4px */
+.blog-article-meta {
+  font-family: var(--font-sans), sans-serif; font-size: .9rem;
+  color: var(--prune); opacity: .7; margin-top: .75rem;
+}
+.blog-article-image {
+  width: 100%; height: 380px; object-fit: cover;
+  border-radius: 1.5rem; display: block; margin-bottom: 2.5rem;
+}
+/* LISIBILITÉ : 1.05rem = 16.8px — un article se lit longtemps, il mérite
+   un cran de plus que le texte courant. */
+.blog-article-corps {
+  font-family: var(--font-sans), sans-serif; font-size: 1.05rem;
+  line-height: 1.9; color: var(--prune);
+}
+.blog-article-corps p { margin-bottom: 1.4rem; }
+.blog-article-corps h2 {
+  font-family: var(--font-serif), serif; font-size: 1.8rem; font-weight: 500;
+  color: var(--prune); margin: 2.5rem 0 .8rem;
+}
+.blog-article-corps h3 {
+  font-family: var(--font-serif), serif; font-size: 1.35rem; font-weight: 500;
+  color: var(--prune); margin: 2rem 0 .6rem;
+}
+.blog-article-corps ul, .blog-article-corps ol { margin: 0 0 1.4rem 1.5rem; }
+.blog-article-corps li { margin-bottom: .5rem; }
+.blog-article-corps a { color: var(--rose-fonce); text-decoration: underline; }
+.blog-article-pied {
+  margin-top: 3.5rem; padding-top: 2rem;
+  border-top: 1px solid var(--rose-clair);
+  font-family: var(--font-sans), sans-serif; font-size: .9rem;
+  text-align: center;
+}
 
 /* ── RESPONSIVE ─────────────────────────────────────────────── */
 @media (max-width: 1100px) {
@@ -945,6 +1041,9 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
   .tarif-tableau tbody th { padding:1rem .75rem; }
   .tarif-tableau td { font-size:1.5rem; padding:1rem .4rem; }
   .tarif-tableau-nom { font-size:1.05rem; }
+  .blog-page { padding-top: 7rem; }
+  .blog-grille { grid-template-columns: 1fr; gap: 1.5rem; }
+  .blog-article-image { height: 220px; }
   .contact-cards { grid-template-columns:1fr; }
   .cert-grid { grid-template-columns:1fr; }
   .bespoke-types { grid-template-columns:1fr; }
