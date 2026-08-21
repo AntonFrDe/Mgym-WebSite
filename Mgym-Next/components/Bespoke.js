@@ -1,3 +1,4 @@
+import { TELEPHONE } from './liens'
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -47,7 +48,7 @@ export default function Bespoke() {
             </div>
 
             <div className="bespoke-actions">
-              <a href="tel:0609316145" className="btn-primary">
+              <a href={`tel:${TELEPHONE}`} className="btn-primary">
                 Prendre rendez-vous
               </a>
               {plaquetteDisponible && (

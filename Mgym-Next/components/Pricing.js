@@ -1,4 +1,5 @@
-import { LIEN_INSCRIPTION, destination, attributsLienExterne } from './liens'
+import { TELEPHONE, TELEPHONE_AFFICHE } from './liens'
+import LienFormulaire from './LienFormulaire'
 
 // Pricing.js — les tarifs de la saison.
 //
@@ -29,13 +30,20 @@ const carte = [
 
 // Mention commune aux trois formules ci-dessus : elle était répétée sur
 // chaque ligne, elle se dit une fois pour toutes.
-const carteNote =
-  'Cours collectifs & sorties marche nordique · prêt de bâton compris'
+const carteNote = 'Prêt de bâton compris pour le forfait une seance'
 
-// Tarifs saison, en deux colonnes : une personne / parents & enfants.
+// Tarifs saison, en deux colonnes : une personne / famille.
 // C'est la comparaison que le visiteur cherche, autant la lui montrer.
 // Les deux en-têtes se modifient ici, pas dans le JSX.
-const colonnesSaison = ['Une personne', 'Parents & enfants']
+//
+// « Famille » est volontairement court : c'est un en-tête de colonne, il doit
+// tenir sur une ligne y compris sur téléphone. L'astérisque renvoie à la note
+// sous le tableau, qui dit précisément qui a droit à ce tarif — l'écrire en
+// entier dans l'en-tête casserait la lecture du tableau.
+const colonnesSaison = ['Une personne', 'Famille *']
+
+const noteFamille =
+  '* Tarif famille : réservé aux parents et à leurs enfants, ainsi qu\'aux couples.'
 
 const saison = [
   {
@@ -58,13 +66,21 @@ const saisonPartielle = [
   { nom: 'Trimestre', detail: 'D\'avril à juin', prix: '75€' },
 ]
 
-// Ce que le formulaire d'inscription demande. Annoncé avant le clic : on ne
-// fait pas quitter le site à quelqu'un sans lui dire ce qui l'attend.
+// Ce que le formulaire d'inscription demande RÉELLEMENT. Annoncé avant le
+// clic : on ne fait pas quitter le site à quelqu'un sans lui dire ce qui
+// l'attend, ni sans qu'il puisse réunir ses informations d'abord.
+//
+// Cette liste doit rester le reflet du formulaire Google (LIEN_INSCRIPTION
+// dans liens.js). Si une question y est ajoutée ou retirée, corriger ici :
+// une annonce fausse est pire que pas d'annonce du tout.
 const etapesInscription = [
-  'Vos coordonnées',
-  'L\'activité qui vous intéresse',
-  'La formule tarifaire choisie',
-  'Votre historique personnel',
+  'Vos coordonnées et votre date de naissance',
+  'Le ou les cours choisis',
+  'La formule tarifaire',
+  'Votre mode de règlement',
+  'Votre parcours sportif',
+  'Les points de santé à signaler',
+  'Votre accord pour le droit à l\'image',
 ]
 
 // Une vignette : le prix en grand, le nom dessous. Sert aux formules à la
@@ -142,7 +158,10 @@ export default function Pricing() {
                 </tbody>
               </table>
             </div>
-            <p className="tarif-note">Valable une saison, de septembre à juin</p>
+            <p className="tarif-note">
+              Valable une saison, de septembre à juin<br />
+              {noteFamille}
+            </p>
 
             <div className="tarif-vignettes tarif-vignettes--duo">
               {saisonPartielle.map((tarif) => (
@@ -164,23 +183,41 @@ export default function Pricing() {
         <div className="inscription apparition">
           <p className="inscription-titre">Envie de nous <em>rejoindre</em> ?</p>
           <p className="inscription-sous-titre">
-            Remplissez le formulaire d&apos;inscription en ligne, il ne prend
-            que quelques minutes.
+            L&apos;inscription se fait par un formulaire en ligne. Comptez
+            quelques minutes.
           </p>
 
+          {/* Annoncer le contenu du formulaire AVANT le clic : on ne découvre
+              pas qu'il faut son historique médical une fois arrivé dessus. */}
+          <p className="inscription-annonce">Il vous sera demandé :</p>
           <ul className="inscription-etapes">
             {etapesInscription.map((etape) => (
               <li key={etape}>{etape}</li>
             ))}
           </ul>
 
-          <a
-            href={destination(LIEN_INSCRIPTION)}
-            className="btn-primary"
-            {...attributsLienExterne(LIEN_INSCRIPTION)}
-          >
-            S&apos;inscrire en ligne
-          </a>
+          {/* Le formulaire s'ouvre sur cette question ; y arriver sans avoir
+              lu les documents oblige à tout reprendre plus tard. */}
+          <p className="inscription-alerte">
+            Le formulaire commence par vous demander si vous avez pris
+            connaissance du <strong>règlement intérieur</strong> et des{' '}
+            <strong>conditions générales</strong>. Procurez-vous-les avant de
+            commencer.
+          </p>
+
+          <LienFormulaire>Remplir le formulaire d&apos;inscription</LienFormulaire>
+
+          {/* Deux informations que le bouton seul ne donne pas : la page ne
+              disparaît pas, et le téléphone reste une option pour qui ne
+              souhaite pas passer par un formulaire. */}
+          <p className="inscription-precision">
+            Le formulaire s&apos;ouvre dans un nouvel onglet — cette page
+            reste ouverte derrière.<br />
+            Vous préférez le téléphone ?{' '}
+            <a href={`tel:${TELEPHONE}`} className="price-lien">
+              {TELEPHONE_AFFICHE}
+            </a>
+          </p>
         </div>
 
       </div>

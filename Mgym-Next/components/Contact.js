@@ -1,4 +1,5 @@
-import { LIEN_INSCRIPTION, attributsLienExterne } from './liens'
+import { TELEPHONE, TELEPHONE_AFFICHE, EMAIL } from './liens'
+import LienFormulaire from './LienFormulaire'
 
 // Les icônes SVG sont intégrées directement en JSX (pas besoin de bibliothèque)
 const contactCards = [
@@ -19,7 +20,7 @@ const contactCards = [
         <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.17 1.19 2 2 0 012.17 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.34a16 16 0 006.29 6.29l1.41-1.41a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
       </svg>
     ),
-    content: <a href="tel:0609316145" className="contact-value">06 09 31 61 45</a>,
+    content: <a href={`tel:${TELEPHONE}`} className="contact-value">{TELEPHONE_AFFICHE}</a>,
   },
   {
     label: 'Email',
@@ -29,7 +30,7 @@ const contactCards = [
         <polyline points="22,6 12,13 2,6"/>
       </svg>
     ),
-    content: <a href="mailto:gym.mirepoix@gmail.com" className="contact-value">gym.mirepoix@gmail.com</a>,
+    content: <a href={`mailto:${EMAIL}`} className="contact-value">{EMAIL}</a>,
   },
 ]
 
@@ -64,24 +65,23 @@ export default function Contact() {
             Première séance d&apos;essai ou inscription directe —<br />
             Emmanuelle vous accueille avec plaisir.
           </p>
+
+          {/* Trois chemins, et chacun annonce où il mène. « S'inscrire »
+              seul ne disait pas qu'il ouvrait un formulaire ailleurs :
+              c'est la ligne .cta-btns-aide juste en dessous qui le précise,
+              plutôt que d'allonger le texte des boutons. */}
           <div className="cta-btns">
-            {/* L'inscription en ligne passe en premier : c'est l'action que
-                l'on souhaite voir aboutir. Appeler et écrire restent offerts
-                à celles et ceux qui préfèrent la voix ou le courriel.
-                Ici, pas de repli vers #contact comme ailleurs : on y est déjà.
-                Sans adresse de formulaire, le bouton n'apparaît donc pas. */}
-            {LIEN_INSCRIPTION && (
-              <a
-                href={LIEN_INSCRIPTION}
-                className="cta-btn-rose"
-                {...attributsLienExterne(LIEN_INSCRIPTION)}
-              >
-                S&apos;inscrire en ligne
-              </a>
-            )}
-            <a href="tel:0609316145"                className="cta-btn-rose">Appeler</a>
-            <a href="mailto:gym.mirepoix@gmail.com" className="cta-btn-outline">Nous écrire</a>
+            <LienFormulaire className="cta-btn-rose">
+              Formulaire d&apos;inscription
+            </LienFormulaire>
+            <a href={`tel:${TELEPHONE}`} className="cta-btn-rose">Appeler</a>
+            <a href={`mailto:${EMAIL}`}  className="cta-btn-outline">Nous écrire</a>
           </div>
+          <p className="cta-btns-aide">
+            Le formulaire s&apos;ouvre dans un nouvel onglet. Il demande vos
+            coordonnées, l&apos;activité choisie et quelques informations sur
+            votre santé.
+          </p>
         </div>
 
       </div>

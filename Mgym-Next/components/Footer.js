@@ -4,6 +4,8 @@
 // d'une section change dans app/page.js, il faut le corriger aux deux
 // endroits — c'est le prix du doublon, assumé ici : un pied de page et un
 // menu n'ont pas forcément vocation à lister les mêmes entrées.
+import { TELEPHONE, TELEPHONE_AFFICHE, EMAIL } from './liens'
+
 const navLinks = [
   { href: '#about',     label: 'À propos'  },
   { href: '#activites', label: 'Activités' },
@@ -48,13 +50,13 @@ export default function Footer() {
                 <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
               </svg>
             </a>
-            <a href="mailto:gym.mirepoix@gmail.com" aria-label="Email M'GYM">
+            <a href={`mailto:${EMAIL}`} aria-label="Email M'GYM">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                 <polyline points="22,6 12,13 2,6"/>
               </svg>
             </a>
-            <a href="tel:0609316145" aria-label="Téléphone M'GYM">
+            <a href={`tel:${TELEPHONE}`} aria-label="Téléphone M'GYM">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.17 1.19 2 2 0 012.17 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.34a16 16 0 006.29 6.29l1.41-1.41a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
               </svg>
@@ -66,7 +68,7 @@ export default function Footer() {
 
       <div className="footer-bottom">
         © 2025 M&apos;GYM Association · Route de Layrac-sur-Tarn, 31340 Mirepoix-sur-Tarn
-        · 06 09 31 61 45 · gym.mirepoix@gmail.com
+        · {TELEPHONE_AFFICHE} · {EMAIL}
       </div>
     </footer>
   )

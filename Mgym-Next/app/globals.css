@@ -193,6 +193,14 @@ body {
   transition: border-color .25s, background .25s, transform .25s;
 }
 .btn-secondary:hover { border-color: var(--creme); background: rgba(var(--creme-rgb),.1); transform: translateY(-2px); }
+/* Petite flèche ↗ accolée au libellé d'un bouton qui quitte le site.
+   .35em plutôt qu'une valeur en pixels : elle suit la taille du texte du
+   bouton, quelle que soit celle-ci. */
+.icone-externe {
+  display:inline-block; vertical-align:-.05em;
+  margin-left:.5em; flex-shrink:0;
+}
+
 /* Bouton outline pour usage sur fonds clairs (hors hero) */
 .btn-outline {
   display: inline-block;
@@ -644,6 +652,33 @@ body {
   background:var(--creme); padding:.5rem 1rem; border-radius:2rem;
 }
 .inscription-etapes li::before { content:'✦'; color:var(--rose); font-size:.6rem; }
+/* LISIBILITÉ : .85rem ≈ 13.6px — annonce ce que contient la liste. */
+.inscription-annonce {
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--rose);
+  margin-top:1.75rem;
+}
+/* Décolle le bouton de la liste, puisque la liste a maintenant son annonce. */
+.inscription-etapes { margin-top:1rem; }
+/* LISIBILITÉ : .85rem ≈ 13.6px, le plancher du projet. Ce texte dit ce que
+   le bouton ne peut pas dire : que la page ne disparaît pas, et qu'on peut
+   passer par le téléphone. */
+/* Le point de blocage du formulaire, annoncé avant le clic. Encadré plutôt
+   qu'en simple italique : c'est la seule chose qui oblige à tout recommencer
+   si on l'apprend trop tard.
+   LISIBILITÉ : .9rem = 14.4px, au-dessus du plancher du projet. */
+.inscription-alerte {
+  font-family:var(--font-sans),sans-serif; font-size:.9rem; line-height:1.7;
+  color:var(--prune); text-align:left;
+  max-width:480px; margin:1.75rem auto 2rem;
+  background:var(--blanc); border-left:3px solid var(--rose);
+  border-radius:.75rem; padding:.9rem 1.1rem;
+}
+.inscription-alerte strong { color:var(--rose-fonce); font-weight:700; }
+.inscription-precision {
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; line-height:1.7;
+  color:var(--prune); opacity:.7; margin-top:1.25rem;
+}
 
 /* ── PLANNING ───────────────────────────────────────────────────
    Le planning est un vrai tableau HTML (et non une image) : il se
@@ -793,6 +828,12 @@ body {
 .cta-btn-rose:hover { background:var(--rose-fonce); }
 .cta-btn-outline { display:inline-block; border:1.5px solid rgba(var(--blanc-rgb),.2); color:var(--blanc); font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; text-decoration:none; padding:.95rem 2rem; border-radius:3rem; transition:border-color .25s, color .25s; }
 .cta-btn-outline:hover { border-color:var(--rose); color:var(--rose); }
+/* LISIBILITÉ : .85rem ≈ 13.6px. Sur le bandeau prune, le blanc à 55 %
+   reste largement au-dessus du seuil de contraste. */
+.cta-btns-aide {
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; line-height:1.7;
+  color:rgba(var(--blanc-rgb),.55); margin-top:1.25rem;
+}
 
 /* ── FOOTER ─────────────────────────────────────────────────── */
 footer { background:var(--prune); padding:3.5rem 5rem; }
