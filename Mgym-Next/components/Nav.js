@@ -25,7 +25,10 @@ export default function Nav() {
       <div className="nav-inner">
 
         <a href="#hero" className="nav-logo">
-          <img src="/Images/Logo.avif" alt="M'GYM" />
+          {/* alt vide VOLONTAIREMENT : le nom « M'GYM » est écrit juste à
+              côté. Un alt qui le répète le fait lire deux fois par un
+              lecteur d'écran. */}
+          <img src="/Images/Logo.avif" alt="" />
           <span className="nav-logo-text">M&apos;GYM</span>
         </a>
 

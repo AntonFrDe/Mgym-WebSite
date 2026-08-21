@@ -948,6 +948,12 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
   .contact-cards { grid-template-columns:1fr; }
   .cert-grid { grid-template-columns:1fr; }
   .bespoke-types { grid-template-columns:1fr; }
+  /* Version allégée du fond d'accueil sur téléphone. L'image de bureau
+     fait 2560 px de large : sur un écran de 375 px elle est sept fois
+     trop grande, et son téléchargement retarde tout le reste de la page.
+     Ne s'applique QU'AU repli local — une image venue du CMS est déjà
+     redimensionnée par le CDN de Sanity. */
+  .hero-bg[data-repli="1"] { background-image: url('/fond1-mobile.avif') !important; }
   .hero-h1 { font-size:clamp(3.8rem,15vw,6rem); }
   .ham { display:flex; }
   .nav-links { display:none; }

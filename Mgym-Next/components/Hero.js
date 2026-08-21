@@ -14,6 +14,10 @@ export default function Hero({ site }) {
       <div
         className="hero-bg"
         style={site.heroImage ? { backgroundImage: `url(${site.heroImage.src})` } : undefined}
+        /* Marque le repli local : le CSS peut alors servir une version
+           allégée sur téléphone. Une image venue du CMS est déjà
+           redimensionnée par le CDN, elle n'en a pas besoin. */
+        data-repli={site.heroImage?.src?.startsWith('/fond1') ? '1' : undefined}
         role="img"
         aria-label={site.heroImage?.alt || ''}
       />

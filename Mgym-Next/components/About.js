@@ -14,8 +14,18 @@ export default function About({ site }) {
         <div className="about-grid">
 
           <div className="about-img-wrap apparition-gauche">
+            {/* PAS de loading="lazy" ici : sur mobile, c'est cette photo que
+                le navigateur retient comme « plus grand élément visible »,
+                donc celle que Google chronomètre. La différer retardait la
+                mesure au lieu de l'améliorer — vérifié par deux passages
+                Lighthouse. fetchPriority la demande tôt sans bloquer le
+                reste. */}
             {site.aProposPhoto && (
-              <img src={site.aProposPhoto.src} alt={site.aProposPhoto.alt} />
+              <img
+                src={site.aProposPhoto.src}
+                alt={site.aProposPhoto.alt}
+                fetchPriority="high"
+              />
             )}
             <div className="about-deco" />
             {site.aProposBadgeNombre && (

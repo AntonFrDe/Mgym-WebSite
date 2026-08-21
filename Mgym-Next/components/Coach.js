@@ -17,7 +17,7 @@ export default function Coach({ site }) {
 
           <div className="coach-img-wrap apparition-gauche">
             {site.coachPhoto && (
-              <img src={site.coachPhoto.src} alt={site.coachPhoto.alt} />
+              <img src={site.coachPhoto.src} alt={site.coachPhoto.alt} loading="lazy" />
             )}
             <div className="coach-deco" />
           </div>

@@ -55,6 +55,7 @@ export default function Bespoke({ site, infos }) {
                 src={site.bespokeImage.src}
                 alt={site.bespokeImage.alt}
                 className="bespoke-img"
+                loading="lazy"
               />
             )}
           </div>

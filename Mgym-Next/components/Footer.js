@@ -26,7 +26,7 @@ export default function Footer({ site, infos }) {
 
         <div>
           <div className="footer-brand">
-            <img src="/Images/Logo.avif" alt="M'GYM" />
+            <img src="/Images/Logo.avif" alt="" />
             <div>
               <div className="footer-brand-name">M&apos;GYM</div>
               <div className="footer-brand-sub">{site.footerBaseline}</div>

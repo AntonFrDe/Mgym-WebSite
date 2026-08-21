@@ -68,8 +68,32 @@ export default async function RootLayout({ children }) {
   // cookie signé : une session expirée retombe sur le site publié.
   const enPreview = await previewActif()
 
+  // L'image d'accueil est posée en fond CSS : le navigateur ne la découvre
+  // qu'après avoir analysé la feuille de style, soit très tard. Elle est
+  // pourtant le plus gros élément visible de la page — celui que Google
+  // chronomètre. Ce préchargement la demande dès la première ligne du HTML.
+  const { site } = await getContenu(enPreview)
+  const imageAccueil = site.heroImage?.src
+  // Le repli local a une variante allégée pour téléphone (voir la media
+  // query .hero-bg[data-repli] dans globals.css). Précharger la version
+  // de bureau sur mobile annulerait tout le gain.
+  const replisLocal = imageAccueil?.startsWith('/fond1')
+
   return (
     <html lang="fr" className={`${cormorant.variable} ${montserrat.variable}`}>
+      <head>
+        {imageAccueil && replisLocal && (
+          <>
+            <link rel="preload" as="image" href="/fond1-mobile.avif"
+                  media="(max-width: 700px)" fetchPriority="high" />
+            <link rel="preload" as="image" href={imageAccueil}
+                  media="(min-width: 701px)" fetchPriority="high" />
+          </>
+        )}
+        {imageAccueil && !replisLocal && (
+          <link rel="preload" as="image" href={imageAccueil} fetchPriority="high" />
+        )}
+      </head>
       {/* La classe descend toute la page pour laisser la place au bandeau.
           Sur le site public, elle n'est jamais posée. */}
       <body className={enPreview ? 'en-preview' : undefined}>
