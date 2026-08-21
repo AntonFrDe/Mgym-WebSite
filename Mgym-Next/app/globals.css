@@ -168,7 +168,9 @@ body.en-preview { padding-top: 2.6rem; }
 }
 .hero-bg {
   position: absolute; inset: 0; z-index: 0;
-  background: url('/fond1.avif') center/cover no-repeat;
+  /* L'image elle-même vient du contenu (Hero.js) : elle est
+     choisie dans le back-office. Ici, seul le cadrage. */
+  background: center/cover no-repeat;
 }
 .hero-overlay {
   position: absolute; inset: 0; z-index: 1;
@@ -646,8 +648,14 @@ body.en-preview { padding-top: 2.6rem; }
 /* LISIBILITÉ : .85rem = 13.6px pour les notes */
 .tarif-note { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--prune); opacity:.7; font-style:italic; text-align:center; margin-top:1rem; line-height:1.65; }
 .tarif-sur-mesure { font-family:var(--font-sans),sans-serif; font-size:.95rem; color:var(--prune); opacity:.8; text-align:center; line-height:1.8; }
-.price-lien { color:var(--rose-fonce); font-weight:600; text-decoration:underline; }
-.price-lien:hover { color:var(--prune); }
+.price-lien,
+.tarif-sur-mesure a,
+.lead a,
+.contact-cta-sub a { color:var(--rose-fonce); font-weight:600; text-decoration:underline; }
+.price-lien:hover,
+.tarif-sur-mesure a:hover,
+.lead a:hover,
+.contact-cta-sub a:hover { color:var(--prune); }
 
 /* Bloc d'inscription, sous la grille tarifaire : c'est l'étape logique
    après avoir choisi sa formule. Encadré rose clair sur le fond crème de

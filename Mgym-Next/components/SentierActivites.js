@@ -1,12 +1,14 @@
 'use client'
 // 'use client' obligatoire : IntersectionObserver, scroll, état de clic.
 
-import { useEffect, useRef, useState } from 'react'
-import { activites as activities } from './activitesData'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import EnteteActivites from './EnteteActivites'
+import TexteRiche from './TexteRiche'
 
-// Les données vivent dans activitesData.js : le sentier et le carrousel
-// affichent exactement les mêmes 8 activités.
+// Les activités arrivent en PROPS, déjà chargées par app/page.js. Elles
+// sont donc présentes au tout premier rendu : c'est ce qui protège les
+// animations. Un composant qui les récupérerait lui-même se remonterait
+// après coup, et les étapes repasseraient invisibles.
 
 // ── Tracé du chemin ────────────────────────────────────────────
 // Génère un chemin en S qui relie N points en alternant gauche/droite,
@@ -30,12 +32,11 @@ function buildPath(n, { width = 860, segH = 230, topPad = 60, xLeft = 65, xRight
   return { d, width, height: topPad * 2 + segH * (n - 1) }
 }
 
-const SENTIER = buildPath(activities.length)
 
 // ── Trace le chemin au scroll (stroke-dashoffset), sans dépendance
 // externe. Respecte prefers-reduced-motion en affichant le trait
 // complet d'emblée et en coupant l'écouteur de scroll.
-function useTraceAuScroll(pathRef, wrapRef) {
+function useTraceAuScroll(pathRef, wrapRef, signature) {
   useEffect(() => {
     const path = pathRef.current
     const wrap = wrapRef.current
@@ -72,7 +73,10 @@ function useTraceAuScroll(pathRef, wrapRef) {
     window.addEventListener('scroll', onScroll, { passive: true })
     update()
     return () => window.removeEventListener('scroll', onScroll)
-  }, [pathRef, wrapRef])
+    // `signature` change quand le nombre d'activités change : sans elle,
+    // l'effet ne se rejouerait pas et strokeDasharray resterait calculé
+    // sur l'ancienne longueur de chemin.
+  }, [pathRef, wrapRef, signature])
 }
 
 // ── Une étape du sentier ───────────────────────────────────────
@@ -112,13 +116,15 @@ function Etape({ activite, index }) {
   return (
     <div ref={ref} className={`etape etape--${cote}${estVisible ? ' est-visible' : ''}`}>
       <div className="etape-media">
-        <img src={activite.image} alt={activite.name} loading="lazy" />
+        {activite.image && (
+          <img src={activite.image.src} alt={activite.image.alt} loading="lazy" />
+        )}
       </div>
 
       <div className="etape-contenu">
         <span className="etape-num">{String(index + 1).padStart(2, '0')}</span>
-        <h3>{activite.name}</h3>
-        <p className="etape-accroche">{activite.accroche}</p>
+        <h3>{activite.titre}</h3>
+        <p className="etape-accroche">{activite.descriptionCourte}</p>
 
         <button
           type="button"
@@ -145,15 +151,15 @@ function Etape({ activite, index }) {
             d'activité — bouton « En savoir plus » sans contenu derrière.
             React et le JS inline basculent donc exactement le même attribut. */}
         <div id={panneauId} className="etape-panneau" hidden={!estOuvert}>
-          <p>{activite.desc}</p>
+          <TexteRiche valeur={activite.descriptionRiche} />
           <div className="etape-tags">
-            {activite.tags.map((tag) => (
+            {(activite.motsCles ?? []).map((tag) => (
               <span key={tag} className="etape-tag">{tag}</span>
             ))}
           </div>
-          {activite.href && (
-            <a href={activite.href} className="etape-lien">
-              {activite.lienTexte || 'Découvrir en détail →'}
+          {activite.lienInterne && (
+            <a href={activite.lienInterne} className="etape-lien">
+              {activite.libelleLien || 'Découvrir en détail →'}
             </a>
           )}
         </div>
@@ -162,21 +168,30 @@ function Etape({ activite, index }) {
   )
 }
 
-export default function SentierActivites() {
+export default function SentierActivites({ site, activites = [] }) {
   const pathRef = useRef(null)
   const wrapRef = useRef(null)
-  useTraceAuScroll(pathRef, wrapRef)
+
+  // Le chemin est recalculé si le nombre d'activités change — 8 -> 7 quand
+  // la cliente en désactive une, 8 -> 9 quand elle en ajoute une.
+  const sentier = useMemo(() => buildPath(activites.length), [activites.length])
+
+  useTraceAuScroll(pathRef, wrapRef, activites.length)
+
+  // Aucune activité : la section entière disparaît plutôt que d'afficher
+  // un titre au-dessus d'un chemin vide.
+  if (activites.length === 0) return null
 
   return (
     <section id="activites" className="section-pad">
       <div className="section-max">
 
-        <EnteteActivites instruction="Cliquez sur une étape pour en découvrir tous les bienfaits." />
+        <EnteteActivites site={site} instruction="Cliquez sur une étape pour en découvrir tous les bienfaits." />
 
         <div className="activites-sentier" ref={wrapRef}>
           <svg
             className="sentier-trait"
-            viewBox={`0 0 ${SENTIER.width} ${SENTIER.height}`}
+            viewBox={`0 0 ${sentier.width} ${sentier.height}`}
             preserveAspectRatio="none"
             aria-hidden="true"
           >
@@ -184,15 +199,20 @@ export default function SentierActivites() {
                 ici : un attribut SVG ne sait pas lire var(--rose). */}
             <path
               ref={pathRef}
-              d={SENTIER.d}
+              d={sentier.d}
               fill="none"
               strokeWidth="2"
               strokeLinecap="round"
             />
           </svg>
 
-          {activities.map((act, i) => (
-            <Etape key={act.name} activite={act} index={i} />
+          {/* La clé est l'identifiant Sanity, JAMAIS le titre. Avec
+              key={act.titre}, corriger une faute dans un nom changerait la
+              clé : React démonterait l'étape et la remonterait avec
+              estVisible à false — elle disparaîtrait pour un visiteur ayant
+              déjà défilé. C'est le bug d'animation documenté du projet. */}
+          {activites.map((act, i) => (
+            <Etape key={act._id} activite={act} index={i} />
           ))}
         </div>
 

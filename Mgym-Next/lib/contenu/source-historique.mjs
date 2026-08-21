@@ -11,8 +11,8 @@
 // Ce fichier est jetable : une fois la migration faite, la source de
 // vérité est Sanity. Il reste au dépôt comme trace de l'état d'origine.
 
-import { activites } from '../components/activitesData.js'
-import { TELEPHONE_AFFICHE, EMAIL, LIEN_INSCRIPTION, LIEN_STAGES } from '../components/liens.js'
+import { activites } from '../../components/activitesData.js'
+import { TELEPHONE_AFFICHE, EMAIL, LIEN_INSCRIPTION, LIEN_STAGES } from '../../components/liens.js'
 
 export { activites }
 
@@ -71,7 +71,7 @@ export const siteContent = {
   citationBandeau: [
     { texte: "M'GYM est un espace de " },
     { texte: 'convivialité', gras: true },
-    { texte: ' et de bien-être où prendre soin de soi est un ' },
+    { texte: ' et de bien-être\noù prendre soin de soi est un ' },
     { texte: 'plaisir', gras: true },
     { texte: '.' },
   ],
@@ -80,6 +80,7 @@ export const siteContent = {
   aProposEtiquette: 'Notre histoire',
   aProposTitre: 'Une association',
   aProposTitreItalique: 'ancrée',
+  aProposTitreFin: 'dans le village',
   aProposTexte: [{ texte:
     "Depuis les années 80, M'GYM fait bouger Mirepoix-sur-Tarn en plaçant la " +
     "santé, le bien-être et la convivialité au cœur de ses activités. À ses " +
@@ -115,7 +116,8 @@ export const siteContent = {
 
   // ── Marche nordique ─────────────────────────────────────────
   outdoorEtiquette: 'Explorez aussi',
-  outdoorTitre: 'Marche nordique & activités',
+  outdoorTitre: 'Marche nordique &',
+  outdoorTitreSuite: 'activités',
   outdoorTitreItalique: 'outdoor',
   outdoorTexte: [{ texte:
     "Respirez, bougez et ressourcez-vous en pleine nature. Nos séances " +
@@ -183,9 +185,11 @@ export const siteContent = {
     { nom: 'Mi-saison', detail: 'De janvier à juin', prix: '150€' },
     { nom: 'Trimestre', detail: "D'avril à juin",    prix: '75€' },
   ],
-  tarifsSurMesure: [{ texte:
-    "Besoin d'une formule pour une association, un comité d'entreprise, une " +
-    "collectivité ou un événement ? Découvrez nos tarifs sur mesure." }],
+  tarifsSurMesure: [
+    { texte: "Besoin d'une formule pour une association, un comité d'entreprise, une collectivité ou un événement ? " },
+    { texte: 'Découvrez nos tarifs sur mesure', lien: '#bespoke' },
+    { texte: '.' },
+  ],
   inscriptionTitre: 'Envie de nous',
   inscriptionTitreItalique: 'rejoindre',
   inscriptionSousTitre: "L'inscription se fait par un formulaire en ligne. Comptez quelques minutes.",
@@ -225,7 +229,7 @@ export const siteContent = {
   contactTitreItalique: 'Accès',
   contactCtaTitre: 'Prêtes et prêts à',
   contactCtaTitreItalique: 'commencer',
-  contactCtaSousTitre: [{ texte: "Première séance d'essai ou inscription directe — Emmanuelle vous accueille avec plaisir." }],
+  contactCtaSousTitre: [{ texte: "Première séance d'essai ou inscription directe —\nEmmanuelle vous accueille avec plaisir." }],
   contactCtaAide: "Le formulaire s'ouvre dans un nouvel onglet. Il demande vos coordonnées, l'activité choisie et quelques informations sur votre santé.",
   reseauxEtiquette: 'Suivez-nous',
   reseauxTitre: 'Nos',

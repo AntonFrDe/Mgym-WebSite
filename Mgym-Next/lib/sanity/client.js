@@ -20,7 +20,7 @@
 
 import 'server-only'
 import { createClient } from 'next-sanity'
-import { apiVersion, dataset, projectId } from './env.js'
+import { apiVersion, dataset, projectId, sanityConfigure } from './env.js'
 
 // Réglages communs. `useCdn: true` sert le contenu publié depuis le cache
 // de Sanity : plus rapide et moins coûteux en quota d'API.
@@ -36,26 +36,26 @@ const communs = {
  * renverrait aucun. La protection est côté serveur Sanity, pas seulement
  * dans nos requêtes.
  */
-export const clientPublie = createClient({
-  ...communs,
-  useCdn: true,
-  perspective: 'published',
-})
+export const clientPublie = sanityConfigure
+  ? createClient({ ...communs, useCdn: true, perspective: 'published' })
+  : null
 
 /**
  * Client de PRÉVISUALISATION. Ne fonctionne que si un token de lecture est
  * présent dans l'environnement serveur. `useCdn: false` est obligatoire :
  * le CDN ne connaît que le contenu publié, il servirait une version périmée.
  */
-export const clientBrouillon = createClient({
-  ...communs,
-  useCdn: false,
-  perspective: 'drafts',
-  token: process.env.SANITY_API_READ_TOKEN,
-  // Empêche next-sanity de mettre les brouillons en cache : une
-  // prévisualisation doit toujours refléter l'état actuel de la saisie.
-  stega: false,
-})
+export const clientBrouillon = sanityConfigure
+  ? createClient({
+      ...communs,
+      useCdn: false,
+      perspective: 'drafts',
+      token: process.env.SANITY_API_READ_TOKEN,
+      // Pas de couche stega : une prévisualisation doit refléter la
+      // saisie de l'instant, pas une version mise en cache.
+      stega: false,
+    })
+  : null
 
 /**
  * Le SEUL endroit du projet qui choisit entre les deux clients.
@@ -65,6 +65,10 @@ export const clientBrouillon = createClient({
  * @returns {import('next-sanity').SanityClient}
  */
 export function clientPour(estEnPreview) {
+  // Projet non configuré : aucun client. L'appelant retombera sur le
+  // contenu par défaut.
+  if (!sanityConfigure) return null
+
   if (!estEnPreview) return clientPublie
 
   if (!process.env.SANITY_API_READ_TOKEN) {

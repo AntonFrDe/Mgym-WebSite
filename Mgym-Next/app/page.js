@@ -1,11 +1,20 @@
-// page.js — c'est la PAGE D'ACCUEIL (la route "/").
-// Elle n'écrit pas le HTML elle-même : elle ASSEMBLE des composants.
-// Chaque composant = une section du site, dans son propre fichier.
-// C'est la grande différence avec un seul fichier HTML : ici tout est organisé.
+// page.js — LA page d'accueil (la route « / »).
+//
+// Elle n'écrit pas de HTML : elle récupère le contenu une seule fois et le
+// distribue aux composants, qui restent de simples afficheurs.
+//
+// POURQUOI LE CONTENU EST RÉCUPÉRÉ ICI, ET PAS DANS CHAQUE COMPOSANT
+// Une seule requête pour toute la page plutôt que douze. Et surtout : le
+// contenu est disponible dès le PREMIER rendu. C'est ce qui protège les
+// animations — un composant qui recevrait ses données après coup se
+// remonterait, et les étapes du sentier repasseraient invisibles.
 
-import Hero              from '../components/Hero'
-import Manifesto         from '../components/Manifesto'
-import About             from '../components/About'
+import { previewActif } from '../lib/preview'
+import { getContenu } from '../lib/contenu'
+
+import Hero               from '../components/Hero'
+import Manifesto          from '../components/Manifesto'
+import About              from '../components/About'
 // Les deux versions du site utilisent les mêmes données d'activités.
 // `MGYM_VARIANT=sentier` permet de générer la version verticale.
 import CarrouselActivites from '../components/CarrouselActivites'
@@ -22,23 +31,26 @@ import Footer             from '../components/Footer'
 const isSentier = process.env.MGYM_VARIANT === 'sentier'
 const ActivitesSection = isSentier ? SentierActivites : CarrouselActivites
 
-export default function Home() {
+export default async function Home() {
+  const enPreview = await previewActif()
+  const { site, infos, activites } = await getContenu(enPreview)
+
   return (
     <main>
-      <Hero />
-      <Manifesto />
-      <About />
-      <ActivitesSection />
+      <Hero site={site} />
+      <Manifesto site={site} />
+      <About site={site} />
+      <ActivitesSection site={site} activites={activites} />
       {/* Outdoor prolonge la section Activités (même fond rose) : l'alternance
           crème/rose reprend normalement à partir de Bespoke. */}
-      <Outdoor />
-      <Bespoke />
-      <Coach />
-      <Pricing />
-      <Planning />
-      <Reseaux />
-      <Contact />
-      <Footer />
+      <Outdoor site={site} />
+      <Bespoke site={site} infos={infos} />
+      <Coach site={site} />
+      <Pricing site={site} infos={infos} />
+      <Planning site={site} enPreview={enPreview} />
+      <Reseaux site={site} infos={infos} />
+      <Contact site={site} infos={infos} />
+      <Footer site={site} infos={infos} />
     </main>
   )
 }

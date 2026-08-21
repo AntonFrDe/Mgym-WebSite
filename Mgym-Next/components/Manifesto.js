@@ -1,14 +1,17 @@
 // Manifesto.js — le bandeau sombre qui sépare le hero de « Notre histoire ».
 //
-// C'est une respiration : une seule phrase, en grand, sur fond prune. Le
-// <br /> force la coupure au même endroit que dans la maquette ; sur petit
-// écran la phrase se replie naturellement autour.
-export default function Manifesto() {
+// C'est une respiration : une seule phrase, en grand, sur fond prune.
+// Le texte vient du CMS. TexteRicheEnLigne rend les fragments SANS
+// paragraphe autour : un <p> à l'intérieur d'un <blockquote> stylé
+// casserait la taille de police.
+
+import { TexteRicheEnLigne } from './TexteRiche'
+
+export default function Manifesto({ site }) {
   return (
     <div className="manifesto">
       <blockquote className="apparition">
-        &ldquo;M&apos;GYM est un espace de <strong>convivialité</strong> et de bien-être<br />
-        où prendre soin de soi est un <strong>plaisir</strong>.&rdquo;
+        &ldquo;<TexteRicheEnLigne valeur={site.citationBandeau} />&rdquo;
       </blockquote>
     </div>
   )

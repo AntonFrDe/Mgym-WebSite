@@ -39,6 +39,10 @@ export async function interroger({
 }) {
   const client = clientPour(preview)
 
+  // Sanity pas encore branché : on rend la valeur de repli sans bruit.
+  // Ce n'est pas une erreur, c'est l'état du projet avant migration.
+  if (!client) return siEchec
+
   try {
     return await client.fetch(requete, parametres, {
       signal: AbortSignal.timeout(DELAI_MAX_MS),

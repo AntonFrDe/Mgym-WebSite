@@ -22,8 +22,8 @@
 // classique de ce genre de carrousel.
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { activites } from './activitesData'
 import EnteteActivites from './EnteteActivites'
+import TexteRiche from './TexteRiche'
 
 // deltaMode === 1 : la molette envoie des LIGNES et non des pixels
 // (Firefox surtout). 32px ≈ une ligne, valeur usuelle.
@@ -45,7 +45,7 @@ function pasDeDefilement(piste) {
   return carte.offsetWidth + espace
 }
 
-export default function CarrouselActivites() {
+export default function CarrouselActivites({ site, activites = [] }) {
   const pisteRef = useRef(null)
   const [indexActif, setIndexActif] = useState(0)
   const [progression, setProgression] = useState(0)   // 0 → 1
@@ -63,7 +63,7 @@ export default function CarrouselActivites() {
     setIndexActif(Math.min(activites.length - 1, Math.round(piste.scrollLeft / pas)))
     setAuDebut(piste.scrollLeft <= TOLERANCE_BOUT)
     setALaFin(piste.scrollLeft >= max - TOLERANCE_BOUT)
-  }, [])
+  }, [activites.length])
 
   // Molette → défilement horizontal, avec relâchement en bout de piste.
   // Écouteur natif (et non prop onWheel) car React pose ses écouteurs
@@ -112,7 +112,7 @@ export default function CarrouselActivites() {
       behavior: prefereMoinsAnimation() ? 'auto' : 'smooth',
     })
     setAInteragi(true)
-  }, [])
+  }, [activites.length])
 
   const surTouche = (e) => {
     if (e.key === 'ArrowRight') { e.preventDefault(); allerA(indexActif + 1) }
@@ -124,11 +124,15 @@ export default function CarrouselActivites() {
   const total = activites.length
   const deuxChiffres = (n) => String(n).padStart(2, '0')
 
+  // Aucune activité : la section disparaît plutôt que d'afficher un
+  // carrousel vide avec ses flèches inertes.
+  if (total === 0) return null
+
   return (
     <section id="activites" className="section-pad">
       <div className="section-max">
 
-        <EnteteActivites instruction="Faites défiler les cartes à la molette, au doigt ou avec les flèches pour toutes les découvrir." />
+        <EnteteActivites site={site} instruction="Faites défiler les cartes à la molette, au doigt ou avec les flèches pour toutes les découvrir." />
 
         <div className={`carrousel${auDebut ? ' est-au-debut' : ''}${aLaFin ? ' est-a-la-fin' : ''}`}>
 
@@ -146,31 +150,35 @@ export default function CarrouselActivites() {
               onKeyDown={surTouche}
               onPointerDown={() => setAInteragi(true)}
             >
+              {/* La clé est l'identifiant Sanity, JAMAIS le titre :
+                  renommer une activité ne doit pas démonter sa carte. */}
               {activites.map((act, i) => (
                 <article
-                  key={act.name}
+                  key={act._id}
                   className="carte-act"
-                  aria-label={`Activité ${i + 1} sur ${total} : ${act.name}`}
+                  aria-label={`Activité ${i + 1} sur ${total} : ${act.titre}`}
                 >
                   <div className="carte-act-media">
-                    <img src={act.image} alt={act.name} loading="lazy" />
+                    {act.image && (
+                      <img src={act.image.src} alt={act.image.alt} loading="lazy" />
+                    )}
                     <span className="carte-act-num">{deuxChiffres(i + 1)}</span>
                   </div>
 
                   <div className="carte-act-corps">
-                    <h3>{act.name}</h3>
-                    <p className="carte-act-accroche">{act.accroche}</p>
-                    <p className="carte-act-desc">{act.desc}</p>
+                    <h3>{act.titre}</h3>
+                    <p className="carte-act-accroche">{act.descriptionCourte}</p>
+                    <TexteRiche valeur={act.descriptionRiche} className="carte-act-desc" />
 
                     <div className="carte-act-bas">
                       <div className="carte-act-tags">
-                        {act.tags.map((tag) => (
+                        {(act.motsCles ?? []).map((tag) => (
                           <span key={tag} className="etape-tag">{tag}</span>
                         ))}
                       </div>
-                      {act.href && (
-                        <a href={act.href} className="etape-lien">
-                          {act.lienTexte || 'Découvrir en détail →'}
+                      {act.lienInterne && (
+                        <a href={act.lienInterne} className="etape-lien">
+                          {act.libelleLien || 'Découvrir en détail →'}
                         </a>
                       )}
                     </div>
@@ -183,7 +191,7 @@ export default function CarrouselActivites() {
           {/* Indice de départ : disparaît dès la première interaction */}
           <p className={`carrousel-indice${aInteragi ? ' est-masque' : ''}`} aria-hidden="true">
             <span className="carrousel-indice-molette" />
-            Molette, doigt ou flèches — les 8 activités défilent ici
+            {`Molette, doigt ou flèches — les ${total} activités défilent ici`}
           </p>
 
           {/* Barre de position + commandes */}

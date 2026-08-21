@@ -1,67 +1,61 @@
 // Coach.js — la présentation d'Emmanuelle Franc.
 //
-// Les diplômes sont listés ci-dessous plutôt qu'écrits dans le JSX : en
-// ajouter un se fait en recopiant une ligne, sans toucher à la mise en page.
-// `full: true` fait occuper toute la largeur à la pastille — utile pour la
-// dernière quand leur nombre est impair, sinon elle reste seule dans sa
-// colonne et la grille paraît bancale.
-const certifications = [
-  { text: 'Diplômée des métiers de la forme', full: false },
-  { text: 'Professeure certifiée Pilates',    full: false },
-  { text: 'Professeure certifiée Yoga',       full: false },
-  { text: 'Instructrice Marche Nordique',     full: false },
-  { text: 'Masseuse bien-être',               full: true  },
-]
+// Les diplômes et les chiffres-clés viennent du back-office. La règle des
+// trois chiffres est portée par le schéma Sanity (avertissement au-delà) :
+// le bandeau est dessiné pour trois, deux ou quatre le déséquilibrent.
 
-export default function Coach() {
+import { Fragment } from 'react'
+import TexteRiche from './TexteRiche'
+
+export default function Coach({ site }) {
+  const stats = site.coachStatistiques ?? []
+
   return (
     <section id="coach" className="section-pad">
       <div className="section-max">
         <div className="coach-grid">
 
           <div className="coach-img-wrap apparition-gauche">
-            <img
-              src="/Images/CoachPhoto.webp"
-              alt="Emmanuelle Franc — coach M'GYM"
-            />
+            {site.coachPhoto && (
+              <img src={site.coachPhoto.src} alt={site.coachPhoto.alt} />
+            )}
             <div className="coach-deco" />
           </div>
 
           <div className="apparition-droite">
-            <p className="section-label">Votre coach</p>
+            <p className="section-label">{site.coachEtiquette}</p>
             <h2 className="section-title coach-titre">
-              Emmanuelle<br /><em>Franc</em>
+              {site.coachPrenom}<br /><em>{site.coachNom}</em>
             </h2>
             <div className="divider" />
 
-            <div className="coach-stats">
-              <div className="coach-stat">
-                <div className="coach-stat-num">+20</div>
-                <div className="coach-stat-label">Ans d&apos;expérience</div>
+            {stats.length > 0 && (
+              <div className="coach-stats">
+                {stats.map((stat, i) => (
+                  <Fragment key={stat._key ?? stat.libelle}>
+                    {i > 0 && <div className="coach-stat-sep" />}
+                    <div className="coach-stat">
+                      <div className="coach-stat-num">{stat.nombre}</div>
+                      <div className="coach-stat-label">{stat.libelle}</div>
+                    </div>
+                  </Fragment>
+                ))}
               </div>
-              <div className="coach-stat-sep" />
-              <div className="coach-stat">
-                <div className="coach-stat-num">5</div>
-                <div className="coach-stat-label">Disciplines</div>
-              </div>
-              <div className="coach-stat-sep" />
-              <div className="coach-stat">
-                <div className="coach-stat-num">40+</div>
-                <div className="coach-stat-label">Ans d&apos;asso</div>
-              </div>
-            </div>
+            )}
 
-            <p className="lead coach-texte">
-              Avec son énergie, Emmanuelle vous accompagne dans votre pratique avec
-              des conseils personnalisés. M&apos;GYM est un espace de convivialité et de
-              bien-être où prendre soin de soi est un plaisir.
-            </p>
+            <TexteRiche valeur={site.coachTexte} className="lead coach-texte" />
 
             <div className="cert-grid">
-              {certifications.map((cert) => (
-                <div key={cert.text} className={`cert-item${cert.full ? ' full' : ''}`}>
+              {(site.coachCertifications ?? []).map((cert, i, tout) => (
+                <div
+                  key={cert}
+                  /* La dernière pastille prend toute la largeur quand leur
+                     nombre est impair : seule dans sa colonne, la grille
+                     paraîtrait bancale. */
+                  className={`cert-item${i === tout.length - 1 && tout.length % 2 === 1 ? ' full' : ''}`}
+                >
                   <span className="cert-icon">✦</span>
-                  <span className="cert-text">{cert.text}</span>
+                  <span className="cert-text">{cert}</span>
                 </div>
               ))}
             </div>

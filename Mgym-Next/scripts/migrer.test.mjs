@@ -7,7 +7,7 @@
 
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
-import { activites, creneaux } from './contenu-actuel.mjs'
+import { activites, creneaux } from '../lib/contenu/source-historique.mjs'
 
 const identifiant = (prefixe, texte) =>
   `${prefixe}-${String(texte)

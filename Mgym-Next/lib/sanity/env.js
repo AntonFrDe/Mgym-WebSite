@@ -12,33 +12,23 @@
 // lus ailleurs, uniquement côté serveur.
 
 /**
- * @param {string} nom  nom de la variable
- * @param {string|undefined} valeur
- * @returns {string}
+ * Les identifiants sont OPTIONNELS. Tant qu'ils sont absents, le site
+ * affiche le contenu par défaut (lib/contenu/defaut.js) : c'est un état
+ * de fonctionnement normal, pas une panne.
+ *
+ * Lever une erreur ici empêcherait le site de se construire avant que le
+ * projet Sanity n'existe — exactement l'inverse de ce qu'on veut.
  */
-function exigee(nom, valeur) {
-  if (!valeur) {
-    throw new Error(
-      `Variable d'environnement manquante : ${nom}\n` +
-      `Copiez .env.example en .env.local et renseignez cette valeur.\n` +
-      `Elle se trouve sur sanity.io/manage, dans les réglages du projet.`
-    )
-  }
-  return valeur
-}
-
-export const projectId = exigee(
-  'NEXT_PUBLIC_SANITY_PROJECT_ID',
-  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
-)
-
-export const dataset = exigee(
-  'NEXT_PUBLIC_SANITY_DATASET',
-  process.env.NEXT_PUBLIC_SANITY_DATASET
-)
+export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || ''
+export const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
 
 // Date figée volontairement : elle verrouille le comportement de l'API.
 // La faire avancer « pour être à jour » peut changer le résultat des
 // requêtes sans prévenir.
 export const apiVersion =
   process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2024-10-01'
+
+/**
+ * Le CMS est-il branché ? Un seul endroit répond à cette question.
+ */
+export const sanityConfigure = Boolean(projectId)

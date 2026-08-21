@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url'
 import {
   activites, creneaux, nomsAffiches, siteContent,
   infosPratiques, seoGlobal, images,
-} from './contenu-actuel.mjs'
+} from '../lib/contenu/source-historique.mjs'
 
 const RACINE = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const ECRIRE = process.argv.includes('--ecrire')

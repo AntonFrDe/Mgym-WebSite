@@ -1,222 +1,169 @@
-import { TELEPHONE, TELEPHONE_AFFICHE } from './liens'
-import LienFormulaire from './LienFormulaire'
-
 // Pricing.js — les tarifs de la saison.
 //
 // L'affichage n'est PAS une longue liste de lignes identiques : dix lignes
-// qui se ressemblent, on les lit toutes pour trouver la sienne. Ici, trois
+// qui se ressemblent, on les lit toutes pour trouver la sienne. Trois
 // formes différentes selon ce que le tarif est :
-//   · l'adhésion, obligatoire  → un bandeau seul, impossible à manquer ;
-//   · les formules à la carte  → trois vignettes côte à côte, le prix
-//                                d'abord, pour comparer d'un coup d'œil ;
-//   · les tarifs saison        → un vrai tableau une personne / famille,
-//                                parce que c'est exactement la question que
-//                                se pose le visiteur.
-// Tout se modifie dans les tableaux ci-dessous, sans toucher au HTML.
-
-// Adhésion obligatoire — le préalable à tout le reste.
-const adhesion = {
-  nom: 'Adhésion association',
-  detail: 'Obligatoire pour participer aux cours',
-  prix: '15€',
-}
-
-// Formules à la carte : on paie ce que l'on consomme.
-const carte = [
-  { nom: 'Forfait 10 séances', detail: 'Valable 3 mois', prix: '80€' },
-  { nom: 'Forfait 20 séances', detail: 'Valable 6 mois', prix: '145€' },
-  { nom: 'À la séance', detail: 'Sans engagement', prix: '10€' },
-]
-
-// Mention commune aux trois formules ci-dessus : elle était répétée sur
-// chaque ligne, elle se dit une fois pour toutes.
-const carteNote = 'Prêt de bâton compris pour le forfait une seance'
-
-// Tarifs saison, en deux colonnes : une personne / famille.
-// C'est la comparaison que le visiteur cherche, autant la lui montrer.
-// Les deux en-têtes se modifient ici, pas dans le JSX.
+//   · l'adhésion, obligatoire  -> un bandeau seul, impossible à manquer ;
+//   · les formules à la carte  -> des vignettes, le prix d'abord, pour
+//                                 comparer d'un coup d'œil ;
+//   · les tarifs saison        -> un tableau une personne / famille,
+//                                 parce que c'est exactement la question
+//                                 que se pose le visiteur.
 //
-// « Famille » est volontairement court : c'est un en-tête de colonne, il doit
-// tenir sur une ligne y compris sur téléphone. L'astérisque renvoie à la note
-// sous le tableau, qui dit précisément qui a droit à ce tarif — l'écrire en
-// entier dans l'en-tête casserait la lecture du tableau.
-const colonnesSaison = ['Une personne', 'Famille *']
+// Tout se modifie dans le back-office, onglet « Tarifs ».
 
-const noteFamille =
-  '* Tarif famille : réservé aux parents et à leurs enfants, ainsi qu\'aux couples.'
+import LienFormulaire from './LienFormulaire'
+import TexteRiche from './TexteRiche'
 
-const saison = [
-  {
-    nom: 'Tarif fidélité',
-    detail: 'Renouvellement d\'adhésion',
-    seul: '210€',
-    groupe: '410€',
-  },
-  {
-    nom: 'Tarif plein',
-    detail: 'Première adhésion',
-    seul: '235€',
-    groupe: '460€',
-  },
-]
+// Les en-têtes du tableau sont dans le code : ce sont des repères de
+// lecture, pas du contenu. « Famille * » renvoie à la note explicative
+// saisie, elle, dans le back-office.
+const COLONNES_SAISON = ['Une personne', 'Famille *']
 
-// Saisons plus courtes : pas de déclinaison famille, donc hors du tableau.
-const saisonPartielle = [
-  { nom: 'Mi-saison', detail: 'De janvier à juin', prix: '150€' },
-  { nom: 'Trimestre', detail: 'D\'avril à juin', prix: '75€' },
-]
-
-// Ce que le formulaire d'inscription demande RÉELLEMENT. Annoncé avant le
-// clic : on ne fait pas quitter le site à quelqu'un sans lui dire ce qui
-// l'attend, ni sans qu'il puisse réunir ses informations d'abord.
-//
-// Cette liste doit rester le reflet du formulaire Google (LIEN_INSCRIPTION
-// dans liens.js). Si une question y est ajoutée ou retirée, corriger ici :
-// une annonce fausse est pire que pas d'annonce du tout.
-const etapesInscription = [
-  'Vos coordonnées et votre date de naissance',
-  'Le ou les cours choisis',
-  'La formule tarifaire',
-  'Votre mode de règlement',
-  'Votre parcours sportif',
-  'Les points de santé à signaler',
-  'Votre accord pour le droit à l\'image',
-]
-
-// Une vignette : le prix en grand, le nom dessous. Sert aux formules à la
-// carte et aux saisons partielles.
+/** Une vignette : le prix en grand, le nom dessous. */
 function Vignette({ tarif }) {
   return (
     <div className="tarif-vignette">
       <p className="tarif-vignette-prix">{tarif.prix}</p>
       <p className="tarif-vignette-nom">{tarif.nom}</p>
-      <p className="tarif-vignette-detail">{tarif.detail}</p>
+      {tarif.detail && <p className="tarif-vignette-detail">{tarif.detail}</p>}
     </div>
   )
 }
 
-export default function Pricing() {
+export default function Pricing({ site, infos }) {
+  const carte = site.tarifsCarte ?? []
+  const saison = site.tarifsSaison ?? []
+  const partiels = site.tarifsPartiels ?? []
+  const etapes = site.inscriptionEtapes ?? []
+
   return (
     <section id="tarifs" className="section-pad">
       <div className="section-max">
 
         <div className="tarifs-entete apparition">
-          <p className="section-label">Tarifs</p>
-          <h2 className="section-title">Des formules <em>accessibles</em></h2>
+          <p className="section-label">{site.tarifsEtiquette}</p>
+          <h2 className="section-title">
+            {site.tarifsTitre} <em>{site.tarifsTitreItalique}</em>
+          </h2>
           <div className="divider" />
         </div>
 
         <div className="tarifs">
 
-          <div className="tarif-adhesion apparition">
-            <div>
-              <p className="tarif-adhesion-nom">{adhesion.nom}</p>
-              <p className="tarif-adhesion-detail">{adhesion.detail}</p>
+          {site.adhesion && (
+            <div className="tarif-adhesion apparition">
+              <div>
+                <p className="tarif-adhesion-nom">{site.adhesion.nom}</p>
+                <p className="tarif-adhesion-detail">{site.adhesion.detail}</p>
+              </div>
+              <p className="tarif-adhesion-prix">{site.adhesion.prix}</p>
             </div>
-            <p className="tarif-adhesion-prix">{adhesion.prix}</p>
-          </div>
+          )}
 
-          <div className="apparition">
-            <h3 className="tarif-groupe">À la carte</h3>
-            <div className="tarif-vignettes">
-              {carte.map((tarif) => (
-                <Vignette key={tarif.nom} tarif={tarif} />
-              ))}
+          {carte.length > 0 && (
+            <div className="apparition">
+              <h3 className="tarif-groupe">À la carte</h3>
+              <div className="tarif-vignettes">
+                {carte.map((tarif) => (
+                  <Vignette key={tarif._key ?? tarif.nom} tarif={tarif} />
+                ))}
+              </div>
+              {site.tarifsCarteNote && <p className="tarif-note">{site.tarifsCarteNote}</p>}
             </div>
-            <p className="tarif-note">{carteNote}</p>
-          </div>
+          )}
 
-          <div className="apparition">
-            <h3 className="tarif-groupe">À la saison</h3>
+          {saison.length > 0 && (
+            <div className="apparition">
+              <h3 className="tarif-groupe">À la saison</h3>
 
-            {/* Un vrai tableau : les en-têtes « Une personne » / « Famille »
-                sont annoncés aux lecteurs d'écran, et la comparaison se fait
-                à l'œil sans relire chaque ligne. */}
-            <div className="tarif-tableau-cadre">
-              <table className="tarif-tableau">
-                <thead>
-                  <tr>
-                    <th scope="col">
-                      <span className="visuellement-masque">Formule</span>
-                    </th>
-                    {colonnesSaison.map((colonne) => (
-                      <th key={colonne} scope="col">{colonne}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {saison.map((tarif) => (
-                    <tr key={tarif.nom}>
-                      <th scope="row">
-                        <span className="tarif-tableau-nom">{tarif.nom}</span>
-                        <span className="tarif-tableau-detail">{tarif.detail}</span>
+              {/* Un vrai tableau : les en-têtes de colonnes sont annoncés
+                  aux lecteurs d'écran, et la comparaison se fait à l'œil
+                  sans relire chaque ligne. */}
+              <div className="tarif-tableau-cadre">
+                <table className="tarif-tableau">
+                  <thead>
+                    <tr>
+                      <th scope="col">
+                        <span className="visuellement-masque">Formule</span>
                       </th>
-                      <td>{tarif.seul}</td>
-                      <td>{tarif.groupe}</td>
+                      {COLONNES_SAISON.map((colonne) => (
+                        <th key={colonne} scope="col">{colonne}</th>
+                      ))}
                     </tr>
+                  </thead>
+                  <tbody>
+                    {saison.map((tarif) => (
+                      <tr key={tarif._key ?? tarif.nom}>
+                        <th scope="row">
+                          <span className="tarif-tableau-nom">{tarif.nom}</span>
+                          {tarif.detail && (
+                            <span className="tarif-tableau-detail">{tarif.detail}</span>
+                          )}
+                        </th>
+                        <td>{tarif.prixUnePersonne}</td>
+                        <td>{tarif.prixFamille}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="tarif-note">
+                {site.tarifsSaisonNote}
+                {site.tarifsFamilleNote && <><br />{site.tarifsFamilleNote}</>}
+              </p>
+
+              {partiels.length > 0 && (
+                <div className="tarif-vignettes tarif-vignettes--duo">
+                  {partiels.map((tarif) => (
+                    <Vignette key={tarif._key ?? tarif.nom} tarif={tarif} />
                   ))}
-                </tbody>
-              </table>
+                </div>
+              )}
             </div>
-            <p className="tarif-note">
-              Valable une saison, de septembre à juin<br />
-              {noteFamille}
-            </p>
+          )}
 
-            <div className="tarif-vignettes tarif-vignettes--duo">
-              {saisonPartielle.map((tarif) => (
-                <Vignette key={tarif.nom} tarif={tarif} />
-              ))}
-            </div>
-          </div>
-
-          <p className="tarif-sur-mesure apparition">
-            Besoin d&apos;une formule pour une association, un comité
-            d&apos;entreprise, une collectivité ou un événement ?{' '}
-            <a href="#bespoke" className="price-lien">
-              Découvrez nos tarifs sur mesure
-            </a>
-            .
-          </p>
+          <TexteRiche valeur={site.tarifsSurMesure} className="tarif-sur-mesure apparition" />
         </div>
 
         <div className="inscription apparition">
-          <p className="inscription-titre">Envie de nous <em>rejoindre</em> ?</p>
-          <p className="inscription-sous-titre">
-            L&apos;inscription se fait par un formulaire en ligne. Comptez
-            quelques minutes.
+          <p className="inscription-titre">
+            {site.inscriptionTitre} <em>{site.inscriptionTitreItalique}</em> ?
           </p>
+          <p className="inscription-sous-titre">{site.inscriptionSousTitre}</p>
 
-          {/* Annoncer le contenu du formulaire AVANT le clic : on ne découvre
-              pas qu'il faut son historique médical une fois arrivé dessus. */}
-          <p className="inscription-annonce">Il vous sera demandé :</p>
-          <ul className="inscription-etapes">
-            {etapesInscription.map((etape) => (
-              <li key={etape}>{etape}</li>
-            ))}
-          </ul>
+          {/* Annoncer le contenu du formulaire AVANT le clic : on ne
+              découvre pas qu'il faut son historique médical une fois
+              arrivé dessus. */}
+          {etapes.length > 0 && (
+            <>
+              <p className="inscription-annonce">{site.inscriptionAnnonce}</p>
+              <ul className="inscription-etapes">
+                {etapes.map((etape) => (
+                  <li key={etape}>{etape}</li>
+                ))}
+              </ul>
+            </>
+          )}
 
-          {/* Le formulaire s'ouvre sur cette question ; y arriver sans avoir
-              lu les documents oblige à tout reprendre plus tard. */}
-          <p className="inscription-alerte">
-            Le formulaire commence par vous demander si vous avez pris
-            connaissance du <strong>règlement intérieur</strong> et des{' '}
-            <strong>conditions générales</strong>. Procurez-vous-les avant de
-            commencer.
-          </p>
+          <TexteRiche valeur={site.inscriptionAlerte} className="inscription-alerte" />
 
-          <LienFormulaire>Remplir le formulaire d&apos;inscription</LienFormulaire>
+          <LienFormulaire lien={infos.lienInscription}>
+            {site.inscriptionBouton}
+          </LienFormulaire>
 
-          {/* Deux informations que le bouton seul ne donne pas : la page ne
-              disparaît pas, et le téléphone reste une option pour qui ne
-              souhaite pas passer par un formulaire. */}
           <p className="inscription-precision">
             Le formulaire s&apos;ouvre dans un nouvel onglet — cette page
-            reste ouverte derrière.<br />
-            Vous préférez le téléphone ?{' '}
-            <a href={`tel:${TELEPHONE}`} className="price-lien">
-              {TELEPHONE_AFFICHE}
-            </a>
+            reste ouverte derrière.
+            {infos.telephone && (
+              <>
+                <br />
+                Vous préférez le téléphone ?{' '}
+                <a href={`tel:${infos.telephone.replace(/[ .]/g, '')}`} className="price-lien">
+                  {infos.telephone}
+                </a>
+              </>
+            )}
           </p>
         </div>
 

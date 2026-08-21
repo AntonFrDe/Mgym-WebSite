@@ -13,14 +13,22 @@
 // Le public du site est souvent senior : un bouton qui emmène ailleurs sans
 // prévenir est la première cause d'abandon. D'où l'insistance.
 
-import { LIEN_INSCRIPTION, destination, attributsLienExterne } from './liens'
 
-export default function LienFormulaire({ className = 'btn-primary', children }) {
+
+/**
+ * @param {{lien?: string, className?: string, children: any}} props
+ *   `lien` vient d'« Infos pratiques ». Absent, le bouton renvoie vers la
+ *   section Contact plutôt que vers le vide.
+ */
+export default function LienFormulaire({ lien, className = 'btn-primary', children }) {
+  const destination = lien || '#contact'
+  const externe = Boolean(lien)
+
   return (
     <a
-      href={destination(LIEN_INSCRIPTION)}
+      href={destination}
       className={className}
-      {...attributsLienExterne(LIEN_INSCRIPTION)}
+      {...(externe ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
     >
       {children}
       {/* aria-hidden sur l'icône : elle double une information déjà donnée

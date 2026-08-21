@@ -62,7 +62,7 @@ export const SITE_CONTENT = `*[_type == "siteContent"][0]{
   "heroImage": heroImage${IMAGE},
   "citationBandeau": citationBandeau${TEXTE_RICHE},
 
-  aProposEtiquette, aProposTitre, aProposTitreItalique,
+  aProposEtiquette, aProposTitre, aProposTitreItalique, aProposTitreFin,
   "aProposTexte": aProposTexte${TEXTE_RICHE},
   aProposAvantagesTitre, aProposAvantages,
   "aProposConclusion": aProposConclusion${TEXTE_RICHE},
@@ -71,7 +71,7 @@ export const SITE_CONTENT = `*[_type == "siteContent"][0]{
 
   activitesEtiquette, activitesTitre, activitesTitreItalique, activitesChapo,
 
-  outdoorEtiquette, outdoorTitre, outdoorTitreItalique,
+  outdoorEtiquette, outdoorTitre, outdoorTitreSuite, outdoorTitreItalique,
   "outdoorTexte": outdoorTexte${TEXTE_RICHE},
   "outdoorImage": outdoorImage${IMAGE},
   outdoorMotsCles,

@@ -28,3 +28,4 @@ Site-MGYM*.html
 .DS_Store
 *.log
 .export-tmp/
+.capture.mjs
