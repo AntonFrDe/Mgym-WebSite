@@ -20,7 +20,8 @@
     "studio:deploy": "sanity deploy",
     "studio:dev": "sanity dev --port 3333",
     "test": "node --test \"lib/**/*.test.mjs\"",
-    "verifier": "npm run schemas:check && npm run groq:check && npm test && npm run build"
+    "verifier": "npm run schemas:check && npm run groq:check && npm test && npm run build",
+    "verifier:historique": "node scripts/verifier-historique.mjs"
   },
   "dependencies": {
     "@sanity/client": "^7.26.2",
