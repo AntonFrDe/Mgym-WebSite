@@ -161,6 +161,18 @@ contenu par défaut : trois fichiers décrivant les mêmes champs. C'est pourquo
 neuf tests vérifient leur cohérence — l'oubli s'est produit deux fois pendant
 le développement.
 
+### 17 bis. Le blog
+
+Créé. `/blog` liste les articles avec un état vide digne tant qu'aucun n'est
+publié ; `/blog/[slug]` est pré-calculé au build. Vérifié avec un article
+factice dans une copie jetable du projet — le blog étant vide, il était
+sinon impossible à juger.
+
+Les ancres de la navigation sont devenues absolues (`/#about`) pour rester
+valables depuis `/blog`, ce qui a cassé la copie hors-ligne : ouverte en
+`file://`, `/#about` mène à la racine du disque. `build-standalone.js` les
+ramène en ancres pures.
+
 ### 18. Qu'est-ce qui nécessite encore un développeur ?
 
 | Action | Pourquoi |
@@ -169,7 +181,7 @@ le développement.
 | Changer une couleur, une police | volontairement hors du CMS |
 | Ajouter un **champ** | schéma + requête + contenu par défaut |
 | Modifier les jours affichés au planning | `JOURS_AFFICHES` dans `lib/planning/grille.js` |
-| Créer les pages du blog | **non fait — voir plus bas** |
+| Ajouter une **route** au site | le blog en a demandé une |
 | Brancher le Deploy Hook | une fois, à la mise en production |
 
 Tout le reste — textes, photos, tarifs, horaires, annulations, stages,
@@ -200,21 +212,22 @@ Procédure détaillée dans `ROLLBACK.md`.
 
 ## Ce qui n'est pas fait
 
-**Par blocage** — attendent vos réponses ou des identifiants :
+Tout ce qui pouvait être écrit l'a été. Ce qui reste demande soit un compte,
+soit une décision.
 
-| Phase | Bloqué par |
-|---|---|
-| 8 — publication et invalidation | aucun hébergeur choisi |
-| 15 — tests du workflow complet | aucun projet Sanity |
-| 6 — restauration éprouvée | aucun projet Sanity |
-| 19 — ergonomie chronométrée sur mobile | Studio non déployé |
+| Phase | Écrit | Exécuté | Bloqué par |
+|---|---|---|---|
+| 6 — restauration | ✅ `verifier:historique` | ❌ | aucun projet Sanity |
+| 8 — publication | ✅ `docs/DEPLOIEMENT.md` | ❌ | hébergeur à choisir, DNS à repointer |
+| 15 — workflow complet | ✅ `verifier:workflow`, 9 scénarios | ❌ | aucun projet Sanity |
+| 19 — ergonomie | ✅ `analyser-formulaires` | ⚠️ partiellement | chronométrage impossible hors ligne |
 
-**Par décision** — signalés plutôt que faits en silence :
+**Trois actions ne peuvent pas être faites à votre place** : créer le projet
+Sanity (`sanity login` ouvre un navigateur et demande un compte), choisir
+l'hébergeur, et repointer le DNS de `mgym.fr`.
 
-- **Les pages du blog n'existent pas.** Le modèle `article`, les requêtes, le
-  sitemap et le Studio sont prêts, mais aucune route `/blog` n'a été créée :
-  le site est une page unique, et ajouter des routes change sa nature. À
-  valider avant.
+**Écart assumé, signalé plutôt que fait en silence :**
+
 - **Le champ `icone` sur les activités** n'a pas été créé : le site n'a aucun
   emplacement pour l'afficher.
 ### L'accessibilité plafonne à 96 — ce qui bloque exactement
