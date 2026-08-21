@@ -14,6 +14,7 @@ lisibilité prime sur l'effet technique.
 | [docs/SECURITY.md](docs/SECURITY.md) | 12 points de sécurité, vérifiés |
 | [docs/ROLLBACK.md](docs/ROLLBACK.md) | restaurer une version précédente |
 | [docs/SANITY-SCHEMAS.md](docs/SANITY-SCHEMAS.md) | les modèles de contenu |
+| [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md) | mettre en production, dans l'ordre |
 | [docs/AUDIT-BACKEND.md](docs/AUDIT-BACKEND.md) | l'état des lieux d'origine |
 | [CLAUDE.md](CLAUDE.md) | conventions du code et pièges connus |
 
@@ -136,7 +137,8 @@ Le site se reconstruit (~1 à 2 min) et repart sur le CDN
 suffit et évite d'exposer une route publique à sécuriser.
 
 > ⚠️ Reste à faire : créer le projet Sanity, choisir l'hébergeur, et brancher
-> le Deploy Hook. Voir la fin de [docs/SECURITY.md](docs/SECURITY.md).
+> le Deploy Hook. La marche à suivre complète, dans l'ordre, est dans
+> [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
 
 ---
 

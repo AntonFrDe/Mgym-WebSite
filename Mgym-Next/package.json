@@ -10,6 +10,7 @@
     "dev": "next dev",
     "export:carousel": "MGYM_VARIANT=carousel node scripts/export-statique.mjs",
     "export:sentier": "MGYM_VARIANT=sentier node scripts/export-statique.mjs",
+    "formulaires": "node scripts/analyser-formulaires.mjs",
     "groq:check": "node scripts/valider-requetes.mjs",
     "livraison": "npm run livraison:carousel && npm run livraison:sentier",
     "livraison:carousel": "npm run export:carousel && node build-standalone.js --variant=carousel --dossier",
@@ -23,7 +24,8 @@
     "studio:dev": "sanity dev --port 3333",
     "test": "node --test \"lib/**/*.test.mjs\" \"scripts/**/*.test.mjs\"",
     "verifier": "npm run schemas:check && npm run groq:check && npm test && npm run build",
-    "verifier:historique": "node scripts/verifier-historique.mjs"
+    "verifier:historique": "node scripts/verifier-historique.mjs",
+    "verifier:workflow": "node scripts/tester-workflow.mjs"
   },
   "dependencies": {
     "@sanity/client": "^7.26.2",

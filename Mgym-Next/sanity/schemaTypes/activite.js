@@ -97,7 +97,12 @@ export const activite = defineType({
       type: 'number',
       description:
         'Détermine la position sur le site : 1 en premier. Les activités ' +
-        'sont classées de la plus douce à la plus intense.',
+        'sont classées de la plus douce à la plus intense. Laissé à 99, ' +
+        'la nouvelle activité se place en dernier — vous ajusterez ensuite.',
+      // Valeur par défaut : sans elle, créer une activité oblige à choisir
+      // un numéro AVANT de pouvoir enregistrer, alors qu'on ne sait pas
+      // encore où on veut la mettre. 99 la place en fin de liste.
+      initialValue: 99,
       validation: (Rule) =>
         Rule.required()
           .integer()
