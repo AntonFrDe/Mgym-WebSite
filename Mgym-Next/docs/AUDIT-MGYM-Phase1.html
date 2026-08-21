@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><title>Audit M'GYM — Phase 1</title>
+<style>
+@page { size: A4; margin: 2cm 1.8cm; }
+body { font-family: 'Liberation Serif', Georgia, serif; font-size: 10.5pt; color: #2b2b2b; line-height: 1.45; }
+h1 { font-family: 'Liberation Sans', Arial, sans-serif; font-size: 24pt; color: #4A3B42; margin: 0 0 4pt 0; }
+h2 { font-family: 'Liberation Sans', Arial, sans-serif; font-size: 14pt; color: #B8737A;
+     border-bottom: 1.5pt solid #D18B8E; padding-bottom: 3pt; margin: 22pt 0 8pt 0; }
+h3 { font-family: 'Liberation Sans', Arial, sans-serif; font-size: 11.5pt; color: #4A3B42; margin: 14pt 0 5pt 0; }
+h4 { font-family: 'Liberation Sans', Arial, sans-serif; font-size: 10pt; color: #B8737A; margin: 10pt 0 4pt 0; }
+p { margin: 0 0 7pt 0; text-align: justify; }
+table { border-collapse: collapse; width: 100%; margin: 8pt 0 12pt 0; font-size: 8.5pt;
+        font-family: 'Liberation Sans', Arial, sans-serif; }
+th { background: #D18B8E; color: #ffffff; text-align: left; padding: 4pt 5pt;
+     font-size: 8pt; border: 0.5pt solid #B8737A; }
+td { padding: 4pt 5pt; border: 0.5pt solid #d8c4ca; vertical-align: top; text-align: left; }
+tr.alt td { background: #FBF3F5; }
+code, pre { font-family: 'Liberation Mono', 'Courier New', monospace; font-size: 8.5pt; }
+pre { background: #F4E1E6; border-left: 2.5pt solid #D18B8E; padding: 7pt 9pt; margin: 7pt 0 10pt 0;
+      white-space: pre-wrap; line-height: 1.3; }
+ul, ol { margin: 0 0 8pt 0; padding-left: 18pt; }
+li { margin-bottom: 3pt; }
+.couv { border: 1.5pt solid #D18B8E; padding: 16pt 18pt; margin-bottom: 20pt; background: #FFF7F8; }
+.ident td { border: 0.5pt solid #e4d2d7; font-size: 9pt; }
+.sstitre { font-family: 'Liberation Sans', Arial, sans-serif; font-size: 12pt; color: #B8737A; margin: 0 0 12pt 0; }
+.meta { font-family: 'Liberation Sans', Arial, sans-serif; font-size: 9pt; color: #6b5a61; margin: 0; }
+.encadre p, p.encadre { border-left: 3pt solid #D18B8E; background: #FBF3F5; padding: 8pt 11pt; margin: 10pt 0 12pt 0; text-align: left; }
+.alerte p, p.alerte { border: 1pt solid #B8737A; background: #F4E1E6; padding: 9pt 11pt; margin: 10pt 0 12pt 0; text-align: left; }
+.ok { color: #2e7d32; font-weight: bold; }
+.ko { color: #c0392b; font-weight: bold; }
+.warn { color: #b8860b; font-weight: bold; }
+.note { font-size: 8.5pt; color: #6b5a61; font-style: italic; }
+.saut { page-break-before: always; }
+</style></head><body>
+
+<h1>Audit technique — Site M'GYM</h1>
+<p class="sstitre">Phase 1 : état des lieux avant intégration d'un back-office Sanity</p>
+<table class="ident" cellpadding="5" cellspacing="0">
+<tr bgcolor="#FBF3F5"><td width="18%"><b>Projet</b></td><td>M'GYM — Bien-être &amp; Santé, Mirepoix-sur-Tarn</td></tr>
+<tr><td><b>Dépôt</b></td><td>AntonFrDe/Mgym-WebSite — branche REFONTE-3</td></tr>
+<tr bgcolor="#FBF3F5"><td><b>Date</b></td><td>21 août 2026</td></tr>
+<tr><td><b>Statut</b></td><td>Audit terminé — aucun fichier modifié, aucun commit produit</td></tr>
+<tr bgcolor="#FBF3F5"><td><b>Objet</b></td><td>Rendre le contenu du site administrable par une personne non technique, sans modifier le design ni les animations</td></tr>
+</table>
+
+<h2>Synthèse</h2>
+
+<p>Le dépôt contient une <b>refonte Next.js jamais déployée</b>. Le site réellement en ligne
+sur <code>mgym.fr</code> est un site distinct, construit avec Hostinger Website Builder,
+qui dispose déjà d'un éditeur visuel. Ce constat déplace l'argumentaire du projet :
+la cliente peut déjà éditer son site. Ce que le CMS apporte, c'est de l'éditer
+<b>sans pouvoir casser le design</b>, plus un planning structuré et un SEO maîtrisé.</p>
+
+<p>Trois points bloquent le démarrage de la Phase 2 : le devenir du site Hostinger,
+le sort du pipeline de livraison hors-ligne, et une mise à jour de sécurité préalable.
+Ils sont détaillés en fin de document.</p>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th style="width:42%">Constat</th><th style="width:14%">Gravité</th><th>Conséquence</th></tr>
+<tr><td><code>mgym.fr</code> est déjà en ligne, sur une autre pile, avec un back-office</td><td class="warn">Structurant</td><td>Redéfinit la valeur du projet</td></tr>
+<tr bgcolor="#FBF3F5"><td><code>output: 'export'</code> incompatible avec la prévisualisation</td><td class="ko">Bloquant</td><td>Vérifié par expérience — arbitrage requis</td></tr>
+<tr><td>4 vulnérabilités <i>high</i> dans les dépendances</td><td class="ko">Élevée</td><td>À corriger avant tout ajout</td></tr>
+<tr bgcolor="#FBF3F5"><td><code>key={act.name}</code> dans les deux affichages d'activités</td><td class="ko">Élevée</td><td>Réintroduit un bug d'animation connu</td></tr>
+<tr><td>Aucun secret dans l'historique git</td><td class="ok">Sain</td><td>Rien à assainir</td></tr>
+<tr bgcolor="#FBF3F5"><td><code>.gitignore</code> ne couvre pas <code>.env</code></td><td class="warn">Moyenne</td><td>À corriger avant Sanity</td></tr>
+</table>
+
+<h2>1. Inventaire technique</h2>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th style="width:30%">Point</th><th>Réalité constatée</th></tr>
+<tr><td>Framework</td><td><b>Next.js 15.5.19</b>, App Router — ni Vite, ni SPA</td></tr>
+<tr bgcolor="#FBF3F5"><td>React</td><td>18.3.1 / react-dom 18.3.1</td></tr>
+<tr><td>Node</td><td>v18.19.1</td></tr>
+<tr bgcolor="#FBF3F5"><td>TypeScript</td><td><b>Absent.</b> Aucun <code>tsconfig.json</code>, aucun <code>.ts</code>/<code>.tsx</code> hors généré</td></tr>
+<tr><td>Mode de rendu</td><td><code>output: 'export'</code> — export statique intégral vers <code>out/</code></td></tr>
+<tr bgcolor="#FBF3F5"><td>Routing</td><td><b>Une seule route</b> (<code>app/page.js</code>). Navigation par ancres uniquement</td></tr>
+<tr><td>Gestion d'état</td><td><code>useState</code>/<code>useRef</code> locaux. Pas de Context, pas de store</td></tr>
+<tr bgcolor="#FBF3F5"><td>Animations</td><td>Maison, sans dépendance : IntersectionObserver, transitions CSS, SVG <code>stroke-dashoffset</code></td></tr>
+<tr><td>Styles</td><td>Un seul fichier, <code>app/globals.css</code> (944 lignes). Ni Tailwind, ni CSS Modules</td></tr>
+<tr bgcolor="#FBF3F5"><td>Dépendances</td><td><b>3 exactement</b> : <code>next</code>, <code>react</code>, <code>react-dom</code></td></tr>
+<tr><td>Hébergement</td><td><b>Aucun configuré.</b> Ni Vercel, ni Netlify, ni CI, ni Docker</td></tr>
+<tr bgcolor="#FBF3F5"><td>Livraison actuelle</td><td>Fichier HTML autonome déposé sur Google Drive</td></tr>
+<tr><td>Serveur local</td><td><code>serve.js</code>, 93 lignes sur le module <code>http</code> de Node</td></tr>
+</table>
+
+<p><b>Volumétrie</b> : 21 fichiers source, environ 2 400 lignes hors CSS.
+Composants clients : <code>Nav.js</code>, <code>ClientLayout.js</code>, <code>SentierActivites.js</code>,
+<code>CarrouselActivites.js</code>. Tous les autres sont des composants serveur.</p>
+
+<div class="encadre">
+<p style="margin:0"><b>Deux variantes coexistent</b>, choisies par la variable <code>MGYM_VARIANT</code> :
+<code>CarrouselActivites</code> (défaut) et <code>SentierActivites</code>. Les deux consomment
+le même <code>activitesData.js</code>. Toute intégration CMS doit alimenter les deux.</p>
+</div>
+
+<h2 class="saut">2. Cartographie du contenu en dur</h2>
+
+<p>Chaque ligne a été relevée dans le code réel, avec ses numéros de ligne.</p>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th style="width:22%">Fichier</th><th style="width:11%">Lignes</th><th>Contenu</th><th style="width:15%">Éditable</th></tr>
+<tr><td>app/layout.js</td><td>26-29</td><td>Titre + description SEO</td><td>OUI → siteContent</td></tr>
+<tr bgcolor="#FBF3F5"><td>Hero.js</td><td>4</td><td>5 pastilles d'activités du bandeau</td><td>OUI</td></tr>
+<tr><td>Hero.js</td><td>15-19</td><td>Titre « Bougeons / ensemble »</td><td>OUI → heroTitre</td></tr>
+<tr bgcolor="#FBF3F5"><td>Hero.js</td><td>25-26</td><td>Libellés des 2 boutons + ancres</td><td>Libellés OUI / ancres NON</td></tr>
+<tr><td>globals.css</td><td>145</td><td>Image de fond du hero</td><td>OUI → heroImage (en CSS)</td></tr>
+<tr bgcolor="#FBF3F5"><td>Manifesto.js</td><td>9-12</td><td>Citation du bandeau sombre</td><td>OUI → citationBandeau</td></tr>
+<tr><td>About.js</td><td>25-30</td><td>Étiquette + titre de section</td><td>OUI</td></tr>
+<tr bgcolor="#FBF3F5"><td>About.js</td><td>31-39</td><td>Paragraphe « Notre histoire »</td><td>OUI → aProposTexte</td></tr>
+<tr><td>About.js</td><td>44-49</td><td>5 puces « Rejoindre M'GYM »</td><td>OUI</td></tr>
+<tr bgcolor="#FBF3F5"><td>About.js</td><td>55-62</td><td>Conclusion + mots en accent</td><td>OUI (Portable Text)</td></tr>
+<tr><td>About.js</td><td>20, 22-24</td><td>Photo + badge « +40 ans »</td><td>OUI</td></tr>
+<tr bgcolor="#FBF3F5"><td><b>activitesData.js</b></td><td><b>25-85</b></td><td><b>Les 8 activités</b> (nom, image, accroche, description, tags, lien)</td><td>OUI → activite</td></tr>
+<tr><td>EnteteActivites.js</td><td>18-24</td><td>Titre + chapô section Activités</td><td>OUI</td></tr>
+<tr bgcolor="#FBF3F5"><td>Outdoor.js</td><td>14-22, 40-52</td><td>7 étiquettes + titre + paragraphe</td><td>OUI</td></tr>
+<tr><td>Bespoke.js</td><td>8, 32-42</td><td>4 publics + titre + paragraphe</td><td>OUI</td></tr>
+<tr bgcolor="#FBF3F5"><td>Coach.js</td><td>8-14, 31-58</td><td>5 certifications, 3 statistiques, paragraphe</td><td>OUI</td></tr>
+<tr><td>Pricing.js</td><td>18-62</td><td>Adhésion, 3 formules, tarifs saison et partiels</td><td>OUI</td></tr>
+<tr bgcolor="#FBF3F5"><td>Pricing.js</td><td>76-88</td><td>7 items « Il vous sera demandé »</td><td>OUI — miroir du Google Form</td></tr>
+<tr><td>Planning.js</td><td>14-16</td><td>Jours affichés + libellé de saison</td><td>OUI</td></tr>
+<tr bgcolor="#FBF3F5"><td><b>Planning.js</b></td><td><b>22-54</b></td><td><b>Les créneaux</b>, groupés Matin / Midi / Soir</td><td>OUI → creneau</td></tr>
+<tr><td>Planning.js</td><td>62, 74-77</td><td>Stages (vide) + chapô</td><td>OUI → evenement</td></tr>
+<tr bgcolor="#FBF3F5"><td>Contact.js</td><td>5-34, 61-67, 80-84</td><td>3 cartes, titre CTA, ligne d'aide</td><td>OUI → infosPratiques</td></tr>
+<tr><td>Reseaux.js</td><td>17-30</td><td>Facebook — URL générique non renseignée</td><td>OUI → reseauxSociaux</td></tr>
+<tr bgcolor="#FBF3F5"><td>Footer.js</td><td>9-17</td><td>7 liens de navigation</td><td>NON (structure)</td></tr>
+<tr><td>Footer.js</td><td>35-38, 69-71</td><td>Slogan + mentions légales</td><td>OUI</td></tr>
+<tr bgcolor="#FBF3F5"><td>liens.js</td><td>8-10, 23-36</td><td>Téléphone, courriel, URLs de formulaires</td><td>OUI → infosPratiques</td></tr>
+</table>
+
+<h4>Marqué NON — relève du design, ne doit jamais remonter dans le CMS</h4>
+<p><code>globals.css</code> en entier, hors la ligne 145 · l'ordre des sections dans
+<code>app/page.js</code> (28-46) · l'alternance des fonds crème / rose · les classes
+<code>.apparition*</code> et <code>.retard-*</code> · <code>buildPath()</code> dans
+<code>SentierActivites.js</code> (18-30) · toute la mécanique du carrousel ·
+les SVG inline · <code>build-standalone.js</code>.</p>
+
+<h2 class="saut">3. Point de vigilance : le scrollytelling</h2>
+
+<h3>3.1 La contrainte documentée</h3>
+
+<p>Dans <code>SentierActivites.js</code>, lignes 78 à 107, chaque étape porte
+<b>deux états séparés</b> :</p>
+
+<pre>estOuvert   &lt;- le clic sur « En savoir plus »
+estVisible  &lt;- l'IntersectionObserver au défilement</pre>
+
+<p>Le commentaire du code est explicite : « <i>jamais remis à false : le clic ne touche
+jamais ce state</i> ». Le bug historique venait d'un accordéon où le clic réinitialisait
+la classe posée par l'observateur, faisant disparaître l'étape.</p>
+
+<p>Un troisième mécanisme opère en parallèle : <code>useTraceAuScroll</code> (lignes 34-73)
+mesure <code>path.getTotalLength()</code> <b>une seule fois au montage</b> et pilote
+<code>strokeDashoffset</code> au défilement.</p>
+
+<h3>3.2 Les trois ruptures introduites par le passage en dynamique</h3>
+
+<p>Ce ne sont pas des hypothèses : elles découlent directement du code lu.</p>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th style="width:5%">#</th><th style="width:30%">Rupture</th><th>Mécanisme et mitigation</th></tr>
+<tr><td><b>1</b></td><td><code>key={act.name}</code><br/><span class="note">SentierActivites.js:195<br/>CarrouselActivites.js:151</span></td>
+<td>Le <b>titre</b> sert de clé React. Dès qu'une faute est corrigée dans Sanity, React voit
+une clé différente, démonte l'étape et la remonte avec <code>estVisible = false</code> :
+<b>l'étape disparaît</b> jusqu'à ce que l'observateur la revoie — or l'utilisateur a déjà défilé.
+<br/><b>Mitigation :</b> clé = <code>_id</code> Sanity, stable à la renomination. Non négociable.</td></tr>
+<tr bgcolor="#FBF3F5"><td><b>2</b></td><td><code>const SENTIER = buildPath(activities.length)</code><br/><span class="note">portée module, ligne 32</span></td>
+<td>Le tracé SVG est calculé à l'import, sur un tableau statique. Avec des données dynamiques,
+le nombre d'activités devient variable.<br/>
+<b>Mitigation :</b> déplacer le calcul dans le composant, mémoïsé sur la longueur du tableau.</td></tr>
+<tr><td><b>3</b></td><td><code>useTraceAuScroll</code><br/><span class="note">dépendances [pathRef, wrapRef]</span></td>
+<td>Des refs, donc stables : l'effet ne s'exécute qu'une fois. Si le <code>d</code> du chemin
+change après le montage, le <code>strokeDasharray</code> reste calculé sur l'ancienne longueur.
+<br/><b>Mitigation :</b> ajouter la longueur du chemin aux dépendances.</td></tr>
+</table>
+
+<div class="alerte">
+<p style="margin:0"><b>La décision qui neutralise les trois d'un coup</b><br/>
+Récupérer les données de Sanity <b>au moment du build</b>, pas dans le navigateur.
+En génération statique, les composants reçoivent leur tableau d'activités complet au premier
+rendu : la rupture 1 reste à corriger, mais les ruptures 2 et 3 ne peuvent plus se produire,
+puisque rien ne change après le montage. C'est le mode de rendu qui protège l'animation,
+pas du code défensif.</p>
+</div>
+
+<p>Un rendu côté client casserait aussi le filet de sécurité : le site Next
+<b>n'a pas</b> le <code>setTimeout</code> de 3 secondes qui existe dans
+<code>build-standalone.js</code> (lignes 99-102). Une étape montée après que
+l'utilisateur l'a dépassée resterait invisible indéfiniment.</p>
+
+<h2 class="saut">4. Le site actuellement en ligne</h2>
+
+<p>Vérification DNS et HTTP effectuée le 21 août 2026 :</p>
+
+<pre>mgym.fr        HTTP 200   server: hcdn   x-powered-by: HostingerWebsiteBuilder
+www.mgym.fr    HTTP 200
+admin.mgym.fr  aucun enregistrement DNS
+
+Domaine déposé le 29/06/2022, expire le 29/06/2027, modifié le 31/07/2026</pre>
+
+<p><b>Le site public actuel n'est pas ce dépôt.</b> C'est un site construit avec
+<b>Hostinger Website Builder</b> (317 Ko, moteur Astro interne à Hostinger).
+Il contient « Bougeons », « M'GYM », « Mirepoix », « Emmanuelle », et dispose déjà
+d'une page blog (<code>/blog-list</code>, actuellement sans article).</p>
+
+<div class="alerte">
+<p style="margin:0"><b>La cliente dispose déjà d'un back-office.</b> Hostinger Website Builder
+est un éditeur visuel WYSIWYG : elle peut aujourd'hui modifier n'importe quel texte,
+n'importe quelle image, et publier, sans développeur. La mission telle qu'énoncée décrit
+donc un problème qui, sur <code>mgym.fr</code>, est déjà résolu.</p>
+</div>
+
+<p>Le projet garde tout son sens, mais son argumentaire doit être reformulé.
+Ce que Sanity apporte réellement :</p>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th style="width:40%"></th><th style="width:30%">Hostinger Builder (actuel)</th><th>Next + Sanity (cible)</th></tr>
+<tr><td>Autonomie de la cliente</td><td class="ok">Totale</td><td class="ok">Sur le contenu modélisé</td></tr>
+<tr bgcolor="#FBF3F5"><td><b>Peut casser le design</b></td><td class="ko">Oui, facilement</td><td class="ok">Impossible par construction</td></tr>
+<tr><td>Planning récurrent + exceptions</td><td class="ko">Ressaisie manuelle</td><td class="ok">Modèle métier</td></tr>
+<tr bgcolor="#FBF3F5"><td>Données structurées Schema.org</td><td class="ko">Non</td><td class="ok">Oui</td></tr>
+<tr><td>Le design de la refonte</td><td class="ko">Non</td><td class="ok">Oui</td></tr>
+<tr bgcolor="#FBF3F5"><td>Historique et restauration</td><td class="warn">Limité</td><td class="ok">Complet</td></tr>
+<tr><td>Coût</td><td>Inclus dans l'abonnement</td><td>Free tier + hébergement</td></tr>
+</table>
+
+<p>Le gain réel n'est pas « elle pourra éditer » — elle le peut déjà. C'est
+<b>« elle pourra éditer sans pouvoir casser »</b>, plus le planning structuré et le SEO.</p>
+
+<h2 class="saut">5. Stratégie de rendu : production contre prévisualisation</h2>
+
+<h3>5.1 Le conflit, tranché par l'expérience</h3>
+
+<p>Le cahier des charges accepte une production statique et une prévisualisation dynamique,
+et rend la prévisualisation obligatoire. Or <code>next.config.js</code> contient
+<code>output: 'export'</code>.</p>
+
+<p>Le conflit n'a pas été supposé mais <b>testé</b> : copie jetable du projet, ajout d'une
+route <code>/api/preview</code> utilisant <code>draftMode()</code>, puis build.</p>
+
+<pre>Error: export const dynamic = "force-static" not configured on route
+       "/api/preview" with "output: export"
+&gt; Build error occurred</pre>
+
+<p><code>output: 'export'</code> et la prévisualisation sécurisée sont
+<b>mutuellement exclusifs dans une même configuration</b>. C'est définitif.</p>
+
+<h3>5.2 Ce que cela n'implique pas</h3>
+
+<p><code>output: 'export'</code> n'est pas synonyme de « site statique ». Next hébergé sur
+un runtime Node génère tout de même <b>l'intégralité du HTML au build</b> et le sert depuis
+un CDN. Le référencement et les performances sont identiques. Le drapeau <code>export</code>
+ne sert qu'à produire un dossier <code>out/</code> portable.</p>
+
+<h3>5.3 Architecture recommandée</h3>
+
+<pre>next.config.js  ->  retirer output: 'export' du build par défaut
+Hébergement     ->  Vercel / Netlify / Cloudflare Pages (runtime Node)
+Production      ->  génération statique, contenu publié uniquement, servi par CDN
+Preview         ->  draftMode() + route validant un secret, no-store, noindex
+Publication     ->  Sanity publish -> Deploy Hook de l'hébergeur</pre>
+
+<p>Le Deploy Hook présente un avantage de sécurité décisif : <b>aucune API publique à écrire</b>,
+donc aucune signature à vérifier, aucune limitation de débit à implémenter. La surface
+d'attaque disparaît par construction plutôt que par mitigation.</p>
+
+<h3>5.4 La contrepartie : le pipeline de livraison hors-ligne</h3>
+
+<p><code>build-standalone.js</code> (344 lignes), <code>serve.js</code> (93 lignes) et le dossier
+<code>Livraison-MGYM/</code> dépendent de <code>out/</code>. Ils existaient pour montrer le site
+à la cliente avant mise en ligne, par courriel ou Google Drive — c'est précisément ce que
+la prévisualisation Sanity remplace, en mieux.</p>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th style="width:8%">Option</th><th style="width:34%">Décision</th><th>Conséquence</th></tr>
+<tr><td>1</td><td>Retirer le pipeline (environ 450 lignes)</td><td>Sa fonction est reprise par la preview. Perte : plus de copie hors-ligne</td></tr>
+<tr bgcolor="#FBF3F5"><td>2</td><td>Le conserver via un second mode de build</td><td>La route de preview devrait être exclue de ce build — non supporté nativement par Next</td></tr>
+<tr><td><b>3</b></td><td><b>Le réécrire pour aspirer le site déployé</b></td><td><b>Recommandée.</b> Préserve la fonctionnalité, supprime le couplage à <code>output: 'export'</code>, simplifie le script</td></tr>
+</table>
+
+<h2 class="saut">6. Dépendances</h2>
+
+<pre>21 paquets installés · 475 Mo · package-lock.json commité (OK)
+npm audit : 4 vulnérabilités HIGH, 0 critique</pre>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th style="width:20%">Paquet</th><th style="width:52%">Problème</th><th>Correctif</th></tr>
+<tr><td><code>next</code> 15.5.19</td><td>5 CVE : déni de service sur Server Actions, SSRF, confusion de cache</td><td>next@15.5.23</td></tr>
+<tr bgcolor="#FBF3F5"><td><code>postcss</code></td><td>4 CVE : XSS via <code>&lt;/style&gt;</code>, traversée de chemin par <code>sourceMappingURL</code></td><td>transitif Next</td></tr>
+<tr><td><code>nanoid</code></td><td>2 CVE : boucle infinie sur taille nulle ou négative</td><td>transitif</td></tr>
+<tr bgcolor="#FBF3F5"><td><code>sharp</code> &lt; 0.35</td><td>4 CVE héritées de libvips</td><td>transitif</td></tr>
+</table>
+
+<p>Les quatre sont <b>transitives à Next</b>. La commande <code>npm audit fix --force</code>
+installe <code>next@15.5.23</code>, correctif de patch sans rupture d'API attendue.</p>
+
+<div class="alerte">
+<p style="margin:0"><b>À traiter avant d'ajouter quoi que ce soit.</b> Installer Sanity
+par-dessus une base vulnérable revient à empiler la dette de sécurité.</p>
+</div>
+
+<h2>7. Sécurité de l'existant</h2>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th style="width:42%">Point</th><th style="width:10%">État</th><th>Détail</th></tr>
+<tr><td>Secrets dans l'historique git</td><td class="ok">Sain</td><td>8 021 lignes de diff analysées sur les sources versionnées, hors binaires et bundles</td></tr>
+<tr bgcolor="#FBF3F5"><td>Fichier <code>.env</code> commité</td><td class="ok">Sain</td><td>Aucun, sur toutes les branches</td></tr>
+<tr><td><code>.env.local</code> présent</td><td class="ok">Sain</td><td>Contient <code>KOKO_PRO_TOKEN</code>, correctement ignoré par git</td></tr>
+<tr bgcolor="#FBF3F5"><td><code>.gitignore</code></td><td class="warn">À corriger</td><td>Ne couvre que <code>.env*.local</code> : <code>.env</code> et <code>.env.production</code> passeraient</td></tr>
+<tr><td><code>.env.example</code></td><td class="ko">Absent</td><td>À créer</td></tr>
+<tr bgcolor="#FBF3F5"><td>En-têtes de sécurité</td><td class="ko">Absents</td><td>Le site n'est pas hébergé. Hostinger en pose sur <code>mgym.fr</code>, hors de notre contrôle</td></tr>
+<tr><td><code>dangerouslySetInnerHTML</code></td><td class="ok">Sain</td><td>Aucune occurrence dans le code</td></tr>
+<tr bgcolor="#FBF3F5"><td>CORS Sanity</td><td>—</td><td>Projet Sanity inexistant à ce jour</td></tr>
+</table>
+
+<h2>8. Ce que le cahier des charges résout</h2>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th style="width:14%">Section</th><th>Arbitrage rendu</th></tr>
+<tr><td>§11</td><td><b>JavaScript + JSDoc + types Sanity générés.</b> Pas de migration TypeScript. Cohérent avec la documentation existante du projet</td></tr>
+<tr bgcolor="#FBF3F5"><td>§12</td><td><b>« Aucune dépendance inutile »</b> et non « exactement 3 ». Le conflit avec <code>CLAUDE.md</code> disparaît ; cette ligne de la documentation devra être amendée</td></tr>
+<tr><td>§4</td><td><b>Le rendu Matin / Midi / Soir est conservé.</b> Le modèle <code>creneau</code> / <code>exception</code> / <code>fermeture</code> vit derrière et se regroupe à l'affichage. Faisable sans toucher au visuel</td></tr>
+<tr bgcolor="#FBF3F5"><td>§5</td><td>Confirme les trois ruptures d'animation identifiées en section 3. L'analyse tient sans modification</td></tr>
+</table>
+
+<h2>9. Contradictions résiduelles</h2>
+
+<ol>
+<li><b>La documentation du projet contredit la mission.</b> <code>CLAUDE.md</code> interdit
+encore TypeScript et toute dépendance hors des trois socles. À amender en Phase 2, sinon
+la documentation contredira le code livré.</li>
+<li><b>Le cahier des charges fixe <code>mgym.fr</code> comme site public.</b> Or ce domaine
+sert aujourd'hui un autre site, avec un blog déjà en place. Basculer signifie
+<b>remplacer le site actuel de la cliente</b>, pas en publier un nouveau. Ce n'est pas
+un détail technique mais une décision commerciale.</li>
+<li><b>Le blog existe déjà</b> sur <code>mgym.fr/blog-list</code>, vide. La mission le traite
+comme une fonctionnalité neuve.</li>
+</ol>
+
+<h2>10. Questions bloquantes</h2>
+
+<table border="1" cellpadding="5" cellspacing="0">
+<tr><th style="width:5%">#</th><th style="width:38%">Question</th><th>Enjeu</th></tr>
+<tr><td><b>1</b></td><td>Le site Next remplace-t-il <code>mgym.fr</code>, ou vit-il ailleurs ?</td>
+<td>En cas de remplacement, la cliente perd son éditeur WYSIWYG Hostinger. C'est voulu — c'est ce qui protège le design — mais elle doit l'avoir accepté. Le DNS devra être repointé depuis Hostinger.</td></tr>
+<tr bgcolor="#FBF3F5"><td><b>2</b></td><td>Le pipeline de livraison hors-ligne : option 1, 2 ou 3 ?</td>
+<td>Recommandation : option 3, réécriture pour aspirer le site déployé.</td></tr>
+<tr><td><b>3</b></td><td>Passage de <code>next</code> en 15.5.23 avant la Phase 2 ?</td>
+<td>Correctif de sécurité, version de patch, à isoler dans son propre commit.</td></tr>
+</table>
+
+<h2>Annexe — méthode de vérification</h2>
+
+<p>Toutes les affirmations de ce document reposent sur une observation directe :</p>
+
+<ul>
+<li>Lecture intégrale des 21 fichiers source, de <code>globals.css</code>, des scripts de build et de la documentation du dépôt.</li>
+<li>Relevé des numéros de ligne par recherche automatisée, puis vérification manuelle de chaque plage citée.</li>
+<li><code>npm audit</code> sur l'arbre de dépendances installé.</li>
+<li>Analyse de l'historique git complet, toutes branches, sur les sources versionnées, binaires et bundles générés exclus.</li>
+<li>Résolution DNS et requêtes HTTP sur <code>mgym.fr</code>, <code>www.mgym.fr</code>, <code>admin.mgym.fr</code>, interrogation RDAP de l'AFNIC.</li>
+<li>Test de compatibilité <code>output: 'export'</code> exécuté dans une copie jetable du projet, supprimée après usage.</li>
+</ul>
+
+<p class="note">Le dépôt a été vérifié intact à l'issue de l'audit : aucun fichier modifié,
+aucun commit produit.</p>
+
+</body></html>
