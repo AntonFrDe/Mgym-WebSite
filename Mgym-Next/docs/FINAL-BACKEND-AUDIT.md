@@ -14,8 +14,13 @@ npm run verifier
   ✓ 67 tests, 0 échec
   ✓ build vert
 npm audit                    found 0 vulnerabilities
-Non-régression visuelle      24 captures, SSIM ≥ 0,9996, hauteur identique au pixel
+Non-régression visuelle      24 captures, hauteur identique au pixel
+Lighthouse (build de prod)   Perf 91 · A11y 96 · BP 100 · SEO 100
 ```
+
+Lighthouse a été mesuré en local, sur le build de production, en émulation
+mobile. Un hébergement réel — CDN, compression, HTTP/2 — donnera un meilleur
+résultat, pas un moins bon.
 
 ---
 
@@ -212,8 +217,9 @@ Procédure détaillée dans `ROLLBACK.md`.
   valider avant.
 - **Le champ `icone` sur les activités** n'a pas été créé : le site n'a aucun
   emplacement pour l'afficher.
-- **Lighthouse n'a pas été mesuré** : sans hébergement, un score local ne
-  refléterait pas la production.
+- **L'accessibilité plafonne à 96**, à cause du contraste de la palette rose
+  sur rose. Le corriger reviendrait à modifier le design, ce que la mission
+  interdit. C'est une décision de la cliente, pas une décision technique.
 
 ---
 

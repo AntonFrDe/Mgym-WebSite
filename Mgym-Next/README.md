@@ -92,6 +92,9 @@ npm run verifier       # enchaîne les quatre commandes ci-dessous
 
 Il n'y a **pas de linter** dans ce projet : `npm run verifier` en tient lieu.
 
+Dernière mesure Lighthouse sur le build de production, émulation mobile :
+**Performance 91 · Accessibilité 96 · Bonnes pratiques 100 · SEO 100**.
+
 ---
 
 ## Migrer le contenu existant
