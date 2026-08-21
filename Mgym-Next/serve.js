@@ -1,19 +1,21 @@
 // serve.js — sert le dossier `out/` en local, sans aucune dépendance.
 //
 // POURQUOI CE FICHIER EXISTE
-// Le site est exporté en pages statiques (`output: 'export'` dans
-// next.config.js). Dans ce mode, `next start` REFUSE de démarrer : il n'y a
-// plus de serveur Next à lancer, seulement des fichiers HTML. C'est ce qui
-// cassait `npm start` et `./launch.sh` sans que personne s'en aperçoive.
+// Il sert le dossier `out/`, c'est-à-dire la COPIE HORS-LIGNE du site —
+// celle qui part chez la cliente. `out/` n'est plus produit par
+// `npm run build` mais par `npm run export:carousel` ou `export:sentier`.
 //
-// Plutôt que d'ajouter une dépendance npm pour servir quatre fichiers, on
-// utilise le module `http` fourni avec Node : c'est le même principe que le
-// reste du projet (rien d'installé qui ne soit indispensable).
+// Pour le site hébergé, c'est `npm start` (donc `next start`) qu'il faut :
+// depuis que l'export n'est plus le mode par défaut, il fonctionne à
+// nouveau.
+//
+// Plutôt que d'ajouter une dépendance npm pour servir quelques fichiers, on
+// utilise le module `http` fourni avec Node : c'est le principe du projet,
+// rien d'installé qui ne soit indispensable.
 //
 // Usage :
-//   node serve.js
+//   npm run export:carousel && npm run start:horsligne
 //   node serve.js --port 4000 --hostname 0.0.0.0
-//   PORT=4000 node serve.js
 
 const http = require('http')
 const fs = require('fs')

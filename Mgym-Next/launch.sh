@@ -6,12 +6,12 @@
 #   1. Vérifie que Node.js et npm sont installés
 #   2. Installe les dépendances si nécessaire
 #   3. Build le site (échoue ici si le code ne compile pas)
-#   4. Sert les pages exportées dans out/ (voir serve.js)
+#   4. Lance le serveur Next (npm start)
 #   5. Attend que le site réponde (health check HTTP) avant de rendre la main
 #
-# Note : le site est exporté en pages statiques, il n'y a donc pas de serveur
-# Next à lancer. `npm start` appelle serve.js, un petit serveur de fichiers
-# écrit avec le module http de Node — aucune dépendance supplémentaire.
+# Note : `next start` fonctionne à nouveau depuis que l'export statique n'est
+# plus le mode par défaut. Pour servir la COPIE HORS-LIGNE (out/), c'est
+# `npm run export:carousel && npm run start:horsligne`.
 #
 # Usage :
 #   ./launch.sh           # build + lance en production (port 3000)
@@ -70,8 +70,6 @@ if [ "$MODE" = "prod" ]; then
     exit 1
   fi
   info "Build réussi."
-  # serve.js lit --port / --hostname, comme le faisait `next start` avant
-  # le passage à l'export statique.
   START_CMD=(npm run start -- --port "$PORT" --hostname "$HOST")
 else
   START_CMD=(npm run dev -- --port "$PORT" --hostname "$HOST")

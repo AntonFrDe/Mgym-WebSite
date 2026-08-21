@@ -23,6 +23,8 @@ npm run dev            # développement, http://localhost:3000
 npm run studio:dev     # le back-office,  http://localhost:3333
 npm run verifier       # schémas + requêtes + 67 tests + build
 npm run build          # build du site hébergé
+npm start              # le sert (next start)
+./launch.sh            # build + start + vérification qu'il répond
 npm run livraison      # copie hors-ligne (voir « Livraison » plus bas)
 ./launch.sh --dev      # mode dev sans build
 PORT=4000 ./launch.sh  # autre port

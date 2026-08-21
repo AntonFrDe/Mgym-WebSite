@@ -76,6 +76,19 @@ npm run dev            # le site,   http://localhost:3000
 npm run studio:dev     # le Studio, http://localhost:3333
 ```
 
+Pour vérifier le build de production :
+
+```bash
+npm run build && npm start        # le site hébergé
+./launch.sh                       # build + start + vérification qu'il répond
+```
+
+Pour relire la copie hors-ligne telle que la cliente la recevra :
+
+```bash
+npm run export:carousel && npm run start:horsligne
+```
+
 ---
 
 ## Vérifier
