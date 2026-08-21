@@ -15,7 +15,10 @@
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
 import { visionTool } from '@sanity/vision'
+import { frFRLocale } from '@sanity/locale-fr-fr'
 import { schemaTypes } from './sanity/schemaTypes/index.js'
+import { structure, actionsDocument, modelesDocument } from './sanity/lib/structure.js'
+import { actionDupliquer, actionAnnulerUneDate } from './sanity/lib/actions.jsx'
 
 // Le CLI Sanity n'injecte dans le bundle du Studio que les variables
 // préfixées SANITY_STUDIO_. Celles de Next (NEXT_PUBLIC_) lui sont
@@ -39,9 +42,12 @@ export default defineConfig({
   dataset,
 
   plugins: [
-    // Le menu latéral. Sa structure métier arrive en Phase 4 ; pour
-    // l'instant le Studio affiche la liste brute des types.
-    structureTool(),
+    // Le menu latéral, organisé par tâche et non par type de document.
+    structureTool({ structure }),
+
+    // Le Studio en français : boutons, messages, dates. Sans lui, la
+    // cliente lit « Publish », « Unpublish », « Discard changes ».
+    frFRLocale(),
 
     // Vision : une console pour tester des requêtes GROQ. Réservée au
     // développement — la cliente n'a rien à y faire, et un rôle « editor »
@@ -51,5 +57,17 @@ export default defineConfig({
 
   schema: {
     types: schemaTypes,
+    // Empêche de créer un second exemplaire d'un document unique.
+    templates: modelesDocument,
+  },
+
+  document: {
+    // Retire « Supprimer » et « Dupliquer » des documents uniques, et
+    // ajoute les deux raccourcis du quotidien.
+    actions: (actions, contexte) => [
+      ...actionsDocument(actions, contexte),
+      actionDupliquer,
+      actionAnnulerUneDate,
+    ],
   },
 })

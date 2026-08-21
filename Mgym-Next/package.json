@@ -26,6 +26,7 @@
   "dependencies": {
     "@sanity/client": "^7.26.2",
     "@sanity/image-url": "^2.1.1",
+    "@sanity/locale-fr-fr": "^1.2.36",
     "@sanity/vision": "^4.22.1",
     "next": "^15.5.23",
     "next-sanity": "^11.6.13",
