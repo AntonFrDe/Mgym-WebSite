@@ -15,7 +15,7 @@
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
 import { visionTool } from '@sanity/vision'
-import { schemaTypes } from './sanity/schemaTypes'
+import { schemaTypes } from './sanity/schemaTypes/index.js'
 
 // Le CLI Sanity n'injecte dans le bundle du Studio que les variables
 // préfixées SANITY_STUDIO_. Celles de Next (NEXT_PUBLIC_) lui sont
