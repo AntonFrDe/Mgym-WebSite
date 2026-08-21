@@ -36,11 +36,20 @@ for (const entree of A_COPIER) {
   cpSync(source, path.join(TEMPO, entree), { recursive: true })
 }
 
-// Les routes serveur sont retirées de la COPIE, jamais de l'original.
-const api = path.join(TEMPO, 'app', 'api')
-if (existsSync(api)) {
-  rmSync(api, { recursive: true, force: true })
-  console.log('  Routes serveur écartées de la copie (incompatibles avec l\'export).')
+// Ces routes sont retirées de la COPIE, jamais de l'original.
+//
+//   app/api    routes serveur : incompatibles avec l'export.
+//   app/blog   Next refuse d'exporter une route dynamique dont
+//              generateStaticParams ne rend aucun paramètre. Et la copie
+//              hors-ligne est un document d'UNE page, destiné à être
+//              relu : un blog vide n'y a pas sa place. build-standalone.js
+//              n'assemble d'ailleurs que out/index.html.
+for (const aRetirer of ['api', 'blog']) {
+  const dossier = path.join(TEMPO, 'app', aRetirer)
+  if (existsSync(dossier)) {
+    rmSync(dossier, { recursive: true, force: true })
+    console.log(`  app/${aRetirer} écarté de la copie hors-ligne.`)
+  }
 }
 
 // node_modules par lien symbolique : recopier 900 Mo serait absurde.

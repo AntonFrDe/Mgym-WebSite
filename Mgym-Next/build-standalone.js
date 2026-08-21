@@ -216,7 +216,16 @@ const inlineJs = `
 const transformeImage = enDossier
   ? (rel) => rel                    // "Images/xxx" : fichier voisin du index.html
   : (rel, abs) => dataUri(abs)      // data:image/... : tout dans un seul fichier
-const corps = remplaceImages(body, transformeImage)
+// Les ancres du site hébergé sont ABSOLUES (« /#about ») pour rester
+// valables depuis /blog. Dans un fichier ouvert par double-clic, l'adresse
+// commence par file:// : « /#about » mènerait à la RACINE DU DISQUE, et
+// toute la navigation serait morte. On les ramène donc en ancres pures.
+const relatiseAncres = (html) =>
+  html
+    .replace(/href="\/#([a-zA-Z0-9_-]+)"/g, 'href="#$1"')
+    .replace(/href="\/"/g, 'href="#hero"')
+
+const corps = relatiseAncres(remplaceImages(body, transformeImage))
 const styles = remplaceImages(css, transformeImage)
 
 const html = `<!DOCTYPE html>

@@ -11,6 +11,15 @@ import { getArticleParSlug, getSlugsArticles } from '../../../lib/sanity/queries
 import { dateLisible } from '../../../lib/planning/grille.js'
 import TexteRiche from '../../../components/TexteRiche'
 
+// Seules les adresses rendues par generateStaticParams existent : toute
+// autre renvoie un 404, sans passer par le serveur. C'est exactement le
+// modèle de publication du projet — un nouvel article apparaît après la
+// reconstruction déclenchée par « Publier », pas avant.
+//
+// C'est aussi ce qui permet à la copie hors-ligne de se construire : sans
+// cette ligne, Next refuse d'exporter une route dynamique.
+export const dynamicParams = false
+
 /** Une page par article, calculée au build. */
 export async function generateStaticParams() {
   const slugs = (await getSlugsArticles()) ?? []
