@@ -7,6 +7,7 @@ import Nav from '../components/Nav'
 import ClientLayout from '../components/ClientLayout'
 import BandeauPreview from '../components/BandeauPreview'
 import { previewActif } from '../lib/preview'
+import { getContenu } from '../lib/contenu'
 import './globals.css'
 
 // next/font/google charge les polices directement depuis Google Fonts
@@ -24,10 +25,38 @@ const montserrat = Montserrat({
   variable: '--font-sans',
 })
 
-// metadata = les infos de l'onglet du navigateur et du référencement Google
-export const metadata = {
-  title: "M'GYM — Bien-être & Santé · Mirepoix-sur-Tarn",
-  description: "Association sport et bien-être à Mirepoix-sur-Tarn. Pilates, Yoga, Yogilates, Gym Bien-être, Forme & Force avec Emmanuelle Franc.",
+// Les informations de l'onglet du navigateur et des résultats de
+// recherche viennent du back-office, onglet « Référencement ».
+//
+// generateMetadata (et non une constante) parce que ces valeurs sont
+// désormais lues à la construction du site : elles peuvent changer sans
+// qu'on touche au code.
+export async function generateMetadata() {
+  const { seo } = await getContenu()
+
+  const partage = seo.imagePartage?.src
+    ? [{ url: seo.imagePartage.src, alt: seo.imagePartage.alt }]
+    : undefined
+
+  return {
+    title: seo.titre,
+    description: seo.description,
+    ...(seo.urlCanonique ? { metadataBase: new URL(seo.urlCanonique) } : {}),
+    alternates: seo.urlCanonique ? { canonical: '/' } : undefined,
+    openGraph: {
+      type: 'website',
+      locale: 'fr_FR',
+      title: seo.titre,
+      description: seo.description,
+      images: partage,
+    },
+    twitter: {
+      card: partage ? 'summary_large_image' : 'summary',
+      title: seo.titre,
+      description: seo.description,
+      images: partage,
+    },
+  }
 }
 
 // RootLayout est la fonction principale : elle reçoit {children} = le contenu de chaque page.

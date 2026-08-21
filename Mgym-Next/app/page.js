@@ -27,16 +27,21 @@ import Planning           from '../components/Planning'
 import Reseaux            from '../components/Reseaux'
 import Contact            from '../components/Contact'
 import Footer             from '../components/Footer'
+import DonneesStructurees from '../components/DonneesStructurees'
 
 const isSentier = process.env.MGYM_VARIANT === 'sentier'
 const ActivitesSection = isSentier ? SentierActivites : CarrouselActivites
 
 export default async function Home() {
   const enPreview = await previewActif()
-  const { site, infos, activites } = await getContenu(enPreview)
+  const { site, infos, seo, activites } = await getContenu(enPreview)
 
   return (
     <main>
+      {/* Invisible : la fiche que Google lit pour afficher l'adresse et
+          le téléphone directement dans ses résultats. */}
+      <DonneesStructurees infos={infos} seo={seo} activites={activites} />
+
       <Hero site={site} />
       <Manifesto site={site} />
       <About site={site} />
