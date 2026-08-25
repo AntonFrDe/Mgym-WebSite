@@ -41,7 +41,7 @@ L'ordre compte : chaque étape dépend de la précédente.
 
 ```
 1. Créer le projet Sanity          → donne PROJECT_ID   ✅ zqxwi6qy
-2. Migrer le contenu               → la cliente voit son site dans le back-office
+2. Migrer le contenu               → la cliente voit son site   ✅ 21 documents
 3. Déployer le Studio              → elle peut se connecter
 4. Déployer le site                → donne l'URL de production
 5. Restreindre les CORS            → maintenant qu'on connaît les URL
@@ -85,12 +85,34 @@ choix le plus sûr : le site n'écrit jamais dans Sanity.
 > interaction — CI, ou poste sans navigateur — un token d'administration
 > passé en `SANITY_AUTH_TOKEN` les remplace.
 
-## 2. Migrer le contenu
+## 2. Migrer le contenu — ✅ fait le 25 août 2026
 
 ```bash
 npm run migrer          # simulation, n'écrit rien : à lire avant
 npm run migrer:ecrire   # applique
 ```
+
+21 documents dans `production` : 8 activités, 10 créneaux, `siteContent`,
+`infosPratiques`, `seoGlobal`, plus 13 photos dans la médiathèque. Relancer
+la commande réécrit les mêmes documents — vérifié, le compte ne bouge pas.
+
+> **Cinq photos ont dû être converties.** `fond1`, `Logo`, `CoachMassage`,
+> `MarcheNordique` et `coachHelpingChienTTenHauyt` sont des AVIF **10 bits**,
+> que le décodeur de Sanity refuse (`422 Invalid image`). Le script les
+> convertit en WebP sans perte avant l'envoi ; `public/` n'est pas touché.
+> Les huit images d'activités, en 8 bits, passent telles quelles.
+
+Les neuf scénarios de la Phase 15 ont été joués contre ce projet :
+
+```bash
+npm run build && npm start          # dans un terminal
+node scripts/tester-workflow.mjs    # dans un autre
+```
+
+**21 contrôles sur 21.** Brouillon invisible en production, visible en
+prévisualisation, secret refusé sans indice, redirection ouverte bloquée,
+publication, historique récupérable, étanchéité du client public, sortie de
+prévisualisation, en-têtes, blog et référencement.
 
 ## 3. Déployer le Studio
 

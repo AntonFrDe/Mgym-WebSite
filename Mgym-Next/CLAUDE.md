@@ -42,6 +42,12 @@ La copie hors-ligne survit : `scripts/export-statique.mjs` recopie le projet
 dans un dossier temporaire SANS `app/api/`, y lance un build en mode export et
 rapatrie `out/`. Le projet réel n'est jamais modifié.
 
+Ce build a lieu ailleurs que dans le projet : Next n'y trouve donc pas
+`.env.local`. Le script lui transmet les **trois variables publiques** de
+Sanity — jamais les jetons. Sans cette transmission, la copie se
+construisait avec le contenu par défaut et livrait un site périmé, sans la
+moindre erreur.
+
 ## Architecture
 
 ```
@@ -242,6 +248,14 @@ Pièges à connaître :
 - Le script lit le dossier **`out/`**, produit par `npm run export:carousel`
   ou `export:sentier` — jamais par `npm run build`, qui ne produit plus
   d'export. Les scripts `livraison:*` enchaînent les deux.
+- **Les photos du CMS sont des URL `cdn.sanity.io`.** Une page ouverte par
+  double-clic, souvent sans Internet, n'en afficherait aucune.
+  `scripts/localiser-images.mjs` les rapatrie dans `out/Images/` et réécrit
+  les liens en `/Images/…` avant que `build-standalone.js` ne passe : c'est
+  la seule forme qu'il sait traiter. Il en profite pour **supprimer les
+  photos devenues orphelines** — celles de `public/Images/` que plus aucune
+  page ne cite une fois le CMS branché. Sans ce ménage, elles partaient
+  chez la cliente alors que les remplacer n'aurait rien changé.
 
 ## Le CMS — ce qu'il faut savoir avant d'y toucher
 

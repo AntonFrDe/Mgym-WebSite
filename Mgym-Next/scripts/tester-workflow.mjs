@@ -130,11 +130,25 @@ try {
 
   // ── TEST 5 — l'historique conserve la version précédente ──────
   console.log('\n  TEST 5 — historique et restauration')
+  // Le paramètre est `time`, PAS `revision` : celui-ci attend un
+  // identifiant de révision (^[a-zA-Z0-9_-]+$) et refuse un horodatage.
+  // L'erreur était avalée par un catch, et le test se contentait
+  // d'annoncer que l'historique ne marchait pas — sans dire pourquoi.
   const avant = new Date(Date.now() - 3000).toISOString()
-  const ancienne = await client.request({
-    uri: `/data/history/${dataset}/documents/${ID}?revision=${encodeURIComponent(avant)}`,
-  }).catch(() => null)
-  verifier(Boolean(ancienne), 'une version antérieure est récupérable')
+  let ancienne = null
+  let motifEchec = ''
+  try {
+    ancienne = await client.request({
+      uri: `/data/history/${dataset}/documents/${ID}?time=${encodeURIComponent(avant)}`,
+    })
+  } catch (e) {
+    motifEchec = e.message
+  }
+  const documents = ancienne?.documents ?? []
+  verifier(
+    documents.length > 0,
+    'une version antérieure est récupérable' + (motifEchec ? ` — ${motifEchec}` : '')
+  )
 
   // ── TEST 6 — les brouillons ne fuient pas par l'API publique ──
   console.log('\n  TEST 6 — étanchéité du client public')

@@ -217,16 +217,33 @@ Procédure détaillée dans `ROLLBACK.md`.
 Tout ce qui pouvait être écrit l'a été. Ce qui reste demande soit un compte,
 soit une décision.
 
-| Phase | Écrit | Exécuté | Bloqué par |
-|---|---|---|---|
-| 6 — restauration | ✅ `verifier:historique` | ❌ | aucun projet Sanity |
-| 8 — publication | ✅ `docs/DEPLOIEMENT.md` | ❌ | hébergeur à choisir, DNS à repointer |
-| 15 — workflow complet | ✅ `verifier:workflow`, 9 scénarios | ❌ | aucun projet Sanity |
-| 19 — ergonomie | ✅ `analyser-formulaires` | ⚠️ partiellement | chronométrage impossible hors ligne |
+*Mis à jour le 25 août 2026, une fois le projet Sanity `zqxwi6qy` créé.*
 
-**Trois actions ne peuvent pas être faites à votre place** : créer le projet
-Sanity (`sanity login` ouvre un navigateur et demande un compte), choisir
-l'hébergeur, et repointer le DNS de `mgym.fr`.
+| Phase | Écrit | Exécuté | Reste |
+|---|---|---|---|
+| 6 — restauration | ✅ `verifier:historique` | ✅ | — |
+| 8 — publication | ✅ `docs/DEPLOIEMENT.md` | ❌ | hébergeur à choisir, DNS à repointer |
+| 15 — workflow complet | ✅ `verifier:workflow` | ✅ **21/21** | — |
+| 19 — ergonomie | ✅ `analyser-formulaires` | ⚠️ partiellement | chronométrage sur mobile réel |
+
+Ce que l'exécution a révélé, et qu'aucune relecture n'aurait trouvé :
+
+- **cinq photos en AVIF 10 bits** que Sanity refuse de décoder — la migration
+  s'arrêtait après huit images et zéro document ;
+- **le cache de données de Next** aurait rendu le bouton « Publier » sans
+  effet : pendant `next build`, une entrée existante est réutilisée quel que
+  soit son âge, et les hébergeurs restaurent ce dossier entre deux
+  déploiements ;
+- **la copie hors-ligne se construisait sans Sanity** et livrait le contenu
+  d'avant le CMS, sans erreur ;
+- **le test d'historique interrogeait `?revision=`** au lieu de `?time=`, et
+  un `catch` avalait le message qui le disait.
+
+Les quatre étaient invisibles tant qu'aucun projet réel n'existait.
+
+**Deux actions ne peuvent pas être faites à votre place** : choisir
+l'hébergeur et repointer le DNS de `mgym.fr`. Le déploiement du Studio
+(`sanity deploy`) demande une session ouverte dans un navigateur.
 
 **Écart assumé, signalé plutôt que fait en silence :**
 
