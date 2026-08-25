@@ -1,27 +1,58 @@
 # Mise en production — M'GYM
 
-> Phase 8 du plan. Cette étape ne peut pas être exécutée sans deux décisions
-> qui ne sont pas techniques. Ce document donne la marche à suivre exacte
-> pour chacune, et l'ordre dans lequel les faire.
+> Plan d'action jusqu'à la publication, mis à jour le 25 août 2026.
+> Chaque étape indique **qui la fait**. L'ordre compte : une étape en avance
+> se refait.
 
 ---
 
-## Les deux décisions préalables
+## Où en est-on
 
-### 1. Le site Next remplace-t-il `mgym.fr` ?
+| | |
+|---|---|
+| Projet Sanity | `zqxwi6qy`, dataset `production` |
+| Contenu | 21 documents, 13 photos, 0 brouillon |
+| Contrôles | 67 tests · 21/21 scénarios de workflow · 3/3 historique |
+| Vulnérabilités | 0 |
+| Code | branche `REFONTE-3`, 35 commits d'avance sur `main` |
+| Hébergement | **aucun** — le site ne tourne nulle part |
+| `mgym.fr` | sert toujours le site Hostinger Website Builder |
 
-`mgym.fr` sert aujourd'hui un site construit avec **Hostinger Website
-Builder**, qui possède son propre éditeur visuel. Le remplacer signifie que
-la cliente perd cet éditeur au profit du back-office Sanity.
+---
 
-C'est le but — un éditeur visuel permet de casser la mise en page, Sanity
-non — mais **elle doit l'avoir accepté**, et le DNS devra être repointé
-depuis Hostinger.
+## Vue d'ensemble
 
-### 2. Quel hébergeur ?
+```
+0. Décisions et questions de contenu          VOUS
+1. Régénérer les deux jetons                  VOUS
+2. Déployer le Studio                         vous ouvrez la session, je déploie
+3. Fusionner REFONTE-3 dans main              MOI
+4. Créer le projet chez l'hébergeur           VOUS
+5. Brancher le Deploy Hook                    vous créez, je configure et je teste
+6. Vérifier en production                     MOI
+7. Repointer le DNS                           VOUS
+8. Remettre le site à la cliente              partagé
+```
 
-Le site a besoin d'un **runtime Node** : les pages restent générées au build
-et servies par un CDN, mais les deux routes `/api/preview*` sont dynamiques.
+---
+
+## Étape 0 — Décisions et questions de contenu — **vous**
+
+Trois questions bloquent des étapes plus loin. Aucune n'est technique.
+
+### 0.1 Le site Next remplace-t-il `mgym.fr` ?
+
+`mgym.fr` sert aujourd'hui un site **Hostinger Website Builder**, qui a son
+propre éditeur visuel. Le remplacer signifie que la cliente perd cet éditeur
+au profit de Sanity.
+
+C'est le but — un éditeur visuel permet de casser la mise en page, Sanity non
+— mais **elle doit l'avoir accepté avant** que le DNS ne bouge.
+
+### 0.2 Quel hébergeur ?
+
+Le site a besoin d'un **runtime Node** : les pages sont générées au build et
+servies par un CDN, mais les deux routes `/api/preview*` sont dynamiques.
 
 | | Vercel | Netlify | Cloudflare Pages |
 |---|---|---|---|
@@ -30,28 +61,192 @@ et servies par un CDN, mais les deux routes `/api/preview*` sont dynamiques.
 | Forfait gratuit suffisant | oui | oui | oui |
 | Domaine personnalisé | oui | oui | oui |
 
-Les trois conviennent. Vercel demande le moins de configuration pour Next ;
-c'est le seul argument qui les sépare vraiment ici.
+Les trois conviennent. **Vercel** demande le moins de configuration pour
+Next ; c'est le seul argument qui les sépare réellement ici.
+
+### 0.3 Deux incohérences de contenu, signalées et toujours ouvertes
+
+Elles ne bloquent pas la technique, mais elles seront visibles par les
+adhérentes dès la mise en ligne.
+
+- **La saison.** Le site annonce « Saison 2025 — 2026 ». Le formulaire
+  d'inscription Google s'intitule « ADHESION 26/27 ». L'un des deux est
+  périmé.
+- **Le tarif famille.** 410 € pour deux personnes, alors que deux adhésions
+  individuelles font 2 × 215 € = 430 €. L'écart de 20 € est-il voulu ?
+
+Répondez-moi et je corrige dans Sanity — ou laissez la cliente le faire
+elle-même depuis le Studio, ce qui est un bon premier exercice.
 
 ---
 
-## Ordre des opérations
+## Étape 1 — Régénérer les deux jetons — **vous**
 
-L'ordre compte : chaque étape dépend de la précédente.
+Les jetons `mgym-lecture` et `mgym-migration` ont circulé en clair dans notre
+conversation. Avant toute mise en ligne :
 
-```
-1. Créer le projet Sanity          → donne PROJECT_ID   ✅ zqxwi6qy
-2. Migrer le contenu               → la cliente voit son site   ✅ 21 documents
-3. Déployer le Studio              → elle peut se connecter
-4. Déployer le site                → donne l'URL de production
-5. Restreindre les CORS            → maintenant qu'on connaît les URL
-6. Brancher le Deploy Hook         → « Publier » reconstruit le site
-7. Repointer le DNS                → en dernier, quand tout fonctionne
-```
+<https://www.sanity.io/manage/project/zqxwi6qy/api> → Tokens → supprimer les
+deux, en recréer deux.
+
+Le jeton **Editor** ne sert plus qu'à `scripts/tester-workflow.mjs`. Si vous
+ne comptez pas relancer ce test, ne le recréez pas du tout : le site n'écrit
+jamais dans Sanity.
 
 ---
 
-## 1. Créer le projet Sanity — ✅ fait le 25 août 2026
+## Étape 2 — Déployer le Studio — **vous ouvrez la session, je déploie**
+
+Le CLI Sanity n'est pas connecté sur cette machine, et `sanity login` ouvre
+un navigateur. Tapez dans le prompt :
+
+```
+! npx sanity login
+```
+
+Je prends la suite : `npm run studio:deploy`, choix de l'adresse
+`*.sanity.studio`, vérification que le Studio charge et lit le dataset.
+
+Ensuite, **vous** :
+
+- inviter la cliente : sanity.io/manage → Members → rôle **`editor`**
+  (jamais administrator) ;
+- activer la **double authentification** sur votre compte ;
+- pour une adresse en `admin.mgym.fr` plutôt qu'en `*.sanity.studio` :
+  ajouter un CNAME chez le registrar vers l'adresse Sanity, puis déclarer
+  le domaine dans les réglages du projet. Facultatif, et repoussable.
+
+---
+
+## Étape 3 — Fusionner `REFONTE-3` dans `main` — **moi**
+
+L'hébergeur déploie une branche. `main` est aujourd'hui 35 commits en
+arrière : la déployer publierait le site d'avant le CMS.
+
+La fusion est une avance rapide, sans conflit possible. Je la fais quand vous
+me le dites — c'est votre branche principale, je ne la déplace pas sans
+accord.
+
+---
+
+## Étape 4 — Créer le projet chez l'hébergeur — **vous**
+
+Je ne peux pas le faire : cela demande votre compte et une autorisation
+d'accès à votre dépôt GitHub.
+
+> ⚠️ **Le dépôt n'a pas le projet à sa racine.** `Mgym-WebSite/` contient
+> `Mgym-Next/`. Il faut renseigner **Root Directory = `Mgym-Next`**, sinon le
+> build ne trouve pas `package.json`.
+
+| Réglage | Valeur |
+|---|---|
+| Framework | Next.js (détecté) |
+| Root Directory | **`Mgym-Next`** |
+| Build command | `npm run build` |
+| Node | 22 (voir `.nvmrc`) |
+
+Les cinq variables d'environnement :
+
+```
+NEXT_PUBLIC_SANITY_PROJECT_ID    zqxwi6qy
+NEXT_PUBLIC_SANITY_DATASET       production
+NEXT_PUBLIC_SANITY_API_VERSION   2024-10-01
+SANITY_API_READ_TOKEN            le nouveau jeton Viewer
+SANITY_PREVIEW_SECRET            je vous le donne, il est dans .env.local
+```
+
+**À NE PAS configurer : `SANITY_API_WRITE_TOKEN`.** Le site n'écrit jamais
+dans Sanity. Un jeton d'écriture chez l'hébergeur est une porte ouverte pour
+rien.
+
+---
+
+## Étape 5 — Brancher le Deploy Hook — **vous créez, je configure**
+
+C'est ce qui fait qu'un clic sur **Publier** met le site à jour.
+
+**Vous** : chez l'hébergeur, créer un **Deploy Hook** et me donner son URL —
+ou la coller vous-même dans Sanity avec les réglages ci-dessous.
+
+**Réglages du webhook** (sanity.io/manage → API → Webhooks → Create) :
+
+| Champ | Valeur |
+|---|---|
+| URL | celle du Deploy Hook |
+| Dataset | `production` |
+| Trigger on | Create, Update, Delete |
+| Filter | vide |
+| HTTP method | POST |
+
+> **Aucune route de revalidation n'a été écrite, et c'est délibéré.** Le
+> Deploy Hook est une URL secrète que l'hébergeur protège lui-même : rien à
+> signer, rien à limiter en débit, aucun point d'entrée public de plus à
+> surveiller.
+
+---
+
+## Étape 6 — Vérifier en production — **moi**
+
+Dès que l'URL existe :
+
+```bash
+node scripts/tester-workflow.mjs https://<url-de-production>
+```
+
+Les 21 contrôles : brouillon invisible en production, visible en
+prévisualisation, secret refusé sans indice, redirection ouverte bloquée,
+publication, historique, étanchéité du client public, sortie de
+prévisualisation, en-têtes, blog, référencement.
+
+Puis :
+
+- **restreindre les CORS** — voir `SECURITY.md` point 6. Le site n'a besoin
+  d'aucune origine ; seul le Studio en demande une.
+- **une publication réelle de bout en bout** : modifier un texte dans le
+  Studio, cliquer Publier, chronométrer jusqu'à ce que le site change.
+- **une restauration réelle** : les 5 cases de `ROLLBACK.md`.
+- **Lighthouse sur la vraie URL.** À refaire obligatoirement : les photos
+  viennent maintenant de `cdn.sanity.io`, un autre domaine. J'ai déjà vérifié
+  qu'**aucune préconnexion n'est déclarée** — le navigateur doit résoudre le
+  DNS et négocier le TLS avant de commencer à télécharger l'image la plus
+  grande de la page. Je corrigerai si la mesure le confirme.
+- **une sauvegarde du dataset** :
+  `npx sanity dataset export production sauvegarde-initiale.tar.gz`
+
+---
+
+## Étape 7 — Repointer le DNS — **vous**
+
+**En dernier**, une fois que tout fonctionne sur l'URL de l'hébergeur.
+
+Chez Hostinger : remplacer les enregistrements A / CNAME de `mgym.fr` et
+`www.mgym.fr` par ceux fournis par l'hébergeur. Jusqu'à 24 h de propagation.
+
+> ⚠️ **`Strict-Transport-Security` est déjà déclaré dans `next.config.js`.**
+> Servi sur un domaine dont le certificat HTTPS n'est pas encore en place,
+> les navigateurs refuseront le site **pendant deux ans**. Vérifiez que
+> l'hébergeur a émis le certificat avant que le DNS ne bascule.
+
+---
+
+## Étape 8 — Remettre le site à la cliente — **partagé**
+
+**Moi** : `docs/GUIDE-CLIENTE.md` relu et à jour, copie hors-ligne
+régénérée (`npm run livraison`), sauvegarde initiale du dataset.
+
+**Vous** : la vidéo de prise en main (script prêt dans
+`docs/SCRIPT-VIDEO.md`), et la séance de formation.
+
+**À chronométrer avec elle sur son téléphone** — c'est la phase 19, la seule
+que je ne peux pas terminer seul : modifier un tarif, ajouter un créneau,
+publier un article, changer une photo.
+
+---
+
+---
+
+# Annexe — ce qui est déjà fait
+
+## Le projet Sanity — ✅ 25 août 2026
 
 ```
 projet    zqxwi6qy
@@ -85,7 +280,7 @@ choix le plus sûr : le site n'écrit jamais dans Sanity.
 > interaction — CI, ou poste sans navigateur — un token d'administration
 > passé en `SANITY_AUTH_TOKEN` les remplace.
 
-## 2. Migrer le contenu — ✅ fait le 25 août 2026
+## Le contenu — ✅ 25 août 2026
 
 ```bash
 npm run migrer          # simulation, n'écrit rien : à lire avant
@@ -114,113 +309,19 @@ prévisualisation, secret refusé sans indice, redirection ouverte bloquée,
 publication, historique récupérable, étanchéité du client public, sortie de
 prévisualisation, en-têtes, blog et référencement.
 
-## 3. Déployer le Studio
+## Une fois en ligne — ce qui revient
 
-```bash
-npm run studio:deploy
-```
+Ces points ne font pas partie de la mise en service : ils commencent après.
 
-Sanity propose une adresse en `*.sanity.studio`. Pour `admin.mgym.fr`, ajoutez
-un enregistrement CNAME chez votre registrar vers cette adresse, puis
-déclarez le domaine dans les réglages du projet Sanity.
-
-Invitez la cliente : sanity.io/manage → Members → **rôle `editor`**.
-Activez la double authentification sur votre compte administrateur.
-
-## 4. Déployer le site
-
-Variables à configurer chez l'hébergeur :
-
-```
-NEXT_PUBLIC_SANITY_PROJECT_ID
-NEXT_PUBLIC_SANITY_DATASET       production
-NEXT_PUBLIC_SANITY_API_VERSION   2024-10-01
-SANITY_API_READ_TOKEN            (Viewer)
-SANITY_PREVIEW_SECRET
-```
-
-**À ne PAS configurer : `SANITY_API_WRITE_TOKEN`.** Le site n'écrit jamais
-dans Sanity ; ce token ne sert qu'au script de migration, lancé depuis un
-poste de développement.
-
-Commande de build : `npm run build`. Rien à changer.
-
-## 5. Restreindre les CORS
-
-**Correction apportée après vérification sur le projet réel.** Ce document
-demandait d'autoriser `https://mgym.fr` et `http://localhost:3000`. C'est
-inutile, et donc à ne pas faire.
-
-Le CORS ne gouverne que les requêtes émises par un **navigateur**. Or le site
-n'en émet aucune vers Sanity : `lib/sanity/client.js` porte `import
-'server-only'`, tout le contenu est lu pendant le build. Les photos viennent
-de `cdn.sanity.io`, chargées comme n'importe quelle balise `<img>` — le CORS
-ne s'y applique pas.
-
-Ajouter le domaine de production à la liste n'apporterait rien et élargirait
-la surface pour rien. Seul le **Studio** parle à l'API depuis un navigateur :
-
-```
-http://localhost:3333           déjà autorisé par défaut — vérifié
-https://<projet>.sanity.studio  à ajouter à l'étape 3
-https://admin.mgym.fr           si vous branchez le domaine personnalisé
-```
-
-Jamais `*` avec « Allow credentials ».
-
-## 6. Brancher le Deploy Hook
-
-C'est ce qui fait qu'un clic sur **Publier** met le site à jour.
-
-1. Chez l'hébergeur : créer un **Deploy Hook**, copier son URL secrète.
-2. Dans Sanity : sanity.io/manage → API → **Webhooks** → Create webhook
-   - URL : celle du Deploy Hook
-   - Dataset : `production`
-   - Trigger on : **Create, Update, Delete**
-   - Filter : laisser vide (tout le contenu)
-   - HTTP method : POST
-
-> **Aucune route de revalidation n'a été écrite dans le projet, et c'est
-> volontaire.** Le Deploy Hook de l'hébergeur est une URL secrète qu'il
-> protège lui-même : pas de signature à vérifier, pas de limitation de débit
-> à implémenter, pas d'endpoint public à surveiller. Écrire une API maison
-> aurait ajouté une surface d'attaque pour un gain nul.
-
-### Vérifier
-
-```bash
-npm run verifier:workflow https://mgym.fr
-```
-
-Ce script joue les neuf scénarios de la Phase 15 : brouillon invisible en
-production, visible en prévisualisation, secret refusé, redirection ouverte
-bloquée, publication, historique, étanchéité du client public, sortie de
-prévisualisation, en-têtes, blog et référencement.
-
-## 7. Repointer le DNS
-
-**En dernier**, une fois que tout fonctionne sur l'URL de l'hébergeur.
-
-Chez le registrar du domaine (Hostinger aujourd'hui) : remplacer les
-enregistrements A / CNAME de `mgym.fr` et `www.mgym.fr` par ceux fournis par
-l'hébergeur. Comptez jusqu'à 24 h de propagation.
-
-> ⚠️ **N'activez `Strict-Transport-Security` qu'une fois le certificat HTTPS
-> en place.** L'en-tête est déjà déclaré dans `next.config.js` ; s'il est servi
-> sur un domaine en HTTP, les navigateurs refuseront le site pendant deux ans.
-
----
-
-## Après la mise en service
-
-```
-□ Jouer npm run verifier:workflow contre la production
-□ Tester une restauration réelle (docs/ROLLBACK.md, les 5 cases)
-□ Chronométrer les 4 parcours du Studio sur mobile (Phase 19)
-□ Mesurer Lighthouse sur la vraie URL — le CDN et la compression
-  donneront un meilleur résultat que la mesure locale
-□ Remettre à la cliente docs/GUIDE-CLIENTE.md et enregistrer la vidéo
-  (docs/SCRIPT-VIDEO.md)
-□ Exporter le dataset une première fois :
-    npx sanity dataset export production sauvegarde-initiale.tar.gz
-```
+- **Sauvegarder le dataset** avant chaque intervention importante :
+  `npx sanity dataset export production sauvegarde-AAAA-MM-JJ.tar.gz`.
+  C'est la seule copie qui ne dépende pas de Sanity.
+- **La rétention d'historique dépend du forfait.** Sur le plan gratuit elle
+  est courte : une restauration se joue en jours, pas en mois. Une
+  sauvegarde régulière est ce qui comble l'écart.
+- **Si la cliente casse quelque chose** : `docs/ROLLBACK.md`. Le site retombe
+  déjà tout seul sur `lib/contenu/defaut.js` si un champ est vidé — une
+  section ne peut pas disparaître par accident.
+- **Regénérer la copie hors-ligne** après une modification importante :
+  `npm run livraison`. Elle lit maintenant le contenu du CMS, elle n'est donc
+  plus figée dans le temps.
