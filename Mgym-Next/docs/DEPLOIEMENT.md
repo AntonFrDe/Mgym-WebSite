@@ -178,6 +178,31 @@ sur l'adresse publique **42 secondes plus tard**, sans qu'aucune commande
 n'ait été lancée sur la tour. C'est la régénération incrémentale
 (`lib/revalidation.js`).
 
+### Arrêter
+
+```bash
+./scripts/arreter-tour.sh
+```
+
+Ou `Ctrl+C` dans la fenêtre qui fait tourner `heberger-tour.sh`. Le
+back-office reste en ligne dans les deux cas : Sanity n'a jamais tourné ici.
+
+### Il faut souvent rafraîchir DEUX fois
+
+C'est le comportement normal, et il déroute. La page est servie depuis un
+cache. Passé le délai de péremption, la première visite renvoie **l'ancienne
+version** et déclenche la régénération en arrière-plan ; c'est la visite
+**suivante** qui voit la nouvelle.
+
+Mesuré sur ce site : contenu publié, puis une requête toutes les 10 secondes
+— nouvelle version servie au bout de **10 secondes**. Mais si vous ne
+rafraîchissez qu'une fois et attendez, vous regardez l'ancienne page.
+
+> Dit à la cliente : « publiez, patientez dix secondes, rafraîchissez deux
+> fois ». Pour une mise à jour vraiment instantanée il faudrait que Sanity
+> appelle le site à la publication — possible seulement avec une adresse
+> stable, donc pas avec un tunnel gratuit.
+
 ### Deux limites à connaître
 
 - **L'adresse change à chaque redémarrage.** Les tunnels gratuits donnent un

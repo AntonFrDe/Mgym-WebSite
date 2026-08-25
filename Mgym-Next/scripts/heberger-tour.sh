@@ -99,8 +99,14 @@ if [ "$AVEC_BUILD" = 1 ]; then
 fi
 
 # ── 2. Le site ────────────────────────────────────────────────────
+# `next` est lancé DIRECTEMENT, pas via `npm start`.
+#
+# npm lance next-server en petit-fils : tuer npm laisse le serveur vivant,
+# le port occupé, et l'exécution suivante échoue sur « port déjà utilisé ».
+# En le lançant sans intermédiaire, $PID_SITE désigne vraiment le serveur
+# et le nettoyage fonctionne.
 echo "Démarrage du serveur sur le port ${PORT}…"
-npm start -- --port "$PORT" >/dev/null 2>&1 &
+node node_modules/next/dist/bin/next start --port "$PORT" >/dev/null 2>&1 &
 PID_SITE=$!
 
 for _ in $(seq 1 60); do
@@ -127,8 +133,21 @@ done
 
 [ -n "$ADRESSE" ] || { echo "Aucune adresse obtenue. Journal : $JOURNAL" >&2; exit 1; }
 
-curl -sf -o /dev/null --max-time 30 "$ADRESSE" || {
-  echo "Le tunnel est ouvert mais le site ne répond pas au travers." >&2; exit 1; }
+# Cloudflare annonce l'adresse dans son journal AVANT que ses serveurs de
+# bordure ne la connaissent tous. Tester dans la seconde donne un échec
+# alors que tout va bien : on réessaie pendant une minute.
+JOIGNABLE=0
+for _ in $(seq 1 12); do
+  if curl -sf -o /dev/null --max-time 15 "$ADRESSE"; then JOIGNABLE=1; break; fi
+  kill -0 "$PID_TUNNEL" 2>/dev/null || { echo "Le tunnel s'est arrêté. Journal : $JOURNAL" >&2; exit 1; }
+  sleep 5
+done
+
+[ "$JOIGNABLE" = 1 ] || {
+  echo "Le tunnel est ouvert mais le site ne répond pas au travers après 60 s." >&2
+  echo "Journal : $JOURNAL" >&2
+  exit 1
+}
 
 echo
 echo "  ┌──────────────────────────────────────────────────────────┐"
