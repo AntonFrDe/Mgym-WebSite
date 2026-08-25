@@ -15,6 +15,16 @@ import { getContenu } from '../../lib/contenu'
 import { getArticles } from '../../lib/sanity/queries/index.js'
 import { dateLisible } from '../../lib/planning/grille.js'
 
+// Combien de temps cette page peut rester figée avant de redemander son
+// contenu au CMS. Voir lib/revalidation.js : c'est ce qui permet de
+// modifier le site depuis Sanity sans le reconstruire.
+//
+// Le nombre est écrit en clair parce que Next exige une valeur analysable
+// statiquement — une constante importée est refusée au build. Il est donc
+// répété dans les trois pages, et `lib/revalidation.test.mjs` échoue si
+// l'une d'elles s'écarte de la constante partagée.
+export const revalidate = 60
+
 export async function generateMetadata() {
   const { seo } = await getContenu()
   return {
