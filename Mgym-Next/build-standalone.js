@@ -294,9 +294,9 @@ puis ouvrez le fichier .html dans le dossier obtenu.
 
 IMPORTANT
 ---------
-Gardez toujours les fichiers .html, le dossier "Images" et "fond1.avif"
-ENSEMBLE dans le même dossier. Si vous déplacez une page .html toute
-seule ailleurs, les photos ne s'afficheront plus.
+Gardez toujours les fichiers .html et le dossier "Images" ENSEMBLE dans
+le même dossier, avec tout ce qui les accompagne. Si vous déplacez une
+page .html toute seule ailleurs, les photos ne s'afficheront plus.
 
 Les textes du site s'affichent avec leurs vraies polices si vous êtes
 connecté à Internet. Hors connexion le site reste parfaitement lisible,
@@ -343,11 +343,24 @@ if (!enDossier) {
 
   fs.rmSync(path.join(dossier, 'Images'), { recursive: true, force: true })
   fs.cpSync(path.join(OUT, 'Images'), path.join(dossier, 'Images'), { recursive: true })
-  fs.copyFileSync(path.join(OUT, 'fond1.avif'), path.join(dossier, 'fond1.avif'))
+
+  // Le fond du hero ne vient plus forcément de public/ : quand le CMS
+  // fournit la photo, la page pointe vers Images/fond1-2000.webp et
+  // fond1.avif n'est plus cité par personne. On ne livre donc ce fichier
+  // que si une page s'en sert — sinon c'est un demi-mégaoctet de plus
+  // dans le dossier de la cliente, et un fichier de plus à ne pas
+  // déplacer alors qu'il ne sert à rien.
+  const fondUtilise = html.includes('fond1.avif')
+  if (fondUtilise) {
+    fs.copyFileSync(path.join(OUT, 'fond1.avif'), path.join(dossier, 'fond1.avif'))
+  } else {
+    fs.rmSync(path.join(dossier, 'fond1.avif'), { force: true })
+  }
+
   fs.writeFileSync(path.join(dossier, 'LISEZ-MOI.txt'), lisezMoi)
 
   const pagesPresentes = Object.values(nomPage).filter((p) => fs.existsSync(path.join(dossier, p)))
   console.log('OK ->', dossier + '/ (' + poidsDossier(dossier) + ' Ko)')
   console.log('     ' + pagesPresentes.join(' + '))
-  console.log('     Images/ + fond1.avif + LISEZ-MOI.txt')
+  console.log('     Images/' + (fondUtilise ? ' + fond1.avif' : '') + ' + LISEZ-MOI.txt')
 }

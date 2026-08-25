@@ -22,8 +22,7 @@ import 'server-only'
 import { createClient } from 'next-sanity'
 import { apiVersion, dataset, projectId, sanityConfigure } from './env.js'
 
-// Réglages communs. `useCdn: true` sert le contenu publié depuis le cache
-// de Sanity : plus rapide et moins coûteux en quota d'API.
+// Réglages communs.
 const communs = {
   projectId,
   dataset,
@@ -35,9 +34,21 @@ const communs = {
  * même si une requête demandait explicitement un brouillon, l'API n'en
  * renverrait aucun. La protection est côté serveur Sanity, pas seulement
  * dans nos requêtes.
+ *
+ * `useCdn: false` alors que le CDN serait plus rapide et moins coûteux :
+ * toutes les lectures de ce client ont lieu PENDANT LE BUILD, jamais à la
+ * requête d'un visiteur. Le cache n'économise donc rien de significatif —
+ * une douzaine de requêtes par build — mais il introduit un décalage.
+ * Constaté deux fois sur ce projet : contenu publié, vérifié présent sur
+ * le CDN par une requête directe, et pourtant absent du build lancé dans
+ * la foulée. Les nœuds du CDN ne se mettent pas à jour ensemble.
+ *
+ * Or le build est déclenché par « Publier ». Une lecture périmée à cet
+ * instant précis, c'est la modification de la cliente qui n'arrive pas
+ * sur son site, sans le moindre message d'erreur.
  */
 export const clientPublie = sanityConfigure
-  ? createClient({ ...communs, useCdn: true, perspective: 'published' })
+  ? createClient({ ...communs, useCdn: false, perspective: 'published' })
   : null
 
 /**
