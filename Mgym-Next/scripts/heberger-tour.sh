@@ -85,6 +85,24 @@ nettoyer() {
 }
 trap nettoyer EXIT INT TERM
 
+# ── 0. Le port est-il libre ? ─────────────────────────────────────
+#
+# Sans ce contrôle, une exécution précédente restée en vie rend la panne
+# INVISIBLE : le serveur de ce script échoue à se lier au port, meurt
+# aussitôt, mais le test « le site répond-il ? » réussit quand même —
+# c'est l'ANCIEN serveur qui répond. Le tunnel s'ouvre, annonce une
+# adresse, puis se referme dès que le script constate la mort de son
+# serveur. Le visiteur récolte une « Error 1033 » sans rien comprendre.
+if command -v ss >/dev/null 2>&1; then
+  OCCUPANT="$(ss -lptn "sport = :${PORT}" 2>/dev/null | grep -oP 'pid=\K[0-9]+' | head -1 || true)"
+  if [ -n "${OCCUPANT:-}" ]; then
+    echo "Le port ${PORT} est déjà utilisé par le processus ${OCCUPANT}." >&2
+    echo "  Arrêtez l'hébergement en cours :  ./scripts/arreter-tour.sh" >&2
+    echo "  Ou choisissez un autre port :     PORT=3001 $0" >&2
+    exit 1
+  fi
+fi
+
 # ── 1. Construction ───────────────────────────────────────────────
 if [ "$AVEC_BUILD" = 1 ]; then
   echo "Construction du site (contenu lu dans Sanity)…"
@@ -111,11 +129,18 @@ PID_SITE=$!
 
 for _ in $(seq 1 60); do
   curl -sf -o /dev/null "http://127.0.0.1:${PORT}" && break
-  kill -0 "$PID_SITE" 2>/dev/null || { echo "Le serveur s'est arrêté." >&2; exit 1; }
+  kill -0 "$PID_SITE" 2>/dev/null || { echo "Le serveur s'est arrêté au démarrage." >&2; exit 1; }
   sleep 1
 done
+
+# Deux conditions, pas une : le port répond ET c'est bien notre processus
+# qui est en vie. La première seule se satisfait du serveur d'un voisin.
 curl -sf -o /dev/null "http://127.0.0.1:${PORT}" || {
   echo "Le site n'a pas répondu sur le port ${PORT}." >&2; exit 1; }
+kill -0 "$PID_SITE" 2>/dev/null || {
+  echo "Le serveur de ce script est mort alors que le port répond encore." >&2
+  echo "Un autre serveur occupe le port ${PORT} : ./scripts/arreter-tour.sh" >&2
+  exit 1; }
 echo "  le site répond en local."
 
 # ── 3. Le tunnel ──────────────────────────────────────────────────
