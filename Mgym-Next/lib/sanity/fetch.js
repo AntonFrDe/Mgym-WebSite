@@ -48,8 +48,21 @@ export async function interroger({
       signal: AbortSignal.timeout(DELAI_MAX_MS),
       // En prévisualisation, jamais de cache : la cliente doit voir sa
       // saisie de l'instant, pas celle d'il y a trois minutes.
+      // `force-cache` ne sert qu'à MUTUALISER les requêtes identiques à
+      // l'intérieur d'un même build : la page et le layout demandent tous
+      // deux le contenu du site, Sanity n'est interrogé qu'une fois.
+      //
+      // Ce cache est écrit sur disque (.next/cache/fetch-cache) et SURVIT
+      // d'un build à l'autre. Pendant `next build`, une entrée existante
+      // est réutilisée quel que soit son âge — ni le temps ni un second
+      // build ne l'expirent. Vérifié : contenu modifié dans Sanity,
+      // rebuild, ancien texte servi quand même.
+      //
+      // C'est le défaut qui aurait rendu le bouton « Publier » inopérant :
+      // l'hébergeur restaure ce dossier entre deux déploiements. Il est
+      // vidé au début de chaque build par `scripts/vider-cache-donnees.mjs`
+      // (script `prebuild`). Sans ce vidage, ne PAS utiliser force-cache.
       cache: preview ? 'no-store' : 'force-cache',
-      next: preview ? undefined : { tags: ['sanity'] },
     })
   } catch (erreur) {
     // Le message part dans les journaux du serveur, jamais vers le

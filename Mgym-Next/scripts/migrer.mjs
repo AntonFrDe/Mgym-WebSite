@@ -17,7 +17,9 @@
 // Sanity.
 
 import { createClient } from '@sanity/client'
-import { readFileSync, existsSync } from 'node:fs'
+import { readFileSync, existsSync, mkdtempSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
@@ -104,6 +106,85 @@ const avecCles = (liste) =>
 // créerait un doublon de chaque photo.
 const cacheImages = new Map()
 
+// ── AVIF 10 bits : le décodeur de Sanity ne sait pas les lire ──────
+//
+// Cinq photos du projet (fond1, Logo, CoachMassage, MarcheNordique,
+// coachHelpingChienTTenHauyt) sont encodées en AVIF 10 bits. Les huit
+// images d'activités, elles, sont en 8 bits. Le téléversement des
+// premières échoue avec :
+//
+//   422 Unprocessable Entity — "Invalid image, could not process"
+//   heif: Bitstream not supported by this decoder (2.0)
+//
+// Ce n'est pas un défaut des fichiers : les navigateurs les affichent
+// parfaitement, et le site les sert tel quel. C'est le décodeur HEIF de
+// Sanity qui s'arrête au 8 bits.
+//
+// La parade : convertir en WebP SANS PERTE juste avant l'envoi. Sans
+// perte, donc aucune dégradation ajoutée à celle de l'AVIF d'origine —
+// le fichier grossit (533 Ko -> 4 Mo pour fond1), mais c'est un original
+// d'archive : personne ne le télécharge. Sanity en dérive les formats
+// d'affichage, et `urlImage()` demande déjà `auto('format')`.
+//
+// Les fichiers de `public/` ne sont JAMAIS modifiés : le site hébergé et
+// la copie hors-ligne continuent de servir les AVIF d'origine.
+
+let dossierConversion = null
+
+/** Profondeur de bits d'un fichier image, via ffprobe. */
+function estAvif10bits(absolu) {
+  if (!absolu.toLowerCase().endsWith('.avif')) return false
+  try {
+    const pixFmt = execFileSync('ffprobe', [
+      '-v', 'error', '-select_streams', 'v:0',
+      '-show_entries', 'stream=pix_fmt', '-of', 'csv=p=0', absolu,
+    ], { encoding: 'utf8' }).trim()
+    return pixFmt.includes('10le') || pixFmt.includes('12le')
+  } catch {
+    // ffprobe absent : on laisse passer. Si l'image est bien en 10 bits,
+    // Sanity la refusera avec un message explicite — mieux vaut cet
+    // échec-là qu'un script qui refuse de démarrer sur une machine où
+    // toutes les images sont en 8 bits.
+    return false
+  }
+}
+
+/**
+ * Nom sous lequel l'image arrivera dans Sanity. Calculé SANS convertir :
+ * il sert à chercher l'image dans la médiathèque avant de décider s'il
+ * faut la produire. Sans cette séparation, chaque relance ré-encoderait
+ * 5 Mo de photos pour finir par ne rien téléverser.
+ */
+function nomDansSanity(absolu, nom) {
+  return estAvif10bits(absolu) ? nom.replace(/\.avif$/i, '.webp') : nom
+}
+
+/** Les octets à envoyer, convertis seulement si c'est nécessaire. */
+function octetsTeleversables(absolu, nom) {
+  if (!estAvif10bits(absolu)) return readFileSync(absolu)
+
+  dossierConversion ??= mkdtempSync(path.join(tmpdir(), 'mgym-images-'))
+  const converti = path.join(dossierConversion, nom.replace(/\.avif$/i, '.webp'))
+
+  try {
+    execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', absolu, '-lossless', '1', converti])
+  } catch (e) {
+    throw new Error(
+      `${nom} est un AVIF 10 bits, que Sanity ne sait pas décoder, et la ` +
+      `conversion a échoué.\n` +
+      `  ffmpeg est-il installé ?  sudo apt install ffmpeg\n` +
+      `  cause : ${e.message.split('\n')[0]}`
+    )
+  }
+
+  const octets = readFileSync(converti)
+  console.log(
+    `    ${nom} : AVIF 10 bits converti en WebP sans perte ` +
+    `(${Math.round(octets.length / 1024)} Ko)`
+  )
+  return octets
+}
+
 async function televerser(chemin, alt) {
   if (cacheImages.has(chemin)) return cacheImages.get(chemin)
 
@@ -120,13 +201,16 @@ async function televerser(chemin, alt) {
     return { _simulation: nom }
   }
 
+  const nomFinal = nomDansSanity(absolu, nom)
+
   const existant = await client.fetch(
     '*[_type == "sanity.imageAsset" && originalFilename == $nom][0]._id',
-    { nom }
+    { nom: nomFinal }
   )
 
-  const assetId = existant ??
-    (await client.assets.upload('image', readFileSync(absolu), { filename: nom }))._id
+  const assetId = existant ?? (await client.assets.upload(
+    'image', octetsTeleversables(absolu, nom), { filename: nomFinal }
+  ))._id
 
   const reference = {
     _type: 'imageEditoriale',
