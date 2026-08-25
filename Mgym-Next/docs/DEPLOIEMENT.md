@@ -14,7 +14,7 @@
 | Contenu | 21 documents, 13 photos, 0 brouillon |
 | Contrôles | 67 tests · 21/21 scénarios de workflow · 3/3 historique |
 | Vulnérabilités | 0 |
-| Code | branche `REFONTE-3`, 35 commits d'avance sur `main` |
+| Code | `main` = `REFONTE-3` — branche par défaut du dépôt, prête à déployer |
 | Hébergement | **aucun** — le site ne tourne nulle part |
 | `mgym.fr` | sert toujours le site Hostinger Website Builder |
 
@@ -26,7 +26,7 @@
 0. Décisions et questions de contenu          VOUS
 1. Régénérer les deux jetons                  VOUS
 2. Déployer le Studio                         ✅ mgym.sanity.studio
-3. Fusionner REFONTE-3 dans main              MOI
+3. Fusionner REFONTE-3 dans main              ✅ 39 commits
 4. Créer le projet chez l'hébergeur           VOUS
 5. Brancher le Deploy Hook                    vous créez, je configure et je teste
 6. Vérifier en production                     MOI
@@ -131,14 +131,30 @@ vérifié par en-tête de réponse.
 
 ---
 
-## Étape 3 — Fusionner `REFONTE-3` dans `main` — **moi**
+## Étape 3 — Fusionner `REFONTE-3` dans `main` — ✅ fait le 25 août 2026
 
-L'hébergeur déploie une branche. `main` est aujourd'hui 35 commits en
-arrière : la déployer publierait le site d'avant le CMS.
+39 commits, en avance rapide, sans conflit. `main` et `REFONTE-3` pointent
+sur le même commit, et `main` est la branche par défaut du dépôt :
+l'hébergeur la prendra sans réglage particulier.
 
-La fusion est une avance rapide, sans conflit possible. Je la fais quand vous
-me le dites — c'est votre branche principale, je ne la déplace pas sans
-accord.
+`npm run verifier` repasse depuis `main` — schémas, requêtes, 67 tests, build.
+
+**Le dépôt est public.** L'historique a été relu : aucun jeton, aucun secret.
+`.env.local` n'a jamais été suivi, et le secret de prévisualisation est absent
+de tous les commits.
+
+Deux observations, sans effet sur le déploiement :
+
+- `new pic/` — 21 Mo de PNG d'origine, suivis par git. Ce sont les sources
+  dont les `.avif` du site sont tirés ; elles ne partent jamais chez la
+  cliente. Elles alourdissent seulement le clone.
+- Ce sont **des photos d'adhérentes, en pleine résolution, dans un dépôt
+  public**. Le site n'en publie que des versions réduites. À voir avec la
+  cliente si cette différence lui importe.
+
+**Pour la suite :** travailler sur `REFONTE-3`, et fusionner dans `main`
+quand un déploiement est voulu. C'est ce qui rend la mise en production
+délibérée plutôt qu'automatique à chaque commit.
 
 ---
 
