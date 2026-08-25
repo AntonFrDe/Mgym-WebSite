@@ -20,6 +20,29 @@
 // hors-ligne livrée à la cliente (voir scripts/export-statique.mjs).
 const enExport = process.env.MGYM_EXPORT === '1'
 
+// ── HSTS : opt-in, et c'est délibéré ────────────────────────────
+//
+// `Strict-Transport-Security` ordonne au navigateur de n'utiliser que
+// HTTPS sur ce domaine, pendant deux ans, sous-domaines compris. Il n'y a
+// pas de marche arrière : l'en-tête est mémorisé par le navigateur du
+// visiteur, pas par le serveur. Le retirer plus tard ne le désactive pas.
+//
+// Deux façons de se tirer une balle dans le pied :
+//   · le servir sur un domaine sans certificat valide — le site devient
+//     inaccessible, et le rester deux ans ;
+//   · le servir depuis un domaine PARTAGÉ (*.trycloudflare.com,
+//     *.ngrok-free.app) — `includeSubDomains` s'applique alors à tous les
+//     sous-domaines de ce domaine, pour ce visiteur. On casse le site des
+//     autres.
+//
+// Le commentaire précédent disait déjà « à n'activer qu'une fois le
+// certificat en place », juste au-dessus d'une ligne qui l'activait
+// toujours. La condition est maintenant réelle.
+//
+// À poser sur le domaine définitif, une fois HTTPS vérifié :
+//   MGYM_HSTS=1
+const hstsActif = process.env.MGYM_HSTS === '1'
+
 // ── En-têtes de sécurité ────────────────────────────────────────
 // Chacun ferme une porte précise. Ils ne s'appliquent qu'au site hébergé :
 // la copie hors-ligne n'a pas de serveur pour les émettre.
@@ -39,9 +62,11 @@ const enTetes = [
   // Le site n'a besoin ni de la caméra, ni du micro, ni de la position.
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()' },
 
-  // Impose HTTPS pour deux ans. À n'activer qu'une fois le certificat en
-  // place : un site en HTTP deviendrait inaccessible.
-  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
+  // Voir le bloc « HSTS » en haut du fichier : absent par défaut, présent
+  // seulement si MGYM_HSTS=1.
+  ...(hstsActif
+    ? [{ key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' }]
+    : []),
 
   {
     key: 'Content-Security-Policy',

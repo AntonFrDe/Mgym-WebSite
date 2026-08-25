@@ -27,11 +27,12 @@
 1. Régénérer les deux jetons                  VOUS
 2. Déployer le Studio                         ✅ mgym.sanity.studio
 3. Fusionner REFONTE-3 dans main              ✅ 39 commits
-4. Créer le projet chez l'hébergeur           VOUS
-5. Brancher le Deploy Hook                    vous créez, je configure et je teste
-6. Vérifier en production                     MOI
-7. Repointer le DNS                           VOUS
-8. Remettre le site à la cliente              partagé
+4. Test sur la tour, tunnel Cloudflare        ✅ opérationnel
+5. La cliente teste et valide                 VOUS + la cliente
+6. Installer sur un VPS OVH                   vous ouvrez le compte, j'installe
+7. Vérifier en production                     MOI
+8. Repointer le DNS                           VOUS
+9. Remettre le site à la cliente              partagé
 ```
 
 ---
@@ -49,20 +50,21 @@ au profit de Sanity.
 C'est le but — un éditeur visuel permet de casser la mise en page, Sanity non
 — mais **elle doit l'avoir accepté avant** que le DNS ne bouge.
 
-### 0.2 Quel hébergeur ?
+### 0.2 Quel hébergeur ? — décidé : OVH, où la cliente a déjà un compte
 
-Le site a besoin d'un **runtime Node** : les pages sont générées au build et
-servies par un CDN, mais les deux routes `/api/preview*` sont dynamiques.
+À savoir avant de s'y engager : **OVH ne déploie pas Next.js clé en main.**
+Il n'y a pas d'équivalent du bouton « connecter le dépôt » de Vercel. Il faut
+un **VPS**, y installer Node, y faire tourner le site comme un service, et
+gérer soi-même le certificat et les mises à jour de sécurité du serveur.
 
-| | Vercel | Netlify | Cloudflare Pages |
-|---|---|---|---|
-| Next 15 App Router | natif | adaptateur officiel | adaptateur officiel |
-| Deploy Hook | oui | oui | oui |
-| Forfait gratuit suffisant | oui | oui | oui |
-| Domaine personnalisé | oui | oui | oui |
+C'est faisable et documenté plus bas, mais c'est du travail récurrent que les
+plateformes prennent en charge. Le mutualisé OVH ne convient pas : il sert du
+PHP, pas un processus Node.
 
-Les trois conviennent. **Vercel** demande le moins de configuration pour
-Next ; c'est le seul argument qui les sépare réellement ici.
+> `mgym.fr` est aujourd'hui servi par **Hostinger**, pas OVH — vérifié :
+> l'en-tête de réponse annonce `server: hcdn`, le CDN d'Hostinger. Le compte
+> OVH de la cliente sert donc autre chose. À éclaircir avant de toucher au
+> DNS : où est le domaine, et où sont les adresses e-mail.
 
 ### 0.3 Deux incohérences de contenu, signalées et toujours ouvertes
 
@@ -158,63 +160,85 @@ délibérée plutôt qu'automatique à chaque commit.
 
 ---
 
-## Étape 4 — Créer le projet chez l'hébergeur — **vous**
+## Étape 4 — Test sur la tour — ✅ opérationnel
 
-Je ne peux pas le faire : cela demande votre compte et une autorisation
-d'accès à votre dépôt GitHub.
+Le site tourne sur cette machine et est joignable publiquement, le temps que
+la cliente le juge.
 
-> ⚠️ **Le dépôt n'a pas le projet à sa racine.** `Mgym-WebSite/` contient
-> `Mgym-Next/`. Il faut renseigner **Root Directory = `Mgym-Next`**, sinon le
-> build ne trouve pas `package.json`.
-
-| Réglage | Valeur |
-|---|---|
-| Framework | Next.js (détecté) |
-| Root Directory | **`Mgym-Next`** |
-| Build command | `npm run build` |
-| Node | 22 (voir `.nvmrc`) |
-
-Les cinq variables d'environnement :
-
-```
-NEXT_PUBLIC_SANITY_PROJECT_ID    zqxwi6qy
-NEXT_PUBLIC_SANITY_DATASET       production
-NEXT_PUBLIC_SANITY_API_VERSION   2024-10-01
-SANITY_API_READ_TOKEN            le nouveau jeton Viewer
-SANITY_PREVIEW_SECRET            je vous le donne, il est dans .env.local
+```bash
+./scripts/heberger-tour.sh
 ```
 
-**À NE PAS configurer : `SANITY_API_WRITE_TOKEN`.** Le site n'écrit jamais
-dans Sanity. Un jeton d'écriture chez l'hébergeur est une porte ouverte pour
-rien.
+Le script construit le site, le sert, ouvre un tunnel Cloudflare et affiche
+l'adresse. **Aucun port n'est ouvert sur la box** : le tunnel sort, il
+n'entre pas. Le HTTPS vient de Cloudflare.
+
+Vérifié de bout en bout : titre modifié dans le Studio à 23:22:03, visible
+sur l'adresse publique **42 secondes plus tard**, sans qu'aucune commande
+n'ait été lancée sur la tour. C'est la régénération incrémentale
+(`lib/revalidation.js`).
+
+### Deux limites à connaître
+
+- **L'adresse change à chaque redémarrage.** Les tunnels gratuits donnent un
+  nom aléatoire en `*.trycloudflare.com`. Pour une adresse stable il faut un
+  domaine à vous, déclaré chez Cloudflare.
+- **La fenêtre doit rester ouverte**, et la tour allumée. Ctrl+C coupe tout.
+
+### HSTS est désactivé, et ce n'est pas un oubli
+
+`Strict-Transport-Security` n'est plus émis que si `MGYM_HSTS=1`. Sur un
+domaine partagé comme `trycloudflare.com`, `includeSubDomains` aurait cassé,
+dans le navigateur de la cliente, **tous** les autres sites en
+`.trycloudflare.com` — pendant deux ans, sans marche arrière possible côté
+serveur.
+
+Le commentaire de `next.config.js` disait déjà « à n'activer qu'une fois le
+certificat en place », juste au-dessus d'une ligne qui l'activait toujours.
+La condition est maintenant réelle. À poser sur le domaine définitif, une
+fois HTTPS vérifié.
 
 ---
 
-## Étape 5 — Brancher le Deploy Hook — **vous créez, je configure**
+## Étape 5 — La cliente teste et valide — **vous + la cliente**
 
-C'est ce qui fait qu'un clic sur **Publier** met le site à jour.
+C'est le but de l'étape 4. Ce qu'il faut lui faire faire, dans le Studio, et
+regarder apparaître sur le site :
 
-**Vous** : chez l'hébergeur, créer un **Deploy Hook** et me donner son URL —
-ou la coller vous-même dans Sanity avec les réglages ci-dessous.
+```
+□ modifier un tarif
+□ ajouter un créneau au planning
+□ changer une photo
+□ publier un article
+□ prévisualiser un brouillon avant de le publier
+```
 
-**Réglages du webhook** (sanity.io/manage → API → Webhooks → Create) :
-
-| Champ | Valeur |
-|---|---|
-| URL | celle du Deploy Hook |
-| Dataset | `production` |
-| Trigger on | Create, Update, Delete |
-| Filter | vide |
-| HTTP method | POST |
-
-> **Aucune route de revalidation n'a été écrite, et c'est délibéré.** Le
-> Deploy Hook est une URL secrète que l'hébergeur protège lui-même : rien à
-> signer, rien à limiter en débit, aucun point d'entrée public de plus à
-> surveiller.
+Chronométrez-la sur son téléphone : c'est la phase 19, et c'est la seule
+mesure qui dise si le back-office lui convient vraiment.
 
 ---
 
-## Étape 6 — Vérifier en production — **moi**
+## Étape 6 — Installer sur un VPS OVH — **vous ouvrez le compte, j'installe**
+
+**Pas de Deploy Hook ici.** Il n'a de sens que chez une plateforme qui
+reconstruit sur appel. Sur un VPS, c'est la régénération incrémentale qui
+tient ce rôle — déjà en place, déjà mesurée. Publier suffit.
+
+**Vous** : ouvrir un VPS chez OVH (le plus petit suffit largement), me donner
+un accès SSH.
+
+**Moi** : Node 22, le dépôt, les variables d'environnement, un service
+systemd qui redémarre tout seul, Caddy ou nginx pour le certificat
+Let's Encrypt, et `MGYM_HSTS=1` une fois HTTPS vérifié.
+
+> Ce que le VPS apporte face à la tour : une adresse fixe, une machine qui ne
+> s'éteint pas, et un certificat sur le vrai domaine. Ce qu'il coûte : les
+> mises à jour de sécurité du serveur, à faire régulièrement. C'est le prix
+> de ne pas dépendre d'une plateforme.
+
+---
+
+## Étape 7 — Vérifier en production — **moi**
 
 Dès que l'URL existe :
 
@@ -244,7 +268,7 @@ Puis :
 
 ---
 
-## Étape 7 — Repointer le DNS — **vous**
+## Étape 8 — Repointer le DNS — **vous**
 
 **En dernier**, une fois que tout fonctionne sur l'URL de l'hébergeur.
 
@@ -258,7 +282,7 @@ Chez Hostinger : remplacer les enregistrements A / CNAME de `mgym.fr` et
 
 ---
 
-## Étape 8 — Remettre le site à la cliente — **partagé**
+## Étape 9 — Remettre le site à la cliente — **partagé**
 
 **Moi** : `docs/GUIDE-CLIENTE.md` relu et à jour, copie hors-ligne
 régénérée (`npm run livraison`), sauvegarde initiale du dataset.
