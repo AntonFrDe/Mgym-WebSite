@@ -77,11 +77,25 @@ try {
 
   // ── 4. Restauration de la version précédente ──────────────────
   // On relit le document tel qu'il était avant la seconde publication.
+  //
+  // Le paramètre est `time`, PAS `revision` : ce dernier attend un
+  // identifiant de révision (^[a-zA-Z0-9_-]+$) et rejette un horodatage.
+  // L'erreur était masquée par un catch, et ce contrôle échouait en
+  // laissant croire à une limite du plan Sanity.
   const avant = new Date(Date.now() - 1000).toISOString()
-  const ancien = await client.request({
-    uri: `/data/history/${dataset}/documents/${ID}?revision=${encodeURIComponent(avant)}`,
-  }).catch(() => null)
-  verifier(Boolean(ancien), 'une version antérieure est récupérable')
+  let ancien = null
+  let motif = ''
+  try {
+    ancien = await client.request({
+      uri: `/data/history/${dataset}/documents/${ID}?time=${encodeURIComponent(avant)}`,
+    })
+  } catch (e) {
+    motif = e.message
+  }
+  verifier(
+    (ancien?.documents ?? []).length > 0,
+    'une version antérieure est récupérable' + (motif ? ` — ${motif}` : '')
+  )
 
   console.log('')
 } catch (e) {
