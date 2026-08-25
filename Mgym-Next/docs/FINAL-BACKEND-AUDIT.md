@@ -123,8 +123,10 @@ débit et à surveiller, pour un gain nul.
 
 ### 12. Les CORS sont-ils minimaux ?
 
-**À faire à la création du projet.** La liste des origines est dans
-`SECURITY.md`, point 6.
+**Oui — le site n'a besoin d'aucune origine autorisée**, ce que le projet
+réel a confirmé : `localhost:3000` et `mgym.fr` sont refusés par l'API, et le
+site construit quand même. Aucune requête navigateur ne part vers Sanity.
+Détail et mesures dans `SECURITY.md`, point 6.
 
 ### 13. Les en-têtes sont-ils compatibles avec le site ?
 

@@ -40,7 +40,7 @@ c'est le seul argument qui les sépare vraiment ici.
 L'ordre compte : chaque étape dépend de la précédente.
 
 ```
-1. Créer le projet Sanity          → donne PROJECT_ID
+1. Créer le projet Sanity          → donne PROJECT_ID   ✅ zqxwi6qy
 2. Migrer le contenu               → la cliente voit son site dans le back-office
 3. Déployer le Studio              → elle peut se connecter
 4. Déployer le site                → donne l'URL de production
@@ -51,22 +51,39 @@ L'ordre compte : chaque étape dépend de la précédente.
 
 ---
 
-## 1. Créer le projet Sanity
+## 1. Créer le projet Sanity — ✅ fait le 25 août 2026
 
-```bash
-npx sanity login          # ouvre le navigateur, interactif
-npx sanity init --project-plan free
+```
+projet    zqxwi6qy
+dataset   production   existant, public en lecture, vide
 ```
 
-Notez l'identifiant du projet, puis remplissez `.env.local` (voir
-`.env.example`). Générez le secret de prévisualisation :
+`.env.local` est rempli, le secret de prévisualisation est généré (64
+caractères hexadécimaux). Vérifié dans cet état :
 
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
+| Contrôle | Résultat |
+|---|---|
+| `npm run verifier` | schémas, requêtes, 67 tests, build — tout passe |
+| les 13 requêtes GROQ jouées contre le serveur Sanity | acceptées |
+| contenu affiché avec un dataset vide | le contenu par défaut, intact |
+| secrets présents dans un bundle navigateur | aucun |
+| `npm run studio:build` | compile, n'embarque que `SANITY_STUDIO_*` |
 
-Créez ensuite un **token de lecture** sur sanity.io/manage → API → Tokens,
-rôle **Viewer** — jamais Editor.
+Reste à créer **deux tokens** sur
+<https://www.sanity.io/manage/project/zqxwi6qy/api> → Tokens :
+
+| Nom | Rôle | Où il va |
+|---|---|---|
+| `mgym-lecture` | **Viewer** | `.env.local` et l'hébergeur |
+| `mgym-migration` | **Editor** | `.env.local` seulement, effaçable après |
+
+Le second ne sert qu'une fois, à l'étape 2. Le supprimer ensuite est le
+choix le plus sûr : le site n'écrit jamais dans Sanity.
+
+> Les commandes `sanity deploy` et `sanity dataset export` réclament une
+> session (`npx sanity login`, qui ouvre un navigateur). Pour les jouer sans
+> interaction — CI, ou poste sans navigateur — un token d'administration
+> passé en `SANITY_AUTH_TOKEN` les remplace.
 
 ## 2. Migrer le contenu
 
@@ -108,17 +125,26 @@ Commande de build : `npm run build`. Rien à changer.
 
 ## 5. Restreindre les CORS
 
-sanity.io/manage → API → CORS origins. N'autoriser que :
+**Correction apportée après vérification sur le projet réel.** Ce document
+demandait d'autoriser `https://mgym.fr` et `http://localhost:3000`. C'est
+inutile, et donc à ne pas faire.
+
+Le CORS ne gouverne que les requêtes émises par un **navigateur**. Or le site
+n'en émet aucune vers Sanity : `lib/sanity/client.js` porte `import
+'server-only'`, tout le contenu est lu pendant le build. Les photos viennent
+de `cdn.sanity.io`, chargées comme n'importe quelle balise `<img>` — le CORS
+ne s'y applique pas.
+
+Ajouter le domaine de production à la liste n'apporterait rien et élargirait
+la surface pour rien. Seul le **Studio** parle à l'API depuis un navigateur :
 
 ```
-https://mgym.fr                 production
-https://<projet>.vercel.app     prévisualisations de déploiement
-http://localhost:3000           développement
-http://localhost:3333           Studio en local
+http://localhost:3333           déjà autorisé par défaut — vérifié
+https://<projet>.sanity.studio  à ajouter à l'étape 3
+https://admin.mgym.fr           si vous branchez le domaine personnalisé
 ```
 
-Jamais `*` avec « Allow credentials ». Retirez les origines de test avant la
-mise en service.
+Jamais `*` avec « Allow credentials ».
 
 ## 6. Brancher le Deploy Hook
 

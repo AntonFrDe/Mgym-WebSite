@@ -149,9 +149,9 @@ Le site se reconstruit (~1 à 2 min) et repart sur le CDN
 **Aucune API de revalidation n'a été écrite** : le Deploy Hook de l'hébergeur
 suffit et évite d'exposer une route publique à sécuriser.
 
-> ⚠️ Reste à faire : créer le projet Sanity, choisir l'hébergeur, et brancher
-> le Deploy Hook. La marche à suivre complète, dans l'ordre, est dans
-> [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
+> Le projet Sanity existe (`zqxwi6qy`, dataset `production`). Restent à faire :
+> les deux tokens, l'hébergeur, et le Deploy Hook. La marche à suivre complète,
+> dans l'ordre, est dans [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
 
 ---
 

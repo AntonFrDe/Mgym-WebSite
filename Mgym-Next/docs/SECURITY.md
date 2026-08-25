@@ -16,7 +16,7 @@
 | 3 | Brouillons en production | ✅ |
 | 4 | XSS et Portable Text | ✅ |
 | 5 | Téléversement de fichiers | ✅ |
-| 6 | CORS | ⚠️ à faire à la création du projet |
+| 6 | CORS | ✅ vérifié — le site n'a besoin d'aucune origine |
 | 7 | En-têtes HTTP | ✅ (une exception assumée) |
 | 8 | Webhooks | ✅ aucun n'existe |
 | 9 | Contrôle d'accès | ⚠️ à tester avec un vrai compte |
@@ -167,19 +167,34 @@ la sécurité, mais c'est de l'accessibilité, et le public du site est âgé.
 
 ---
 
-## 6. CORS — ⚠️ à faire
+## 6. CORS — vérifié sur le projet réel
 
-À la création du projet Sanity, n'autoriser que les origines réelles :
+Ce point demandait d'autoriser quatre origines, dont celle du site. **C'était
+une erreur d'analyse, corrigée ici :** le site n'a besoin d'aucune.
+
+Le CORS n'arbitre que les requêtes émises par un navigateur. Le site n'en
+émet aucune vers l'API Sanity — `lib/sanity/client.js` porte `import
+'server-only'`, et tout le contenu est lu pendant le build. Les photos
+viennent de `cdn.sanity.io`, chargées comme n'importe quel `<img>` : le CORS
+ne s'applique pas aux images.
+
+Constaté sur `zqxwi6qy` le 25 août 2026 :
 
 ```
-https://mgym.fr              production
-https://*.vercel.app         prévisualisations de déploiement
-http://localhost:3000        développement
-http://localhost:3333        Studio en local
+Origin: http://localhost:3333   ->  autorisée (réglage par défaut de Sanity)
+Origin: http://localhost:3000   ->  refusée
+Origin: https://mgym.fr         ->  refusée
 ```
 
-**Jamais `*` avec « Allow credentials ».** Retirer les origines de test avant
-la mise en production.
+Le site construit et fonctionne dans cet état. Les deux dernières lignes
+doivent **rester** refusées : les ajouter n'apporterait rien et ouvrirait
+l'API à deux origines de plus.
+
+Seul le Studio parle à l'API depuis un navigateur. À autoriser, au moment où
+ces adresses existent : `https://<projet>.sanity.studio`, et
+`https://admin.mgym.fr` si le domaine personnalisé est branché.
+
+**Jamais `*` avec « Allow credentials ».**
 
 ---
 
@@ -306,7 +321,7 @@ jamais le code servi.
 ## Ce qu'il reste à faire avant la mise en production
 
 ```
-□ Créer le projet Sanity, restreindre les CORS (point 6)
+□ Autoriser le domaine du Studio dans les CORS (point 6)
 □ Créer le token de lecture, rôle Viewer uniquement
 □ Générer SANITY_PREVIEW_SECRET :
     node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
