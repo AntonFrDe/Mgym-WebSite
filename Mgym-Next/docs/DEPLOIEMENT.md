@@ -25,7 +25,7 @@
 ```
 0. Décisions et questions de contenu          VOUS
 1. Régénérer les deux jetons                  VOUS
-2. Déployer le Studio                         vous ouvrez la session, je déploie
+2. Déployer le Studio                         ✅ mgym.sanity.studio
 3. Fusionner REFONTE-3 dans main              MOI
 4. Créer le projet chez l'hébergeur           VOUS
 5. Brancher le Deploy Hook                    vous créez, je configure et je teste
@@ -94,23 +94,37 @@ jamais dans Sanity.
 
 ---
 
-## Étape 2 — Déployer le Studio — **vous ouvrez la session, je déploie**
+## Étape 2 — Déployer le Studio — ✅ fait le 25 août 2026
 
-Le CLI Sanity n'est pas connecté sur cette machine, et `sanity login` ouvre
-un navigateur. Tapez dans le prompt :
+Le back-office est en ligne : **<https://mgym.sanity.studio>**
 
 ```
-! npx sanity login
+projet      zqxwi6qy
+workspace   mgym
+dataset     production
+appId       boxdaz4dq35cp6n8w9v3z44x
 ```
 
-Je prends la suite : `npm run studio:deploy`, choix de l'adresse
-`*.sanity.studio`, vérification que le Studio charge et lit le dataset.
+L'adresse et l'`appId` sont figés dans `sanity.cli.js`. Les deux sont
+demandés de façon interactive sinon, et une réponse distraite changerait
+l'adresse mise en favori par la cliente, ou créerait un second Studio.
 
-Ensuite, **vous** :
+> L'adresse **redirige vers `sanity.io` et demande une connexion**. Ce n'est
+> pas une panne : Sanity héberge désormais les Studios dans son tableau de
+> bord, et un back-office se connecte. La cliente peut garder
+> `mgym.sanity.studio` en favori.
+
+**CORS : rien à faire.** Seul `http://localhost:3333` est déclaré sur le
+projet ; les origines en `*.sanity.studio` sont autorisées implicitement —
+vérifié par en-tête de réponse.
+
+### Ce qui reste sur cette étape — **vous**
 
 - inviter la cliente : sanity.io/manage → Members → rôle **`editor`**
   (jamais administrator) ;
 - activer la **double authentification** sur votre compte ;
+- **ouvrir le Studio et vérifier** que les 21 documents sont là et que les
+  photos s'affichent — la seule chose que je ne peux pas voir d'ici ;
 - pour une adresse en `admin.mgym.fr` plutôt qu'en `*.sanity.studio` :
   ajouter un CNAME chez le registrar vers l'adresse Sanity, puis déclarer
   le domaine dans les réglages du projet. Facultatif, et repoussable.
