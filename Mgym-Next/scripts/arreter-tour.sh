@@ -37,14 +37,21 @@ fi
 
 # Le tunnel n'écoute sur aucun port : on le désigne par son exécutable.
 # Les crochets empêchent le motif de se reconnaître lui-même.
+#
+# Deux fournisseurs possibles, donc deux formes de processus : cloudflared,
+# ou un ssh vers localhost.run. Oublier le second laissait un tunnel ouvert
+# vers un site arrêté.
 for pid in $(pgrep -f "[c]loudflared tunnel" 2>/dev/null); do
   kill "$pid" 2>/dev/null && { echo "  tunnel Cloudflare fermé (pid ${pid})"; arretes=$((arretes+1)); }
+done
+for pid in $(pgrep -f "[s]sh .*localhost\.run" 2>/dev/null); do
+  kill "$pid" 2>/dev/null && { echo "  tunnel localhost.run fermé (pid ${pid})"; arretes=$((arretes+1)); }
 done
 
 sleep 2
 
 # Les récalcitrants, s'il en reste.
-for pid in $(pgrep -f "[n]ext-server" 2>/dev/null) $(pgrep -f "[c]loudflared tunnel" 2>/dev/null); do
+for pid in $(pgrep -f "[n]ext-server" 2>/dev/null) $(pgrep -f "[c]loudflared tunnel" 2>/dev/null) $(pgrep -f "[s]sh .*localhost\.run" 2>/dev/null); do
   kill -9 "$pid" 2>/dev/null && echo "  processus ${pid} forcé"
 done
 
