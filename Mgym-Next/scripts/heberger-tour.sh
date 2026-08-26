@@ -168,11 +168,23 @@ for _ in $(seq 1 12); do
   sleep 5
 done
 
-[ "$JOIGNABLE" = 1 ] || {
-  echo "Le tunnel est ouvert mais le site ne répond pas au travers après 60 s." >&2
-  echo "Journal : $JOURNAL" >&2
-  exit 1
-}
+# Un échec ICI n'est PAS une raison d'arrêter.
+#
+# Ce test vérifie l'adresse depuis CETTE machine. Or une machine peut très
+# bien ne pas résoudre un nom que le reste du monde résout : résolveur
+# d'entreprise, cache DNS négatif, DNS menteur d'un fournisseur d'accès.
+# C'est arrivé pendant la mise au point : le nom était introuvable en
+# local et parfaitement résolu par le DNS public de Google.
+#
+# Interrompre le script fermait alors un tunnel qui fonctionnait. On se
+# contente donc d'avertir : c'est à la personne devant l'écran de juger,
+# depuis son téléphone, si l'adresse répond ou non.
+if [ "$JOIGNABLE" != 1 ]; then
+  echo
+  echo "  ATTENTION — cette machine n'arrive pas à joindre l'adresse ci-dessous."
+  echo "  Cela ne veut pas dire qu'elle ne fonctionne pas : essayez-la depuis"
+  echo "  un téléphone en 4G avant de conclure. Journal : $JOURNAL"
+fi
 
 echo
 echo "  ┌──────────────────────────────────────────────────────────┐"
