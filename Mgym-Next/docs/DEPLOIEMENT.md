@@ -243,7 +243,52 @@ mesure qui dise si le back-office lui convient vraiment.
 
 ---
 
-## Étape 6 — Installer sur un VPS OVH — **vous ouvrez le compte, j'installe**
+## Étape 6 — Mettre en ligne sur Vercel — **vous créez le projet**
+
+> **Recommandation révisée.** Ce document proposait un VPS OVH. Deux
+> constats l'ont écartée : un VPS fait porter au prestataire les mises à
+> jour de sécurité, les sauvegardes et le certificat, pendant des années ;
+> et la phase de test par tunnel a montré qu'une adresse temporaire ne
+> tient pas devant une vraie cliente sur son propre réseau. Vercel donne
+> une adresse fixe, gratuite, sans aucune administration système.
+> La suite OVH reste plus bas, si vous préférez ce chemin.
+
+Le dépôt est prêt : `vercel.json` déclare le framework et la région de
+Paris (`cdg1`), et `package.json` exige Node 20.19 minimum.
+
+### Les six écrans
+
+1. **vercel.com** → *Continue with GitHub*.
+2. *Add New…* → *Project* → autoriser l'accès au dépôt `Mgym-WebSite`.
+3. **Root Directory** → cliquer *Edit* → choisir **`Mgym-Next`**.
+   Sans ce réglage, le build ne trouve pas `package.json` : le dépôt n'a
+   pas le projet à sa racine.
+4. *Environment Variables* — coller les cinq :
+
+```
+NEXT_PUBLIC_SANITY_PROJECT_ID    zqxwi6qy
+NEXT_PUBLIC_SANITY_DATASET       production
+NEXT_PUBLIC_SANITY_API_VERSION   2024-10-01
+SANITY_API_READ_TOKEN            le jeton Viewer
+SANITY_PREVIEW_SECRET            celui de votre .env.local
+```
+
+   **Ne pas ajouter `SANITY_API_WRITE_TOKEN`.** Le site n'écrit jamais.
+
+5. *Deploy*. Environ deux minutes.
+6. Noter l'adresse obtenue, en `…vercel.app`. **Elle ne changera plus.**
+
+### Ensuite
+
+- Ajouter cette adresse aux origines CORS de Sanity **n'est pas
+  nécessaire** : le site ne parle jamais à l'API depuis un navigateur.
+- Brancher le Deploy Hook (étape suivante) rend la publication
+  instantanée, au lieu de la minute de la régénération incrémentale.
+- `MGYM_HSTS=1` seulement le jour où le domaine définitif sert en HTTPS.
+
+---
+
+## Variante — installer sur un VPS OVH — **vous ouvrez le compte, j'installe**
 
 **Pas de Deploy Hook ici.** Il n'a de sens que chez une plateforme qui
 reconstruit sur appel. Sur un VPS, c'est la régénération incrémentale qui

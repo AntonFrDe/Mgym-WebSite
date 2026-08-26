@@ -2,6 +2,9 @@
   "name": "mgym",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.19"
+  },
   "scripts": {
     "build": "next build",
     "build:html:all": "npm run build:html:carousel && npm run build:html:sentier",
