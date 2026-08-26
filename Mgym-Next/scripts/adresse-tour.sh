@@ -40,6 +40,32 @@ if [ -z "$ADRESSE" ]; then
   exit 1
 fi
 
+# Deux adresses, et la distinction compte.
+#
+# L'adresse locale ne change JAMAIS et ne dépend ni d'un tunnel ni d'un
+# DNS : c'est la meilleure pour tester depuis un téléphone connecté au
+# même Wi-Fi. L'adresse publique change à chaque démarrage, mais elle
+# fonctionne de partout.
+# Une machine a souvent PLUSIEURS interfaces, sur des sous-réseaux
+# différents — ici l'Ethernet en 192.168.2.x et le Wi-Fi en 192.168.10.x.
+# N'en afficher qu'une envoie l'utilisateur sur le mauvais réseau : son
+# téléphone, connecté au Wi-Fi, ne peut pas joindre l'adresse Ethernet.
+# On les liste donc toutes, avec l'interface, et on ne garde que celles
+# qui répondent vraiment.
+echo
+PREMIERE=1
+while read -r IFACE IP; do
+  curl -sf -o /dev/null --max-time 3 "http://${IP}:${PORT}" || continue
+  if [ "$PREMIERE" = 1 ]; then
+    echo "  Depuis un appareil du même réseau — ces adresses ne changent pas :"
+    echo
+    PREMIERE=0
+  fi
+  printf "      http://%s:%s   (%s)\n" "$IP" "$PORT" "$IFACE"
+done < <(ip -4 -o addr show 2>/dev/null \
+  | awk '$2 != "lo" {split($4, a, "/"); print $2, a[1]}')
+[ "$PREMIERE" = 0 ] && echo
+echo "  Depuis n'importe où — change à chaque démarrage :"
 echo
 echo "      $ADRESSE"
 echo
