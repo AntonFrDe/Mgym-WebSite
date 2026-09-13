@@ -123,8 +123,11 @@ vérifié par en-tête de réponse.
 
 ### Ce qui reste sur cette étape — **vous**
 
-- inviter la cliente : sanity.io/manage → Members → rôle **`editor`**
-  (jamais administrator) ;
+- inviter la cliente : sanity.io/manage → Members. **Le forfait gratuit
+  n'offre que `Administrator` et `Viewer`** — `editor` exige le forfait
+  Growth. Pour qu'elle puisse modifier son site, il faut donc
+  `Administrator`, et compenser par des sauvegardes régulières du dataset.
+  Voir `SECURITY.md`, point 9 ;
 - activer la **double authentification** sur votre compte ;
 - **ouvrir le Studio et vérifier** que les 21 documents sont là et que les
   photos s'affichent — la seule chose que je ne peux pas voir d'ici ;

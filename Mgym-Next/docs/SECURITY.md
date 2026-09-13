@@ -257,6 +257,27 @@ gain nul.
 
 ## 9. Contrôle d'accès — ⚠️ à tester
 
+> ⚠️ **Ce point est démenti par le forfait gratuit de Sanity.** Celui-ci
+> n'offre que **deux rôles : Administrator et Viewer**. Le rôle `editor`
+> n'existe qu'à partir du forfait Growth, à 15 $ par siège et par mois.
+>
+> Sur le forfait gratuit, il faut donc choisir :
+>
+> | | ce qu'elle peut faire | ce qu'elle peut casser |
+> |---|---|---|
+> | **Viewer** | lire | rien — mais elle ne peut pas modifier son site |
+> | **Administrator** | tout modifier et publier | supprimer le dataset, créer et révoquer des jetons, retirer des membres, supprimer le projet |
+>
+> Il n'y a pas d'intermédiaire. Pour qu'elle modifie son contenu, elle doit
+> être **Administrator**.
+>
+> **La parade est la sauvegarde, pas le rôle.** Une suppression accidentelle
+> se rattrape avec un export du dataset ; sans export, elle est définitive.
+> Voir `ROLLBACK.md` et la section « Une fois en ligne » de `DEPLOIEMENT.md`.
+>
+> Ce qui suit décrit le comportement du rôle `editor`, applicable seulement
+> si le projet passe un jour sur le forfait Growth.
+
 La cliente sera invitée avec le rôle **`editor`** : elle peut modifier et
 publier, mais ne peut ni gérer le dataset, ni voir les tokens, ni inviter
 d'autres membres.
