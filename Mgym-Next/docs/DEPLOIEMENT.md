@@ -29,10 +29,11 @@
 3. Fusionner REFONTE-3 dans main              ✅ 39 commits
 4. Test sur la tour, tunnel Cloudflare        ✅ opérationnel
 5. La cliente teste et valide                 VOUS + la cliente
-6. Installer sur un VPS OVH                   vous ouvrez le compte, j'installe
-7. Vérifier en production                     MOI
-8. Repointer le DNS                           VOUS
-9. Remettre le site à la cliente              partagé
+6. Mettre en ligne sur Netlify                ✅ frolicking-babka-da04a6
+7. Brancher le Build hook                     vous créez, je branche
+8. Vérifier en production                     MOI
+9. Repointer le DNS                           VOUS
+10. Remettre le site à la cliente             partagé
 ```
 
 ---
@@ -243,48 +244,87 @@ mesure qui dise si le back-office lui convient vraiment.
 
 ---
 
-## Étape 6 — Mettre en ligne sur Vercel — **vous créez le projet**
+## Étape 6 — Mettre en ligne — ✅ fait le 13 septembre 2026
 
-> **Recommandation révisée.** Ce document proposait un VPS OVH. Deux
-> constats l'ont écartée : un VPS fait porter au prestataire les mises à
-> jour de sécurité, les sauvegardes et le certificat, pendant des années ;
-> et la phase de test par tunnel a montré qu'une adresse temporaire ne
-> tient pas devant une vraie cliente sur son propre réseau. Vercel donne
-> une adresse fixe, gratuite, sans aucune administration système.
-> La suite OVH reste plus bas, si vous préférez ce chemin.
-
-Le dépôt est prêt : `vercel.json` déclare le framework et la région de
-Paris (`cdg1`), et `package.json` exige Node 20.19 minimum.
-
-### Les six écrans
-
-1. **vercel.com** → *Continue with GitHub*.
-2. *Add New…* → *Project* → autoriser l'accès au dépôt `Mgym-WebSite`.
-3. **Root Directory** → cliquer *Edit* → choisir **`Mgym-Next`**.
-   Sans ce réglage, le build ne trouve pas `package.json` : le dépôt n'a
-   pas le projet à sa racine.
-4. *Environment Variables* — coller les cinq :
+Sur **Netlify**, pas Vercel : le plan gratuit de Vercel interdit l'usage
+commercial, et ses conditions citent « être payé pour construire le site ».
+Netlify l'autorise explicitement.
 
 ```
-NEXT_PUBLIC_SANITY_PROJECT_ID    zqxwi6qy
-NEXT_PUBLIC_SANITY_DATASET       production
-NEXT_PUBLIC_SANITY_API_VERSION   2024-10-01
-SANITY_API_READ_TOKEN            le jeton Viewer
-SANITY_PREVIEW_SECRET            celui de votre .env.local
+https://frolicking-babka-da04a6.netlify.app
 ```
 
-   **Ne pas ajouter `SANITY_API_WRITE_TOKEN`.** Le site n'écrit jamais.
+`netlify.toml` porte tout ce qu'il faut : `base = "Mgym-Next"` (le dépôt n'a
+pas le projet à sa racine), l'adaptateur Next — sans lequel aucune route
+serveur n'est déployée — et les **trois identifiants publics de Sanity**.
 
-5. *Deploy*. Environ deux minutes.
-6. Noter l'adresse obtenue, en `…vercel.app`. **Elle ne changera plus.**
+> Ces trois-là sont dans le fichier et non dans l'interface pour une raison
+> apprise à nos dépens : une variable saisie dans l'interface peut avoir une
+> portée qui exclut le build. Le site se construisait alors sans CMS et
+> servait son contenu de secours — sans la moindre erreur, et donc sans que
+> rien ne le signale. Les deux vrais secrets restent dans l'interface : le
+> dépôt est public.
 
-### Ensuite
+Vérifié en production : 34 images venant du CMS, 0 brouillon dans le HTML,
+`/api/preview` en 401 sans secret, redirection ouverte bloquée, les quatre
+en-têtes de sécurité présents.
 
-- Ajouter cette adresse aux origines CORS de Sanity **n'est pas
-  nécessaire** : le site ne parle jamais à l'API depuis un navigateur.
-- Brancher le Deploy Hook (étape suivante) rend la publication
-  instantanée, au lieu de la minute de la régénération incrémentale.
-- `MGYM_HSTS=1` seulement le jour où le domaine définitif sert en HTTPS.
+---
+
+## Étape 7 — Publication instantanée : le Build hook — **vous créez, je branche**
+
+Sans lui, une modification publiée met jusqu'à une minute à apparaître, et
+demande un second rafraîchissement — c'est la régénération incrémentale qui
+travaille. Avec lui, Sanity prévient Netlify, le site se reconstruit, et tout
+le monde voit la nouvelle version.
+
+### Côté Netlify — vous
+
+*Site configuration → Build & deploy → Build hooks → Add build hook*
+
+| Champ | Valeur |
+|---|---|
+| Build hook name | `Publication Sanity` |
+| Branch to build | `main` |
+
+Vous obtenez une URL de la forme
+`https://api.netlify.com/build_hooks/a1b2c3…`.
+
+> **Cette URL est un secret.** Quiconque la possède peut déclencher des
+> reconstructions à volonté et épuiser votre quota. Elle ne se commite pas.
+
+### Côté Sanity — moi, ou vous
+
+sanity.io/manage → API → Webhooks → *Create webhook*
+
+| Champ | Valeur |
+|---|---|
+| Name | `Netlify` |
+| URL | celle du Build hook |
+| Dataset | `production` |
+| Trigger on | Create, Update, Delete |
+| Filter | `!(_id in path("drafts.**"))` |
+| HTTP method | POST |
+
+> ⚠️ **Le filtre n'est pas facultatif.** Sanity enregistre les brouillons en
+> continu pendant la frappe, chacun étant un document `drafts.*`. Sans filtre,
+> chaque sauvegarde automatique déclencherait une reconstruction : une séance
+> de rédaction en produit des dizaines, et le forfait gratuit de Netlify
+> plafonne à 300 minutes de build par mois — le site se reconstruit en 45
+> secondes, soit environ 400 builds mensuels avant de tomber en panne sèche.
+>
+> Le filtre ne laisse passer que les documents publiés, donc exactement ce que
+> le bouton « Publier » produit.
+
+**Aucune route de revalidation n'a été écrite, et c'est délibéré.** Le Build
+hook est une URL secrète que l'hébergeur protège lui-même : rien à signer,
+rien à limiter en débit, aucun point d'entrée public de plus à surveiller.
+
+### Vérifier
+
+Modifier un texte dans le Studio, publier, et chronométrer. Attendu : une
+reconstruction visible dans *Deploys* sur Netlify dans les secondes qui
+suivent, et le site à jour une minute plus tard.
 
 ---
 
@@ -308,7 +348,7 @@ Let's Encrypt, et `MGYM_HSTS=1` une fois HTTPS vérifié.
 
 ---
 
-## Étape 7 — Vérifier en production — **moi**
+## Étape 8 — Vérifier en production — **moi**
 
 Dès que l'URL existe :
 
@@ -338,7 +378,7 @@ Puis :
 
 ---
 
-## Étape 8 — Repointer le DNS — **vous**
+## Étape 9 — Repointer le DNS — **vous**
 
 **En dernier**, une fois que tout fonctionne sur l'URL de l'hébergeur.
 
@@ -352,7 +392,7 @@ Chez Hostinger : remplacer les enregistrements A / CNAME de `mgym.fr` et
 
 ---
 
-## Étape 9 — Remettre le site à la cliente — **partagé**
+## Étape 10 — Remettre le site à la cliente — **partagé**
 
 **Moi** : `docs/GUIDE-CLIENTE.md` relu et à jour, copie hors-ligne
 régénérée (`npm run livraison`), sauvegarde initiale du dataset.
