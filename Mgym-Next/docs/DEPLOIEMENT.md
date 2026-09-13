@@ -377,7 +377,7 @@ Puis :
   DNS et négocier le TLS avant de commencer à télécharger l'image la plus
   grande de la page. Je corrigerai si la mesure le confirme.
 - **une sauvegarde du dataset** :
-  `npx sanity dataset export production sauvegarde-initiale.tar.gz`
+  `npm run sauvegarde`
 
 ---
 
@@ -481,7 +481,9 @@ prévisualisation, en-têtes, blog et référencement.
 Ces points ne font pas partie de la mise en service : ils commencent après.
 
 - **Sauvegarder le dataset** avant chaque intervention importante :
-  `npx sanity dataset export production sauvegarde-AAAA-MM-JJ.tar.gz`.
+  `npm run sauvegarde`. La commande date l'archive, l'écrit HORS du dépôt
+  (il est public et elle pèse 6 Mo), puis la rouvre pour compter ce qu'elle
+  contient — une sauvegarde que personne n'a ouverte n'est pas une sauvegarde.
   C'est la seule copie qui ne dépende pas de Sanity.
 - **La rétention d'historique dépend du forfait.** Sur le plan gratuit elle
   est courte : une restauration se joue en jours, pas en mois. Une

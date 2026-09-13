@@ -133,7 +133,7 @@ L'historique protège d'une erreur de saisie. Il ne protège pas d'une perte
 du projet Sanity. Pour cela, un export complet :
 
 ```bash
-npx sanity dataset export production sauvegarde-$(date +%F).tar.gz
+npm run sauvegarde
 ```
 
 Il produit une archive contenant tous les documents **et** toutes les

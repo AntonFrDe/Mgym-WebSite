@@ -22,6 +22,7 @@
     "migrer:ecrire": "node scripts/migrer.mjs --ecrire",
     "mobile": "bash scripts/apercu-mobile.sh",
     "prebuild": "node scripts/vider-cache-donnees.mjs",
+    "sauvegarde": "bash scripts/sauvegarder.sh",
     "schemas:check": "node scripts/valider-schemas.mjs",
     "start": "next start",
     "start:horsligne": "node serve.js",

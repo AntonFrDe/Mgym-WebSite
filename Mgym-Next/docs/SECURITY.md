@@ -78,7 +78,7 @@ deux étapes.
 ```
 1. Révoquer TOUS les tokens du projet — immédiatement, avant tout diagnostic
 2. sanity.io/manage → Members : retirer tout compte inconnu
-3. Exporter le dataset : npx sanity dataset export production
+3. Exporter le dataset : npm run sauvegarde
 4. Comparer avec la dernière sauvegarde connue
 5. Restaurer les documents altérés (voir ROLLBACK.md)
 6. Créer de nouveaux tokens, redéployer
@@ -270,6 +270,16 @@ gain nul.
 >
 > Il n'y a pas d'intermédiaire. Pour qu'elle modifie son contenu, elle doit
 > être **Administrator**.
+>
+> **Décision retenue : un compte dédié à l'association**, et non le compte
+> personnel du prestataire partagé. Inscription Sanity gratuite avec une
+> adresse de l'association, puis invitation en Administrator sur ce projet.
+> Le forfait gratuit permet 20 sièges.
+>
+> Ce que cela préserve : l'historique montre qui a modifié quoi — et
+> `ROLLBACK.md` en dépend pour savoir quoi restaurer ; un changement de mot
+> de passe de son côté n'enferme personne dehors ; les autres projets Sanity
+> du prestataire restent hors de portée ; chacun a sa double authentification.
 >
 > **La parade est la sauvegarde, pas le rôle.** Une suppression accidentelle
 > se rattrape avec un export du dataset ; sans export, elle est définitive.
