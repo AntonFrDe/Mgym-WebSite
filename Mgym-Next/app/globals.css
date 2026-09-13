@@ -986,6 +986,18 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
 }
 
 /* ── RESPONSIVE ─────────────────────────────────────────────── */
+/* ── NAVIGATION : bascule vers le menu hamburger ──────────────
+   La barre complète tient jusqu'à ~1000 px : sept liens, le bouton
+   CONTACT et le logo. En dessous, elle débordait — « À PROPOS »
+   repassait sur deux lignes PAR-DESSUS le logo, et le bouton CONTACT
+   sortait de l'écran.
+   Le hamburger n'arrivait qu'à 700 px : entre 700 et 1000, la nav
+   était cassée. Constaté sur le site en ligne à 820 px. */
+@media (max-width: 1024px) {
+  .ham { display:flex; }
+  .nav-links { display:none; }
+}
+
 @media (max-width: 1100px) {
   #nav { padding:1rem 2rem; }
   .section-pad { padding:5rem 2.5rem; }
@@ -1055,8 +1067,6 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
      redimensionnée par le CDN de Sanity. */
   .hero-bg[data-repli="1"] { background-image: url('/fond1-mobile.avif') !important; }
   .hero-h1 { font-size:clamp(3.8rem,15vw,6rem); }
-  .ham { display:flex; }
-  .nav-links { display:none; }
   #nav { padding:.9rem 1.25rem; }
   .section-pad { padding:4rem 1.5rem; }
   .hero-text { padding:6rem 1.5rem 4rem; }
