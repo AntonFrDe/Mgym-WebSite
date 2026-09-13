@@ -453,13 +453,24 @@ body.en-preview { padding-top: 2.6rem; }
   display:flex; align-items:stretch;
   gap:1.5rem;                     /* lu par le JS pour calculer un « pas » */
   overflow-x:auto; overflow-y:hidden;
-  /* 'proximity' et non 'mandatory' : avec mandatory, l'alignement forcé
-     se bat avec le défilement pixel par pixel de la molette et donne une
-     sensation d'à-coups. Ici la piste glisse librement à la molette et
-     s'aligne quand même sur une carte en fin de geste et via les flèches. */
-  scroll-snap-type: x proximity;
+  /* Largeur d'une carte, déclarée ICI et pas sur .carte-act : la marge
+     latérale ci-dessous en dépend, et deux valeurs séparées finissent
+     toujours par diverger. */
+  --carte-l: 320px;
+
+  scroll-snap-type: x mandatory;
   overscroll-behavior-x: contain; /* pas de navigation « retour » par geste */
-  padding:1rem .25rem 2rem;       /* laisse respirer les ombres des cartes */
+
+  /* La marge latérale vaut la moitié de l'espace libre autour d'une carte
+     centrée. Sans elle, la PREMIÈRE et la DERNIÈRE carte ne peuvent pas
+     se centrer : il n'y a rien à faire défiler au-delà du bord, et elles
+     restent collées à gauche ou à droite.
+     `max()` la protège des écrans plus étroits qu'une carte, où le calcul
+     deviendrait négatif — une marge négative est ignorée, et on
+     retomberait silencieusement sur zéro.
+     Elle s'annule dans le calcul du JS : centrer la carte N revient à
+     `scrollLeft = N x pas`, ce que allerA() fait déjà. */
+  padding:1rem max(.25rem, calc(50% - var(--carte-l) / 2)) 2rem;
   scrollbar-width:none;           /* Firefox */
 }
 .carrousel-piste::-webkit-scrollbar { display:none; }
@@ -476,8 +487,11 @@ body.en-preview { padding-top: 2.6rem; }
 .carrousel.est-a-la-fin  .carrousel-scene::after  { opacity:0; }
 
 .carte-act {
-  flex:0 0 auto; width:320px;
-  scroll-snap-align:start;
+  flex:0 0 auto; width:var(--carte-l);
+  /* 'center' et non 'start' : la carte active se place au milieu, ses
+     voisines dépassent des deux côtés — on voit qu'il y a un avant et
+     un après. */
+  scroll-snap-align:center;
   display:flex; flex-direction:column;
   background:var(--blanc); border-radius:1.5rem; overflow:hidden;
   box-shadow:0 10px 30px rgba(var(--prune-rgb),.10);
@@ -1023,7 +1037,11 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
   .etape-media { width:90px; height:90px; }
   /* Carrousel : cartes plus étroites que l'écran pour que la suivante
      dépasse toujours du bord droit (l'affordance principale). */
-  .carte-act { width:min(78vw, 300px); }
+  /* Carte rétrécie et écart resserré sur téléphone : sinon la carte
+     centrée occupe presque toute la piste (300 px dans 342) et ses
+     voisines ne dépassent que de 5 px — on ne voit pas qu'il y en a
+     d'autres, ce qui est précisément ce que le centrage doit montrer. */
+  .carrousel-piste { --carte-l: min(64vw, 250px); gap:1rem; }
   .carte-act-media { height:170px; }
   .carrousel-piste { gap:1rem; }
   .carrousel-commandes { gap:1rem; }
