@@ -1,0 +1,7 @@
+# netlify.toml — le projet n'est pas à la racine du dépôt.
+#
+# Sans `base`, Netlify cherche package.json ici et échoue immédiatement.
+# La version de Node vient de Mgym-Next/.nvmrc, que Netlify lit.
+[build]
+  base    = "Mgym-Next"
+  command = "npm run build"
