@@ -20,6 +20,7 @@
     "livraison:sentier": "npm run export:sentier && node build-standalone.js --variant=sentier --dossier",
     "migrer": "node scripts/migrer.mjs",
     "migrer:ecrire": "node scripts/migrer.mjs --ecrire",
+    "mobile": "bash scripts/apercu-mobile.sh",
     "prebuild": "node scripts/vider-cache-donnees.mjs",
     "schemas:check": "node scripts/valider-schemas.mjs",
     "start": "next start",
