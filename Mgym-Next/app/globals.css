@@ -1058,6 +1058,14 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
   .blog-grille { grid-template-columns: 1fr; gap: 1.5rem; }
   .blog-article-image { height: 220px; }
   .contact-cards { grid-template-columns:1fr; }
+  /* Les compteurs du coach étaient la cause du débordement horizontal de
+     toute la page : rangée flex de 2,5rem d'écart et 2rem de marge
+     intérieure, que rien ne faisait se replier. Mesuré à 490 px dans un
+     écran de 390. Le document entier passait à 546 px, et le bouton
+     hamburger se retrouvait à x=486 — hors de l'écran, donc impossible à
+     toucher. C'est ce qui empêchait le menu de s'ouvrir sur téléphone. */
+  .coach-stats { flex-wrap:wrap; justify-content:center; gap:1.25rem; padding:1.25rem 1rem; }
+  .coach-stat-sep { display:none; }
   .cert-grid { grid-template-columns:1fr; }
   .bespoke-types { grid-template-columns:1fr; }
   /* Version allégée du fond d'accueil sur téléphone. L'image de bureau
