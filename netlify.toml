@@ -1,7 +1,18 @@
 # netlify.toml — le projet n'est pas à la racine du dépôt.
 #
-# Sans `base`, Netlify cherche package.json ici et échoue immédiatement.
-# La version de Node vient de Mgym-Next/.nvmrc, que Netlify lit.
+# Sans `base`, Netlify cherche package.json ici et ne trouve rien : le
+# premier déploiement s'est terminé sur « No build steps found » puis a
+# publié le dépôt brut, en annonçant « Site is live ».
+#
+# `publish` et le greffon sont déclarés EXPLICITEMENT. Netlify détecte
+# bien Next.js, mais sans ces deux lignes il a publié le dossier de base
+# tel quel : « 1 new file(s), 0 new function(s) ». Zéro fonction signifie
+# que /api/preview et /api/preview-exit n'existent pas en production —
+# donc pas de prévisualisation des brouillons pour la cliente.
 [build]
   base    = "Mgym-Next"
   command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
