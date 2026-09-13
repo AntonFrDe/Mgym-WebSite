@@ -16,3 +16,23 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# ── Identifiants PUBLICS de Sanity ──────────────────────────────
+#
+# Ils ne sont pas secrets : ils figurent dans l'URL de l'API, que
+# n'importe quel visiteur peut lire. Le préfixe NEXT_PUBLIC_ le dit
+# d'ailleurs explicitement.
+#
+# Ils sont ici plutôt que dans l'interface de Netlify pour deux raisons.
+# D'abord, une variable saisie dans l'interface peut avoir une portée qui
+# exclut le build — et c'est arrivé : le site se construisait sans CMS et
+# servait son contenu de secours, sans la moindre erreur. Ensuite, un
+# dépôt cloné se construit ici correctement du premier coup.
+#
+# Les deux VRAIS secrets — SANITY_API_READ_TOKEN et SANITY_PREVIEW_SECRET
+# — restent dans l'interface de l'hébergeur. Ils ne doivent jamais être
+# commités, et le dépôt est public.
+[build.environment]
+  NEXT_PUBLIC_SANITY_PROJECT_ID  = "zqxwi6qy"
+  NEXT_PUBLIC_SANITY_DATASET     = "production"
+  NEXT_PUBLIC_SANITY_API_VERSION = "2024-10-01"
