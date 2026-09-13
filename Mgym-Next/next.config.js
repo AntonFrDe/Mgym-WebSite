@@ -43,6 +43,24 @@ const enExport = process.env.MGYM_EXPORT === '1'
 //   MGYM_HSTS=1
 const hstsActif = process.env.MGYM_HSTS === '1'
 
+// ── 'unsafe-eval' : en DÉVELOPPEMENT uniquement ─────────────────
+//
+// `next dev` compile les modules à la volée et les évalue avec eval()
+// pour le rechargement à chaud. Sans cette autorisation, le navigateur
+// refuse TOUT le JavaScript de la page :
+//
+//   EvalError: Evaluating a string as JavaScript violates the following
+//   Content Security Policy directive... 'unsafe-eval' is not allowed
+//
+// React ne s'hydrate alors jamais. Le menu ne s'ouvre pas, les sections
+// restent invisibles, le carrousel ne défile plus — et rien ne l'indique,
+// sinon une ligne dans la console. Le site construit, lui, fonctionne :
+// le défaut n'existe QU'EN développement, ce qui le rend trompeur.
+//
+// La production ne reçoit jamais cette autorisation : `next build` fixe
+// NODE_ENV à 'production'.
+const enDeveloppement = process.env.NODE_ENV !== 'production'
+
 // ── En-têtes de sécurité ────────────────────────────────────────
 // Chacun ferme une porte précise. Ils ne s'appliquent qu'au site hébergé :
 // la copie hors-ligne n'a pas de serveur pour les émettre.
@@ -85,7 +103,7 @@ const enTetes = [
       // chaque requête et ferait perdre la mise en cache CDN de tout le
       // site. Compromis assumé et documenté dans SECURITY.md : ce site
       // n'a ni saisie utilisateur, ni authentification, ni script tiers.
-      "script-src 'self' 'unsafe-inline'",
+      `script-src 'self' 'unsafe-inline'${enDeveloppement ? " 'unsafe-eval'" : ''}`,
       // Aucune requête sortante en dehors du CMS.
       "connect-src 'self' https://*.api.sanity.io https://*.apicdn.sanity.io",
       // Personne ne peut encadrer le site, et le site n'encadre personne.
