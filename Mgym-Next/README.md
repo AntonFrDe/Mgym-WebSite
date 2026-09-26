@@ -17,6 +17,7 @@ lisibilité prime sur l'effet technique.
 | [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md) | mettre en production, dans l'ordre |
 | [docs/AUDIT-BACKEND.md](docs/AUDIT-BACKEND.md) | l'état des lieux d'origine |
 | [CLAUDE.md](CLAUDE.md) | conventions du code et pièges connus |
+| [PASSATION.md](PASSATION.md) | reprendre le projet : état, prochaine manipulation, pièges |
 
 ---
 
