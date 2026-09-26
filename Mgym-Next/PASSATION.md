@@ -65,40 +65,48 @@ sauvegarde du dataset vérifiée.
 
 ---
 
-## La prochaine manipulation : `mgym.fr`
+## La prochaine manipulation : `mgym.fr` — décidé : zone DNS chez OVH
 
-Deux faits établis par mesure, qui contredisent ce qu'on croyait :
+Le site reste chez Netlify. On rapatrie la **zone DNS** chez OVH, où le
+domaine est déjà acheté (registrar OVH, expiration 29/06/2027). Ainsi,
+Hostinger pourra être résilié sans rien casser : tant que la zone y vit,
+résilier Hostinger coupe à la fois le site ET la messagerie.
 
-1. **La zone DNS n'est pas chez OVH.** Les serveurs de noms sont
-   `ns1.dns-parking.com` / `ns2.dns-parking.com`, ceux de **Hostinger**.
-   Écrire dans la zone OVH n'a aucun effet. Le jeton `ovhcloud` créé
-   pendant le projet ne sert à rien ici.
-2. **L'association a des adresses e-mail** : `MX → mx3.mail.ovh.net`,
-   `mx4.mail.ovh.net`. Elles vivent dans la zone Hostinger.
-   **Ne jamais changer les serveurs de noms** sans recréer les MX, sous
-   peine de couper sa messagerie.
+### Inventaire de la zone Hostinger (mesuré le 26/09/2026)
 
-### Les quatre étapes
+| Nom | Type | Valeur | Sort |
+|---|---|---|---|
+| `@` | A | `193.58.105.88`, `147.79.119.52` (tournent) | → `75.2.60.5` |
+| `@` | AAAA | 2 adresses `2a02:4780:…` | **supprimées** (Netlify n'en veut pas) |
+| `www` | CNAME | `www.mgym.fr.cdn.hstgr.net` | → `frolicking-babka-da04a6.netlify.app.` |
+| `@` | MX | `1 mx4.mail.ovh.net`, `10 mx3.mail.ovh.net` | **recopiés à l'identique** |
+| `@` | TXT | `"1\|www.mgym.fr"` | supprimé (marqueur du CDN Hostinger) |
 
-1. **Netlify** — *Domain management → Add a domain* → `mgym.fr`.
-   Affichera « awaiting DNS ». Rien ne bouge encore.
-2. **Hostinger** — hPanel → Zone DNS. **Remplacer**, ne pas ajouter :
+Rien d'autre : pas de joker, pas de SPF, DKIM, DMARC, CAA ni `mail.`/`ftp.`
+(sondés un par un — un transfert de zone n'est pas possible).
 
-   | Type | Nom | Ancienne valeur | Nouvelle |
-   |---|---|---|---|
-   | `A` | `@` | `147.79.116.92`, `147.79.119.135` | `75.2.60.5` |
-   | `CNAME` | `www` | `www.mgym.fr.cdn.hstgr.net` | `frolicking-babka-da04a6.netlify.app` |
+### Les cinq étapes, dans cet ordre
 
-   Ne toucher à rien d'autre. Surtout pas aux `MX` ni aux `NS`.
-   *(`75.2.60.5` = `apex-loadbalancer.netlify.com`, vérifié.)*
-3. **Attendre** le certificat Let's Encrypt, émis automatiquement.
-4. **Alors seulement** poser `MGYM_HSTS=1` dans Netlify et redéployer.
+1. **Netlify** — *Domain management → Add a domain* → `mgym.fr` (principal),
+   `www.mgym.fr` s'ajoute avec. Refuser « Netlify DNS ». État : « awaiting DNS ».
+2. **OVH** — *Web Cloud → Noms de domaine → mgym.fr → Zone DNS*. Si aucune
+   zone n'existe, la créer (sans « enregistrements minimaux »). Puis faire
+   correspondre la zone EXACTEMENT au tableau ci-dessus, colonne « Sort » :
+   supprimer les A/AAAA/CNAME/TXT par défaut d'OVH, vérifier les deux MX
+   (priorités 1 et 10). Rien ne change encore pour personne.
+3. **Vérifier la zone OVH avant de basculer** : je l'interroge directement
+   sur les serveurs OVH. On ne passe à 4 que si tout correspond.
+4. **OVH** — onglet *Serveurs DNS* → *Modifier* → mettre les serveurs OVH
+   affichés dans l'onglet Zone DNS (`dnsXX.ovh.net` / `nsXX.ovh.net`).
+   Propagation jusqu'à 24–48 h ; pendant ce temps, les deux zones répondent
+   avec les MES MX : la messagerie ne s'interrompt pas, le site alterne
+   entre l'ancien et le nouveau.
+5. **Attendre** le certificat Let's Encrypt de Netlify, **puis seulement**
+   poser `MGYM_HSTS=1` dans Netlify et redéployer.
 
-> ⚠️ Cette bascule **coupe le site actuel de la cliente**. Son accord
-> d'abord. Abaisser le TTL du `A` à 300 s une heure avant réduit la
-> coupure à quelques minutes.
-
----
+> ⚠️ L'étape 4 remplace le site actuel de la cliente. Son accord d'abord.
+> Et **ne pas résilier Hostinger** avant que `mgym.fr NS` réponde OVH
+> partout.
 
 ## Ce qu'il reste ensuite
 
