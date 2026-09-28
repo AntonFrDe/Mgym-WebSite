@@ -121,6 +121,25 @@ export const activite = defineType({
     }),
 
     defineField({
+      name: 'rubrique',
+      title: 'Où l\'afficher',
+      type: 'string',
+      description:
+        'Un cours régulier va dans le carrousel des activités. Les ateliers ' +
+        'thématiques et les prestations sur mesure ont chacun leur onglet ' +
+        'dans la section « Plus d\'activités ».',
+      options: {
+        list: [
+          { title: 'Cours régulier (carrousel des activités)', value: 'cours' },
+          { title: 'Ateliers thématiques (onglet « Plus d\'activités »)', value: 'ateliers' },
+          { title: 'Prestations sur mesure (onglet « Plus d\'activités »)', value: 'surMesure' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'cours',
+    }),
+
+    defineField({
       name: 'lienInterne',
       title: 'Lien « en savoir plus »',
       type: 'string',
@@ -131,9 +150,12 @@ export const activite = defineType({
         list: [
           { title: '(aucun)', value: '' },
           { title: 'Le planning', value: '#planning' },
+          { title: 'Les stages & événements', value: '#evenements' },
+          { title: 'Les ateliers thématiques', value: '#ateliers' },
           { title: 'Les prestations sur mesure', value: '#bespoke' },
           { title: 'Les tarifs', value: '#tarifs' },
           { title: 'Nous contacter', value: '#contact' },
+          { title: 'La marche nordique & le plein air', value: '#outdoor' },
         ],
       },
     }),

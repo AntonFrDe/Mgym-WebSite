@@ -9,6 +9,7 @@ import TexteRiche from './TexteRiche'
 
 export default function Coach({ site }) {
   const stats = site.coachStatistiques ?? []
+  const avecAvis = (site.temoignages ?? []).some((t) => t?.texte?.trim()) || Boolean(site.avisLienGoogle)
 
   return (
     <section id="coach" className="section-pad">
@@ -41,6 +42,17 @@ export default function Coach({ site }) {
                   </Fragment>
                 ))}
               </div>
+            )}
+
+            {/* Le pont vers les témoignages, juste sous les chiffres : après
+                « qui est la coach », la question suivante est « qu'en
+                pensent ceux qui l'ont suivie ? ». */}
+            {avecAvis && (
+              <a href="#temoignages" className="coach-avis">
+                <span className="etoiles" aria-hidden="true">★★★★★</span>
+                Lire les avis{site.avisNote ? ` · ${site.avisNote}/5` : ''}
+                <span aria-hidden="true">↓</span>
+              </a>
             )}
 
             <TexteRiche valeur={site.coachTexte} className="lead coach-texte" />

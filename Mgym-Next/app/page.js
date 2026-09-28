@@ -11,6 +11,9 @@
 
 import { previewActif } from '../lib/preview'
 import { getContenu } from '../lib/contenu'
+import { getArticles } from '../lib/sanity/queries/index.js'
+import { repartirActivites } from '../lib/contenu/rubriques.js'
+import { periodeLisible } from '../lib/evenements/format.js'
 
 import Hero               from '../components/Hero'
 import Manifesto          from '../components/Manifesto'
@@ -19,11 +22,13 @@ import About              from '../components/About'
 // `MGYM_VARIANT=sentier` permet de générer la version verticale.
 import CarrouselActivites from '../components/CarrouselActivites'
 import SentierActivites   from '../components/SentierActivites'
-import Outdoor            from '../components/Outdoor'
-import Bespoke            from '../components/Bespoke'
+import PlusActivites      from '../components/PlusActivites'
 import Coach              from '../components/Coach'
+import Temoignages        from '../components/Temoignages'
 import Pricing            from '../components/Pricing'
 import Planning           from '../components/Planning'
+import Evenements, { lienEvenement } from '../components/Evenements'
+import BlogApercu         from '../components/BlogApercu'
 import Reseaux            from '../components/Reseaux'
 import Contact            from '../components/Contact'
 import Footer             from '../components/Footer'
@@ -44,7 +49,27 @@ const ActivitesSection = isSentier ? SentierActivites : CarrouselActivites
 
 export default async function Home() {
   const enPreview = await previewActif()
-  const { site, infos, seo, activites } = await getContenu(enPreview)
+  const { site, infos, seo, activites, evenements } = await getContenu(enPreview)
+  // La copie hors-ligne n'a pas de blog (voir export-statique.mjs) : pas
+  // d'aperçu qui mènerait à des pages absentes.
+  const articles = process.env.MGYM_EXPORT === '1' ? [] : await getArticles(enPreview)
+  // Les cours vont dans le carrousel ; les deux offres (ateliers,
+  // prestations sur mesure) dans les onglets « Plus d'activités ».
+  const { cours, ateliers } = repartirActivites(activites)
+  // Les prochains ateliers : les événements rattachés à l'activité
+  // « Ateliers thématiques » dans le back-office. L'onglet les affiche
+  // directement, au lieu d'un simple « voir les dates ».
+  const prochainsAteliers = ateliers
+    ? evenements
+        .filter((ev) => ev.activite?._id === ateliers._id)
+        .slice(0, 3)
+        .map((ev) => ({
+          _id: ev._id,
+          titre: ev.titre,
+          quand: periodeLisible(ev.dateDebut, ev.dateFin),
+          href: lienEvenement(ev, seo.urlCanonique),
+        }))
+    : []
 
   return (
     <main>
@@ -55,14 +80,14 @@ export default async function Home() {
       <Hero site={site} />
       <Manifesto site={site} />
       <About site={site} />
-      <ActivitesSection site={site} activites={activites} />
-      {/* Outdoor prolonge la section Activités (même fond rose) : l'alternance
-          crème/rose reprend normalement à partir de Bespoke. */}
-      <Outdoor site={site} />
-      <Bespoke site={site} infos={infos} />
+      <ActivitesSection site={site} activites={cours} />
+      <PlusActivites site={site} infos={infos} ateliers={ateliers} prochainsAteliers={prochainsAteliers} />
       <Coach site={site} />
+      <Temoignages site={site} />
       <Pricing site={site} infos={infos} />
       <Planning site={site} enPreview={enPreview} />
+      <Evenements site={site} evenements={evenements} urlSite={seo.urlCanonique} />
+      <BlogApercu articles={articles} />
       <Reseaux site={site} infos={infos} />
       <Contact site={site} infos={infos} />
       <Footer site={site} infos={infos} />

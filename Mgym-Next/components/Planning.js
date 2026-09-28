@@ -36,6 +36,14 @@ export default async function Planning({ site, enPreview = false }) {
 
   const grille = construireGrille(creneaux)
 
+  // La même grille, relue jour par jour pour la version téléphone. Les
+  // lignes de la grille sont déjà dans l'ordre Matin → Midi → Soir, et
+  // chaque case triée par heure : mises bout à bout, elles donnent la
+  // journée dans l'ordre chronologique.
+  const parJour = JOURS_AFFICHES
+    .map((jour) => ({ jour, cours: grille.flatMap((ligne) => ligne.cours[jour.valeur] ?? []) }))
+    .filter(({ cours }) => cours.length > 0)
+
   // Les séances des prochaines semaines qui ne se déroulent PAS comme
   // d'habitude. Le moteur rend tout ; on ne garde que l'inhabituel.
   const changements = getPlanningForRange(creneaux, exceptions, fermetures, du, au)
@@ -54,18 +62,22 @@ export default async function Planning({ site, enPreview = false }) {
           <TexteRiche valeur={site.planningChapo} className="lead" />
         </div>
 
-        {/* Le tableau ne se replie pas en colonne unique : un planning se lit
-            en comparant les jours entre eux. Sur petit écran il défile donc
-            horizontalement dans son propre conteneur, sans jamais pousser la
-            page entière vers la droite.
-            Le titre de saison et l'indice de défilement sont volontairement
-            HORS du conteneur qui défile : sinon ils disparaissent dès que
-            l'on fait glisser le tableau. */}
+        {/* DEUX AFFICHAGES DES MÊMES CRÉNEAUX, le CSS choisit selon la largeur.
+
+            Sur ordinateur, un TABLEAU : un planning se lit en comparant les
+            jours entre eux, côte à côte.
+
+            Sur téléphone, une LISTE jour par jour. Le tableau y défilait à
+            l'horizontale : 620 px dans 342, un jour et un tiers visibles
+            sur quatre — la comparaison qui justifie le tableau n'y était de
+            toute façon plus possible, et il fallait faire glisser pour
+            découvrir chaque jour.
+
+            La version masquée l'est par `display: none`, que les lecteurs
+            d'écran respectent aussi : le planning n'est jamais lu deux fois.
+            Le titre de saison est HORS des deux : il vaut pour les deux. */}
         <div className="apparition">
           <p className="planning-saison">{site.planningSaison}</p>
-          <p className="planning-indice" aria-hidden="true">
-            Faites glisser le tableau pour voir tous les jours →
-          </p>
 
           <div className="planning-wrap">
             <table className="planning-table" aria-label={`Planning des cours, ${site.planningSaison ?? ''}`}>
@@ -105,6 +117,22 @@ export default async function Planning({ site, enPreview = false }) {
               </tbody>
             </table>
           </div>
+
+          <ul className="planning-jours" aria-label={`Planning des cours, ${site.planningSaison ?? ''}`}>
+            {parJour.map(({ jour, cours }) => (
+              <li key={jour.valeur} className="planning-jour-carte">
+                <h3 className="planning-jour-titre">{jour.libelle}</h3>
+                <ul className="planning-jour-liste">
+                  {cours.map((c) => (
+                    <li key={c._id}>
+                      <span className="planning-heure">{heureLisible(c.heureDebut)}</span>
+                      <span className="planning-nom">{c.activite?.titre ?? '—'}</span>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
         </div>
 
         {changements.length > 0 && (

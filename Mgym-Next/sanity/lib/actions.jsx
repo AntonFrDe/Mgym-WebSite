@@ -4,6 +4,41 @@
 // « parce que c'est possible » : un menu d'actions encombré fait hésiter.
 
 import { useState } from 'react'
+import { useDocumentOperation } from 'sanity'
+import { adressePour } from '../../lib/adresse-web.js'
+
+/**
+ * « Publier » qui remplit l'adresse web tout seul (articles, événements).
+ *
+ * Le champ « Adresse web » exigeait un clic sur « Generate » : oublié, la
+ * publication était refusée — et un événement sans adresse n'aurait de
+ * toute façon eu aucune page sur le site. Ce bouton garde TOUT le
+ * comportement du « Publier » d'origine (il l'enveloppe) et ajoute un seul
+ * geste : si l'adresse est vide, il la fabrique à partir du titre (et de la
+ * date pour un événement) juste avant de publier.
+ *
+ * Une adresse déjà remplie n'est JAMAIS modifiée : un lien partagé sur
+ * Facebook doit continuer de marcher, même si le titre change ensuite.
+ */
+export function avecAdresseAutomatique(PublierOriginal) {
+  function PublierAvecAdresse(props) {
+    const { patch } = useDocumentOperation(props.id, props.type)
+    const original = PublierOriginal(props)
+    if (!original) return original
+
+    return {
+      ...original,
+      onHandle: () => {
+        const doc = props.draft || props.published
+        const adresse = doc && !doc.slug?.current ? adressePour(doc) : ''
+        if (adresse) patch.execute([{ set: { slug: { _type: 'slug', current: adresse } } }])
+        original.onHandle?.()
+      },
+    }
+  }
+  PublierAvecAdresse.action = PublierOriginal.action
+  return PublierAvecAdresse
+}
 
 /**
  * « Dupliquer » sur un événement ou un article.

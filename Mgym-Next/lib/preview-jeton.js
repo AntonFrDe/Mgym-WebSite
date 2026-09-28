@@ -9,8 +9,53 @@
 
 import { createHmac, timingSafeEqual } from 'node:crypto'
 
-/** Durée d'une session de prévisualisation. */
+/** Durée d'une session de prévisualisation ouverte par lien secret. */
 export const DUREE_PREVIEW_MS = 60 * 60 * 1000 // une heure
+
+/**
+ * Durée d'une session ouverte DEPUIS LE STUDIO (outil « Aperçu »). Plus
+ * longue : la cliente garde l'aperçu ouvert pendant qu'elle travaille, et
+ * une session expirée afficherait sans prévenir le contenu publié au lieu
+ * de ses modifications. Le risque est moindre qu'avec le lien secret : le
+ * Studio fabrique un secret neuf à chaque ouverture, lié à son compte.
+ */
+export const DUREE_STUDIO_MS = 8 * 60 * 60 * 1000 // une journée de travail
+
+/**
+ * La requête vient-elle d'un cadre (iframe) posé par un AUTRE site ?
+ * C'est le cas de l'aperçu du Studio : mgym.sanity.studio encadre mgym.fr.
+ * Les en-têtes Sec-Fetch-* sont posés par le navigateur, pas par la page.
+ *
+ * @param {{get: (nom: string) => string|null}} entetes
+ */
+export function depuisCadreTiers(entetes) {
+  return entetes.get('sec-fetch-site') === 'cross-site' && entetes.get('sec-fetch-dest') === 'iframe'
+}
+
+/**
+ * Les attributs des cookies de prévisualisation.
+ *
+ *   · En ligne (https) : Secure et SameSite=None — sans eux, un cookie posé
+ *     dans le cadre du Studio n'est jamais renvoyé.
+ *   · Dans un cadre tiers : Partitioned en plus. Safari 18.4+ (donc tout
+ *     iPhone à jour) JETTE sinon le cookie d'un site encadré par un autre :
+ *     l'aperçu du Studio afficherait le contenu publié. Le cookie est alors
+ *     rangé « dans la partition du Studio » : il ne vaut que là.
+ *   · En local (http) : SameSite=Lax, ni Secure ni Partitioned, que le
+ *     navigateur refuserait sans https.
+ *
+ * @param {{production: boolean, cadreTiers?: boolean, dureeMs?: number}} options
+ */
+export function optionsCookiePreview({ production, cadreTiers = false, dureeMs }) {
+  return {
+    httpOnly: true,   // invisible au JavaScript de la page
+    path: '/',
+    secure: production,
+    sameSite: production ? 'none' : 'lax',
+    ...(production && cadreTiers ? { partitioned: true } : {}),
+    ...(dureeMs ? { maxAge: Math.floor(dureeMs / 1000) } : {}),
+  }
+}
 
 /**
  * Compare deux chaînes sans laisser fuir leur ressemblance par le temps

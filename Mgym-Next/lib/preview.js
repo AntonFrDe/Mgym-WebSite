@@ -6,7 +6,7 @@
 
 import 'server-only'
 import { cookies, draftMode } from 'next/headers'
-import { creerJeton, jetonValide, DUREE_PREVIEW_MS } from './preview-jeton.js'
+import { creerJeton, jetonValide, optionsCookiePreview, DUREE_PREVIEW_MS } from './preview-jeton.js'
 
 export { DUREE_PREVIEW_MS }
 
@@ -29,31 +29,51 @@ function secret() {
   return s
 }
 
+/** Le cookie de Next qui porte le mode brouillon. */
+const COOKIE_BROUILLON = '__prerender_bypass'
+
+const enProduction = () => process.env.NODE_ENV === 'production'
+
 /**
  * Ouvre une session : active le mode brouillon de Next et pose le cookie
  * d'expiration signé.
+ *
+ * `cadreTiers` : la demande vient de l'aperçu du Studio, qui encadre le
+ * site depuis un autre domaine. Les DEUX cookies — celui de Next et le
+ * nôtre — reçoivent alors l'attribut Partitioned, sans lequel Safari les
+ * jette (voir optionsCookiePreview). Le cookie de Next est donc réécrit
+ * juste après que Next l'a posé : même valeur, attributs complétés.
+ *
+ * @param {{dureeMs?: number, cadreTiers?: boolean}} [options]
  */
-export async function ouvrirPreview() {
-  const magasin = await cookies()
-
-  magasin.set(COOKIE_EXPIRATION, creerJeton(secret()), {
-    httpOnly: true,   // invisible au JavaScript de la page
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: Math.floor(DUREE_PREVIEW_MS / 1000),
-  })
-
+export async function ouvrirPreview({ dureeMs = DUREE_PREVIEW_MS, cadreTiers = false } = {}) {
   const brouillon = await draftMode()
   brouillon.enable()
+
+  const magasin = await cookies()
+  const attributs = optionsCookiePreview({ production: enProduction(), cadreTiers })
+  magasin.set(COOKIE_EXPIRATION, creerJeton(secret(), Date.now() + dureeMs), {
+    ...attributs,
+    maxAge: Math.floor(dureeMs / 1000),
+  })
+  const valeurNext = magasin.get(COOKIE_BROUILLON)?.value
+  if (valeurNext) magasin.set(COOKIE_BROUILLON, valeurNext, attributs)
 }
 
-/** Ferme la session et efface les deux cookies. */
-export async function fermerPreview() {
+/**
+ * Ferme la session et efface les deux cookies. Un cookie partitionné ne
+ * s'efface qu'avec le même attribut : on les expire donc avec les attributs
+ * qui ont servi à les poser.
+ *
+ * @param {{cadreTiers?: boolean}} [options]
+ */
+export async function fermerPreview({ cadreTiers = false } = {}) {
   const brouillon = await draftMode()
   brouillon.disable()
   const magasin = await cookies()
-  magasin.delete(COOKIE_EXPIRATION)
+  const attributs = optionsCookiePreview({ production: enProduction(), cadreTiers })
+  magasin.set(COOKIE_EXPIRATION, '', { ...attributs, maxAge: 0 })
+  if (cadreTiers) magasin.set(COOKIE_BROUILLON, '', { ...attributs, maxAge: 0 })
 }
 
 /**

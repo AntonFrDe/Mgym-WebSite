@@ -17,6 +17,7 @@
 import 'server-only'
 import {
   getSiteContent, getInfosPratiques, getSeoGlobal, getActivites, getDonneesPlanning,
+  getEvenementsAVenir,
 } from '../sanity/queries/index.js'
 import { urlImage } from '../sanity/image.js'
 import { contenuDefaut } from './defaut.js'
@@ -67,15 +68,16 @@ const IMAGES_SITE = {
  * Rassemble tout le contenu de la page d'accueil en une fois.
  *
  * @param {boolean} [preview]  true = lire les brouillons
- * @returns {Promise<{site: object, infos: object, seo: object, activites: any[]}>}
+ * @returns {Promise<{site: object, infos: object, seo: object, activites: any[], evenements: any[]}>}
  */
 export async function getContenu(preview = false) {
-  // Quatre requêtes indépendantes, lancées ensemble.
-  const [site, infos, seo, activites] = await Promise.all([
+  // Cinq requêtes indépendantes, lancées ensemble.
+  const [site, infos, seo, activites, evenements] = await Promise.all([
     getSiteContent(preview),
     getInfosPratiques(preview),
     getSeoGlobal(preview),
     getActivites(preview),
+    getEvenementsAVenir(preview),
   ])
 
   // Images de siteContent : converties avant fusion, pour que le repli
@@ -104,7 +106,15 @@ export async function getContenu(preview = false) {
           image: normaliserImage(a.image, a.titre ?? '', 800),
         }))
       : contenuDefaut.activites,
+    // Pas de repli pour les événements : sans événement à venir, la frise
+    // affiche son message d'attente. Inventer un stage serait pire.
+    evenements: (evenements ?? []).map(normaliserEvenement),
   }
+}
+
+/** L'image d'un événement, dans la même forme que les autres images. */
+export function normaliserEvenement(ev) {
+  return { ...ev, image: normaliserImage(ev.image, ev.titre ?? '', 1200) }
 }
 
 /**

@@ -10,6 +10,7 @@ import {
   jetonValide,
   cheminInterne,
   DUREE_PREVIEW_MS,
+  depuisCadreTiers, optionsCookiePreview,
 } from './preview-jeton.js'
 
 const SECRET = 'un-secret-de-test-suffisamment-long-0123456789'
@@ -99,5 +100,41 @@ describe('Redirection après prévisualisation', () => {
     assert.equal(cheminInterne(null), '/')
     assert.equal(cheminInterne(undefined), '/')
     assert.equal(cheminInterne(123), '/')
+  })
+})
+
+describe('Cookies de l\'aperçu du Studio', () => {
+  const entetes = (valeurs) => ({ get: (nom) => valeurs[nom] ?? null })
+
+  test('seul un cadre posé par un autre site est un cadre tiers', () => {
+    assert.equal(depuisCadreTiers(entetes({ 'sec-fetch-site': 'cross-site', 'sec-fetch-dest': 'iframe' })), true)
+    assert.equal(depuisCadreTiers(entetes({ 'sec-fetch-site': 'same-origin', 'sec-fetch-dest': 'iframe' })), false)
+    assert.equal(depuisCadreTiers(entetes({ 'sec-fetch-site': 'cross-site', 'sec-fetch-dest': 'document' })), false)
+    assert.equal(depuisCadreTiers(entetes({})), false)
+  })
+
+  test('en ligne, dans le cadre du Studio : Partitioned (sinon Safari jette le cookie)', () => {
+    const o = optionsCookiePreview({ production: true, cadreTiers: true })
+    assert.equal(o.secure, true)
+    assert.equal(o.sameSite, 'none')
+    assert.equal(o.partitioned, true)
+    assert.equal(o.httpOnly, true)
+  })
+
+  test('en ligne, hors cadre : pas de partition — le lien secret doit valoir partout', () => {
+    const o = optionsCookiePreview({ production: true })
+    assert.equal(o.partitioned, undefined)
+    assert.equal(o.sameSite, 'none')
+  })
+
+  test('en local (http) : ni Secure ni Partitioned, que le navigateur refuserait', () => {
+    const o = optionsCookiePreview({ production: false, cadreTiers: true })
+    assert.equal(o.secure, false)
+    assert.equal(o.sameSite, 'lax')
+    assert.equal(o.partitioned, undefined)
+  })
+
+  test('la durée devient un maxAge en secondes', () => {
+    assert.equal(optionsCookiePreview({ production: true, dureeMs: 90_000 }).maxAge, 90)
   })
 })

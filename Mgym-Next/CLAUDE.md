@@ -6,7 +6,8 @@ La lisibilité et la simplicité priment sur l'effet technique.
 
 ## Stack
 
-- **Next.js 15.5** (App Router) + **React 18**
+- **Next.js 15.5** (App Router) + **React 19** (19.2 minimum : exigé par le
+  Studio Sanity 5, dont l'outil « Aperçu » s'adapte aux téléphones)
 - **JavaScript pur** — pas de TypeScript, pas de linter. 67 tests via
   `node --test` (aucune dépendance de test)
 - **CSS global unique** : `app/globals.css` (pas de Tailwind, pas de CSS Modules)
@@ -55,6 +56,7 @@ app/
   layout.js      # <html>/<body>, polices, metadata SEO, Nav + ClientLayout
   page.js        # LA page d'accueil : n'assemble que des composants
   globals.css    # 100 % du style du site, organisé par section
+  blog/, evenements/[slug]/   # les seules routes en plus de l'accueil
 components/
   Nav.js         # nav fixe + menu hamburger mobile ('use client')
   Hero.js        # image plein écran + bande d'activités en verre dépoli
@@ -64,19 +66,32 @@ components/
   EnteteActivites.js     # titre + chapô, partagés par les deux affichages
   SentierActivites.js    # affichage « sentier » vertical ('use client')
   CarrouselActivites.js  # affichage « cartes horizontales » ('use client')
-  Outdoor.js             # « Explorez aussi » : marche nordique & outdoor
+  PlusActivites.js       # 3 onglets : ateliers · sur mesure · plein air ('use client')
+  Evenements.js          # frise des stages & événements (fiches : app/evenements)
+  Temoignages.js         # avis, sous la coach ; note Google
+  BlogApercu.js          # 3 derniers articles (masqué sans article)
+  LienItineraire.js      # ouvre Plans / Google Maps / geo: selon l'appareil ('use client')
+  pictogrammes.js        # TOUS les pictogrammes et logos de réseaux
   liens.js               # adresses des formulaires en ligne (un seul endroit)
-  Bespoke.js Coach.js Pricing.js Planning.js Reseaux.js Contact.js Footer.js
+  Coach.js Pricing.js Planning.js Reseaux.js Contact.js Footer.js
   ClientLayout.js # IntersectionObserver global pour les classes .apparition
 public/Images/   # toutes les photos, en .avif (sauf CoachPhoto.webp)
 public/fond1.avif # fond du hero
 serve.js         # sert out/ en local, sans dépendance (cf. « Commandes »)
 ```
 
-Le site est **une seule route** : toute la navigation se fait par ancres
-(`#about`, `#activites`, `#coach`, `#tarifs`, `#planning`, `#reseaux`,
-`#contact`). Si l'`id` d'une section change, mettre à jour `Nav.js`,
-`Footer.js` et les CTA qui pointent dessus.
+L'accueil se parcourt par ancres (`#about`, `#activites`, `#plus-activites`,
+`#coach`, `#temoignages`, `#tarifs`, `#planning`, `#evenements`,
+`#reseaux`, `#contact`). Si l'`id` d'une section change, mettre à jour la
+liste `LIENS` de `Nav.js`, `Footer.js` et les CTA qui pointent dessus.
+
+`#bespoke`, `#outdoor` et `#ateliers` ne sont plus des sections mais les
+**boutons d'onglets** de « Plus d'activités » : les anciens liens (y compris
+ceux saisis dans le back-office) y mènent toujours ET ouvrent le bon onglet.
+
+Le carrousel ne montre que les activités de rubrique « cours » ; les fiches
+« ateliers » et « surMesure » vont dans les onglets
+(`lib/contenu/rubriques.js`, repli sur l'adresse web des fiches anciennes).
 
 ## Conventions du code
 
@@ -109,22 +124,51 @@ ailleurs : `var(--rose)`, pas `#D18B8E`.
 
 | Rôle | Variable | Valeur |
 |---|---|---|
-| Rose principal | `--rose` | `#D18B8E` |
-| Rose foncé (hover) | `--rose-fonce` | `#B8737A` |
+| Rose principal — **décor seulement** | `--rose` | `#D18B8E` |
+| Rose foncé — **texte rose et boutons** | `--rose-fonce` | `#985258` |
 | Rose clair (fonds alternés) | `--rose-clair` | `#F4E1E6` |
 | Rose pâle (italique du hero) | `--rose-pale` | `#F4C4C7` |
 | Fond crème | `--creme` | `#FFF7F8` |
 | Prune (texte, bandeaux sombres) | `--prune` | `#4A3B42` |
 | Blanc (texte sur fond coloré) | `--blanc` | `#fff` |
+| Texte secondaire (prune à 80 %) | `--texte-doux` | `rgba(prune, .8)` |
 
 Pour une transparence, utiliser la variante `-rgb` :
 `rgba(var(--prune-rgb), .12)` — `rgba()` ne sait pas lire un hexadécimal.
+
+- **Ambiances** : pour ne plus alterner crème/rose sur toute la page, trois
+  teintes d'appoint — `--lin`, `--sauge-clair`/`--sauge-fonce`,
+  `--lavande-clair`/`--lavande-fonce`. Une section d'ambiance redéfinit
+  `--accent-texte` et `--accent-decor` (étiquette, mot italique, filet, ✦) ;
+  les **boutons restent roses partout**. Ordre actuel des fonds : À propos
+  crème · Activités rose · Plus d'activités sauge · Coach lin · Témoignages
+  crème · Tarifs lin · Planning rose · Événements lavande · Blog crème ·
+  Réseaux lin · Contact rose. Jamais deux fonds identiques côte à côte.
+- **Images** : toujours à leurs proportions naturelles (`height:auto`). Une
+  hauteur fixe recadrait le portrait de la coach et les illustrations.
+- **Contraste : deux roses, deux rôles.** `--rose` ne passe pas le minimum
+  lisible pour du texte (2,7:1 sur blanc, 2,15:1 sur rose clair ; il faut
+  4,5:1). Tout **texte** rose sur fond clair et tout **bouton** rose à texte
+  blanc utilisent `--rose-fonce` ; `--rose` reste aux filets, ✦,
+  pictogrammes, bordures et au texte sur le bandeau prune. Survol d'un
+  bouton : `--prune` (sur fond prune : un liseré `--rose-pale`).
+- **Jamais `opacity` pour griser un texte** : elle délave aussi les liens et
+  les mots en gras qu'il contient, et un enfant ne peut pas l'annuler.
+  Utiliser `color: var(--texte-doux)`. En dessous de 80 %, le prune n'est
+  plus lisible sur le rose clair.
 
 - Les sections **alternent** `var(--creme)` et `var(--rose-clair)`. En insérant une section,
   vérifier que l'alternance tient encore.
 - **Lisibilité : ne jamais descendre sous `.85rem` (≈13.6 px)** pour du texte
   courant. Les commentaires `/* LISIBILITÉ : ... */` dans `globals.css` marquent
   ces choix — ce sont des contraintes du client, pas des préférences.
+- **Sur téléphone (≤ 700 px), c'est plus strict** : `.85rem` pour TOUT texte,
+  étiquettes comprises, et `1rem` pour les paragraphes ; cibles tactiles de
+  44 px minimum ; boutons en pleine largeur. Le bloc « TÉLÉPHONE » de la
+  media query 700 px regroupe ces règles, chacune avec la mesure qui l'a
+  motivée. Vérifier à 320, 360, 375 et 390 px de large : le haut de page
+  (bande d'activités), les cartes du carrousel et les boutons étaient cassés
+  à 320–375 px alors que 390 px paraissait correct.
 - Titres en serif light, étiquettes en sans-serif capitales très espacées
   (`letter-spacing: .2em` à `.35em`), boutons en pilules (`border-radius: 3rem`).
 
@@ -176,11 +220,13 @@ fichiers, et une correction sur deux se perdait.
 
 ### Règles du carrousel horizontal
 
-- La molette n'est capturée **que tant qu'il reste des cartes** dans la
-  direction demandée ; arrivé en bout, la page reprend son défilement vertical.
-  Sans cela l'utilisateur est piégé dans la section.
-- L'écouteur `wheel` doit être posé en natif avec `{ passive: false }` :
-  la prop React `onWheel` est passive, `preventDefault()` y est sans effet.
+- **La molette verticale n'est JAMAIS détournée** : elle fait défiler la
+  page, même au-dessus des cartes. Le carrousel la détournait autrefois vers
+  les cartes ; avec l'aimantation (`scroll-snap` obligatoire), chaque cran
+  était ramené à la carte de départ et la page ne défilait plus : le visiteur
+  était BLOQUÉ tant que sa souris survolait le carrousel (mesuré : six crans,
+  zéro pixel). Les cartes se parcourent au doigt, au geste horizontal du pavé
+  tactile (natif), aux flèches et au clavier.
 - La barre de défilement native est masquée pour des raisons esthétiques : en
   contrepartie, **les affordances de remplacement sont obligatoires** (carte
   coupée au bord droit, indice de départ, jauge de progression, compteur,
@@ -188,6 +234,12 @@ fichiers, et une correction sur deux se perdait.
 - Les dimensions (largeur de carte, `gap`) restent définies en CSS ; le JS les
   **mesure** dans le DOM (`pasDeDefilement`). Ne pas coder de largeur en dur
   dans le composant.
+- **Sur téléphone, une carte doit tenir dans l'écran.** La description y est
+  coupée à quatre lignes (`-webkit-line-clamp`) avec un bouton « Lire la
+  suite » (`.carte-act-suite`, classe `.est-ouverte` sur la carte). Le texte
+  reste entier dans le HTML ; `build-standalone.js` reproduit le bouton.
+  Entière, la plus longue description donnait une carte de 733 px pour
+  600 px visibles.
 
 ## Livraison au client — `Site-MGYM-{sentier,carousel}.html`
 
@@ -230,9 +282,10 @@ Pièges à connaître :
 - Le script **retire tous les `<script>` de Next**. Aucune interactivité React
   ne survit. Toute interaction nouvelle doit être **réécrite en JS vanilla**
   dans la constante `inlineJs` de `build-standalone.js` (c'est déjà le cas pour
-  la nav, le menu mobile, les classes `.apparition`, le carrousel, et pour le
-  sentier : révélation des étapes, tracé du chemin au défilement, bouton
-  « En savoir plus »). **Renommer une classe utilisée par ce script sans le
+  la nav, le menu mobile, les classes `.apparition`, le carrousel et son
+  « Lire la suite », les onglets « Plus d'activités », le bouton
+  « Itinéraire », et pour le sentier : révélation des étapes, tracé du chemin
+  au défilement, bouton « En savoir plus »). **Renommer une classe utilisée par ce script sans le
   mettre à jour casse silencieusement le fichier livré, jamais le site Next.**
 - Les liens vers les images doivent rester **absolus** dans le code source
   (`/Images/xxx`) : c'est ce que `build-standalone.js` détecte pour les
@@ -285,6 +338,39 @@ npm run verifier   # schémas + requêtes + 67 tests + build
 
 Documentation complète dans `docs/` : SECURITY, ROLLBACK, SANITY-SCHEMAS,
 GUIDE-CLIENTE, FINAL-BACKEND-AUDIT.
+
+## L'Aperçu du Studio (outil Presentation)
+
+Le back-office affiche le site à côté du formulaire, en direct, avec
+clic-pour-modifier. Les pièces, et ce qu'il ne faut pas casser :
+
+- `sanity/lib/presentation.js` : l'adresse du site (`SANITY_STUDIO_PREVIEW_ORIGIN`,
+  défaut `https://mgym.fr`), les routes, et quelle page montre quel document.
+- `app/api/draft-mode/enable` : vérifie le secret que le STUDIO a créé
+  (aucun secret dans le code du Studio, qui est public). Pose les cookies
+  en `Partitioned` dans le cadre du Studio : **sans cet attribut, Safari
+  (donc tout iPhone) jette le cookie et l'aperçu montre le contenu publié.**
+- `components/EditionVisuelle.js` : cadres cliquables + `router.refresh()`
+  à chaque modification. Ne PAS revenir au rafraîchissement par défaut de
+  next-sanity, qui purge le cache de tout le site à chaque frappe.
+- **Stega** (`lib/sanity/stega.js`) : en aperçu, des caractères invisibles
+  s'ajoutent aux textes. Tout champ que le code COMPARE ou TRANSFORME
+  (statut, jour, heure, téléphone…) doit figurer dans `CHAMPS_SANS_STEGA`,
+  sinon il casse en aperçu seulement — le pire des bugs, invisible en ligne.
+- CSP : `frame-ancestors` n'autorise que le Studio ; `X-Frame-Options` est
+  retiré (il ne sait pas autoriser un autre domaine).
+- Les variables de développement (`localhost`) vont dans `.env.development`,
+  **jamais** dans `.env.local` : `studio:deploy` le lit aussi, et le Studio
+  en ligne prévisualiserait localhost.
+
+## Le Studio : à redéployer après chaque changement de schéma
+
+Les modèles (`sanity/schemaTypes`) et les actions du back-office
+(`sanity/lib`) ne sont vus par la cliente qu'après `npm run studio:deploy`.
+Le bouton **Publier** des articles et événements remplit lui-même l'adresse
+web (`avecAdresseAutomatique`, `lib/adresse-web.js`) : ne pas rétablir une
+validation BLOQUANTE sur le slug, c'est ce qui empêchait la cliente de
+publier ses événements.
 
 ## Hygiène du dépôt
 

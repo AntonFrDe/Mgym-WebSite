@@ -39,8 +39,13 @@ export const evenement = defineType({
       name: 'slug',
       title: 'Adresse web',
       type: 'slug',
+      description: 'Remplie automatiquement quand vous publiez. Ne la changez plus ensuite : les liens déjà partagés cesseraient de marcher.',
       options: { source: 'titre', maxLength: 80 },
-      validation: (Rule) => Rule.required().error('Cliquez sur « Generate ».'),
+      // Un simple AVERTISSEMENT : « Publier » remplit l'adresse tout seul si
+      // elle est vide (voir sanity/lib/actions.jsx). L'erreur d'avant
+      // bloquait la publication tant qu'on n'avait pas cliqué « Generate ».
+      validation: (Rule) =>
+        Rule.required().warning('Elle sera créée automatiquement à la publication.'),
     }),
 
     defineField({

@@ -61,6 +61,9 @@ const hstsActif = process.env.MGYM_HSTS === '1'
 // NODE_ENV à 'production'.
 const enDeveloppement = process.env.NODE_ENV !== 'production'
 
+// L'adresse du back-office, seul site autorisé à encadrer celui-ci (aperçu).
+const studioUrl = process.env.NEXT_PUBLIC_SANITY_STUDIO_URL || 'https://mgym.sanity.studio'
+
 // ── En-têtes de sécurité ────────────────────────────────────────
 // Chacun ferme une porte précise. Ils ne s'appliquent qu'au site hébergé :
 // la copie hors-ligne n'a pas de serveur pour les émettre.
@@ -69,9 +72,10 @@ const enTetes = [
   // un fichier texte contenant du HTML peut être exécuté comme une page.
   { key: 'X-Content-Type-Options', value: 'nosniff' },
 
-  // Le site ne peut pas être affiché dans une iframe sur un autre domaine :
-  // c'est ce qui empêche le détournement de clic.
-  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  // (X-Frame-Options a été retiré : il ne sait autoriser que le même site,
+  // et l'aperçu du Studio doit afficher le site dans un cadre. La même
+  // protection contre le détournement de clic est assurée par
+  // « frame-ancestors » dans la CSP ci-dessous, avec une liste précise.)
 
   // Une adresse de prévisualisation ne fuite pas vers les sites visités
   // ensuite : on n'envoie que le domaine, jamais le chemin complet.
@@ -106,9 +110,15 @@ const enTetes = [
       `script-src 'self' 'unsafe-inline'${enDeveloppement ? " 'unsafe-eval'" : ''}`,
       // Aucune requête sortante en dehors du CMS.
       "connect-src 'self' https://*.api.sanity.io https://*.apicdn.sanity.io",
-      // Personne ne peut encadrer le site, et le site n'encadre personne.
-      "frame-ancestors 'self'",
-      "frame-src 'none'",
+      // Seul le back-office peut afficher le site dans un cadre : c'est
+      // l'outil « Aperçu » (voir sanity/lib/presentation.js). sanity.io y
+      // figure parce que le tableau de bord de Sanity ouvre lui-même le
+      // Studio dans un cadre. Tout autre site est refusé : pas de
+      // détournement de clic possible.
+      // Le site, lui, n'encadre qu'UNE chose : le plan OpenStreetMap de la
+      // section Contact (voir Contact.js).
+      `frame-ancestors 'self' ${studioUrl} https://www.sanity.io${enDeveloppement && !studioUrl.includes('localhost') ? ' http://localhost:3333' : ''}`,
+      "frame-src https://www.openstreetmap.org",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",

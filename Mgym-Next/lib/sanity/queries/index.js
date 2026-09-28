@@ -6,5 +6,5 @@
 export { getSiteContent, getInfosPratiques, getSeoGlobal } from './contenu.js'
 export { getActivites, getActiviteParSlug } from './activites.js'
 export { getDonneesPlanning } from './planning.js'
-export { getEvenementsAVenir, getEvenementParSlug } from './evenements.js'
+export { getEvenementsAVenir, getEvenementParSlug, getSlugsEvenements } from './evenements.js'
 export { getArticles, getArticleParSlug, getSlugsArticles } from './articles.js'

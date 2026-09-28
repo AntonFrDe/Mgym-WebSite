@@ -81,8 +81,16 @@ for (const [champ, info] of Object.entries(imagesBrutes)) {
   }
 }
 
+// Les deux offres qui ne sont pas des cours : elles vont dans les onglets
+// « Plus d'activités », pas dans le carrousel (voir rubriques.js).
+const RUBRIQUE_PAR_NOM = {
+  'Ateliers thématiques': 'ateliers',
+  'Prestations sur mesure': 'surMesure',
+}
+
 // Les activités prennent la même forme que celle renvoyée par Sanity.
 const activites = activitesBrutes.map((a, i) => ({
+  rubrique: RUBRIQUE_PAR_NOM[a.name] ?? 'cours',
   _id: `defaut-activite-${i}`,
   titre: a.name,
   slug: null,

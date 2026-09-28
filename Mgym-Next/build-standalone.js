@@ -71,9 +71,11 @@ const inlineJs = `
   var ham = document.querySelector('.ham');
   var mob = document.getElementById('mob-menu');
   if (ham && mob) {
-    ham.addEventListener('click', function(){ mob.classList.toggle('open'); });
+    ham.addEventListener('click', function(){
+      ham.setAttribute('aria-expanded', mob.classList.toggle('open') ? 'true' : 'false');
+    });
     mob.querySelectorAll('a').forEach(function(a){
-      a.addEventListener('click', function(){ mob.classList.remove('open'); });
+      a.addEventListener('click', function(){ mob.classList.remove('open'); ham.setAttribute('aria-expanded', 'false'); });
     });
   }
   // Apparition en fondu (comme ClientLayout)
@@ -186,17 +188,9 @@ const inlineJs = `
       piste.scrollTo({ left: borne * pas(), behavior: doux ? 'smooth' : 'auto' });
       interagi();
     };
-    piste.addEventListener('wheel', function(e){
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-      var max = piste.scrollWidth - piste.clientWidth;
-      if (max <= 0) return;
-      // On rend la main au défilement vertical de la page une fois en bout
-      if (e.deltaY > 0 ? piste.scrollLeft >= max - TOL : piste.scrollLeft <= TOL) return;
-      e.preventDefault();
-      piste.scrollLeft += e.deltaMode === 1 ? e.deltaY * 32 : e.deltaY;
-      interagi();
-    }, { passive: false });
-    piste.addEventListener('scroll', maj, { passive: true });
+    // La molette verticale n'est PAS détournée : elle fait défiler la page
+    // (voir CarrouselActivites.js). Un défilement des cartes efface l'indice.
+    piste.addEventListener('scroll', function(){ maj(); if (piste.scrollLeft > TOL) interagi(); }, { passive: true });
     piste.addEventListener('pointerdown', interagi);
     piste.addEventListener('keydown', function(e){
       if (e.key === 'ArrowRight') { e.preventDefault(); allerA(index + 1); }
@@ -208,7 +202,68 @@ const inlineJs = `
     if (fleches[1]) fleches[1].addEventListener('click', function(){ allerA(index + 1); });
     window.addEventListener('resize', maj);
     maj();
+
+    // « Lire la suite » des cartes (téléphone) — équivalent de l'état
+    // « ouvertes » de CarrouselActivites.js. Le texte entier est déjà dans
+    // le HTML, seul le CSS le coupe à quatre lignes : on bascule la même
+    // classe .est-ouverte que React, rien n'est reconstruit.
+    piste.querySelectorAll('.carte-act-suite').forEach(function(bouton){
+      bouton.addEventListener('click', function(){
+        var ouverte = bouton.closest('.carte-act').classList.toggle('est-ouverte');
+        bouton.setAttribute('aria-expanded', ouverte ? 'true' : 'false');
+        bouton.textContent = ouverte ? 'Réduire' : 'Lire la suite';
+      });
+    });
   }
+
+  // Onglets « Plus d'activités » — équivalent inline de PlusActivites.js.
+  // Les trois panneaux sont déjà dans le HTML : on bascule l'attribut
+  // hidden, la classe .est-actif et aria-selected, exactement comme React.
+  // Une adresse #bespoke / #outdoor / #ateliers ouvre l'onglet voulu.
+  var onglets = document.querySelectorAll('.onglet');
+  if (onglets.length) {
+    var ouvrirOnglet = function(bouton){
+      onglets.forEach(function(o){
+        var actif = o === bouton;
+        o.classList.toggle('est-actif', actif);
+        o.setAttribute('aria-selected', actif ? 'true' : 'false');
+        o.tabIndex = actif ? 0 : -1;
+        var panneau = document.getElementById(o.getAttribute('aria-controls'));
+        if (panneau) panneau.hidden = !actif;
+      });
+    };
+    onglets.forEach(function(o, i){
+      o.addEventListener('click', function(){ ouvrirOnglet(o); });
+      o.addEventListener('keydown', function(e){
+        var n = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: onglets.length - 1 }[e.key];
+        if (n === undefined) return;
+        e.preventDefault();
+        var cible = onglets[(n + onglets.length) % onglets.length];
+        ouvrirOnglet(cible); cible.focus();
+      });
+    });
+    var ongletDeLAdresse = function(){
+      var cible = location.hash && document.getElementById(location.hash.slice(1));
+      if (cible && cible.classList.contains('onglet')) ouvrirOnglet(cible);
+    };
+    window.addEventListener('hashchange', ongletDeLAdresse);
+    ongletDeLAdresse();
+  }
+
+  // Bouton « Itinéraire » — équivalent inline de LienItineraire.js : Plans
+  // sur iPhone/iPad, geo: sur Android, Google Maps (déjà dans le HTML)
+  // ailleurs.
+  document.querySelectorAll('[data-itineraire]').forEach(function(a){
+    var coord = a.getAttribute('data-lat') + ',' + a.getAttribute('data-lng');
+    var nom = encodeURIComponent(a.getAttribute('data-nom') || "M'GYM");
+    var ua = navigator.userAgent;
+    if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) {
+      a.href = 'https://maps.apple.com/?daddr=' + coord + '&q=' + nom;
+    } else if (/Android/.test(ua)) {
+      a.href = 'geo:' + coord + '?q=' + coord + '(' + nom + ')';
+      a.removeAttribute('target');
+    }
+  });
 `
 
 // 5) Assemblage final

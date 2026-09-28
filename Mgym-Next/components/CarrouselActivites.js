@@ -8,26 +8,28 @@
 //
 // ERGONOMIE — comment l'utilisateur comprend qu'il faut faire défiler :
 //   1. une carte est toujours tronquée sur le bord droit (peek) ;
-//   2. un indice « Molette ou glissez » clignote sous le carrousel et
-//      disparaît dès la première interaction (il ne gêne plus après) ;
+//   2. un indice (« Faites glisser du doigt » / « Utilisez les flèches »)
+//      s'affiche sous le carrousel et disparaît dès la première
+//      interaction (il ne gêne plus après) ;
 //   3. une barre de progression + un compteur « 01 / 08 » montrent où
 //      l'on se trouve dans la série ;
 //   4. deux flèches précédent/suivant pour ceux qui préfèrent cliquer ;
 //   5. les flèches du clavier fonctionnent aussi (accessibilité).
 //
-// RÈGLE IMPORTANTE sur la molette : on ne « capture » la molette que
-// tant qu'il reste des cartes à voir dans la direction demandée. Arrivé
-// au bout, on rend la main au défilement vertical de la page — sinon
-// l'utilisateur se retrouve piégé dans la section, ce qui est le défaut
-// classique de ce genre de carrousel.
+// RÈGLE : LA MOLETTE VERTICALE N'EST JAMAIS DÉTOURNÉE. Elle fait
+// défiler la page, même quand la souris survole les cartes.
+// Le carrousel la détournait autrefois vers les cartes : chaque cran
+// (≈ 120 px) était aussitôt ramené à la carte de départ par l'aimantation
+// (scroll-snap), et la page ne défilait plus non plus — le visiteur
+// restait BLOQUÉ tant que sa souris était au-dessus du carrousel.
+// Mesuré : six crans de molette, zéro pixel de déplacement.
+// Pour parcourir les cartes : le doigt, le geste horizontal du pavé
+// tactile (géré nativement par le navigateur), les flèches, le clavier.
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import EnteteActivites from './EnteteActivites'
 import TexteRiche from './TexteRiche'
 
-// deltaMode === 1 : la molette envoie des LIGNES et non des pixels
-// (Firefox surtout). 32px ≈ une ligne, valeur usuelle.
-const PIXELS_PAR_LIGNE = 32
 // Marge de tolérance pour décider qu'on est arrivé en bout de piste.
 const TOLERANCE_BOUT = 2
 
@@ -52,6 +54,16 @@ export default function CarrouselActivites({ site, activites = [] }) {
   const [auDebut, setAuDebut] = useState(true)
   const [aLaFin, setALaFin] = useState(false)
   const [aInteragi, setAInteragi] = useState(false)
+  // Cartes dont la description est dépliée (téléphone uniquement : sur
+  // grand écran, le bouton « Lire la suite » est masqué et le texte entier).
+  const [ouvertes, setOuvertes] = useState(() => new Set())
+
+  const basculer = (id) => setOuvertes((avant) => {
+    const apres = new Set(avant)
+    if (apres.has(id)) apres.delete(id)
+    else apres.add(id)
+    return apres
+  })
 
   // Recalcule tout ce qui dépend de la position de défilement.
   const majEtat = useCallback(() => {
@@ -63,37 +75,10 @@ export default function CarrouselActivites({ site, activites = [] }) {
     setIndexActif(Math.min(activites.length - 1, Math.round(piste.scrollLeft / pas)))
     setAuDebut(piste.scrollLeft <= TOLERANCE_BOUT)
     setALaFin(piste.scrollLeft >= max - TOLERANCE_BOUT)
+    // Un défilement (doigt, pavé tactile) vaut interaction : l'indice a
+    // rempli son rôle, il s'efface.
+    if (piste.scrollLeft > TOLERANCE_BOUT) setAInteragi(true)
   }, [activites.length])
-
-  // Molette → défilement horizontal, avec relâchement en bout de piste.
-  // Écouteur natif (et non prop onWheel) car React pose ses écouteurs
-  // `wheel` en mode passif : preventDefault() y serait sans effet.
-  useEffect(() => {
-    const piste = pisteRef.current
-    if (!piste) return
-
-    const surMolette = (e) => {
-      // Geste horizontal (trackpad, souris à molette latérale) :
-      // le navigateur le gère déjà correctement, on ne s'en mêle pas.
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return
-
-      const max = piste.scrollWidth - piste.clientWidth
-      if (max <= 0) return
-
-      const versLaFin = e.deltaY > 0
-      const enBout = versLaFin
-        ? piste.scrollLeft >= max - TOLERANCE_BOUT
-        : piste.scrollLeft <= TOLERANCE_BOUT
-      if (enBout) return // on rend la main au défilement vertical de la page
-
-      e.preventDefault()
-      piste.scrollLeft += e.deltaMode === 1 ? e.deltaY * PIXELS_PAR_LIGNE : e.deltaY
-      setAInteragi(true)
-    }
-
-    piste.addEventListener('wheel', surMolette, { passive: false })
-    return () => piste.removeEventListener('wheel', surMolette)
-  }, [])
 
   // Une largeur de fenêtre différente change la largeur des cartes :
   // il faut recalculer l'index actif et la progression.
@@ -132,7 +117,9 @@ export default function CarrouselActivites({ site, activites = [] }) {
     <section id="activites" className="section-pad">
       <div className="section-max">
 
-        <EnteteActivites site={site} instruction="Faites défiler les cartes à la molette, au doigt ou avec les flèches pour toutes les découvrir." />
+        {/* Formulation valable pour la souris comme pour le doigt : ce
+            chapô ne sait pas sur quel appareil il est lu. */}
+        <EnteteActivites site={site} instruction="Faites défiler les cartes, ou utilisez les flèches, pour toutes les découvrir." />
 
         <div className={`carrousel${auDebut ? ' est-au-debut' : ''}${aLaFin ? ' est-a-la-fin' : ''}`}>
 
@@ -152,46 +139,68 @@ export default function CarrouselActivites({ site, activites = [] }) {
             >
               {/* La clé est l'identifiant Sanity, JAMAIS le titre :
                   renommer une activité ne doit pas démonter sa carte. */}
-              {activites.map((act, i) => (
-                <article
-                  key={act._id}
-                  className="carte-act"
-                  aria-label={`Activité ${i + 1} sur ${total} : ${act.titre}`}
-                >
-                  <div className="carte-act-media">
-                    {act.image && (
-                      <img src={act.image.src} alt={act.image.alt} loading="lazy" />
-                    )}
-                    <span className="carte-act-num">{deuxChiffres(i + 1)}</span>
-                  </div>
-
-                  <div className="carte-act-corps">
-                    <h3>{act.titre}</h3>
-                    <p className="carte-act-accroche">{act.descriptionCourte}</p>
-                    <TexteRiche valeur={act.descriptionRiche} className="carte-act-desc" />
-
-                    <div className="carte-act-bas">
-                      <div className="carte-act-tags">
-                        {(act.motsCles ?? []).map((tag) => (
-                          <span key={tag} className="etape-tag">{tag}</span>
-                        ))}
-                      </div>
-                      {act.lienInterne && (
-                        <a href={act.lienInterne} className="etape-lien">
-                          {act.libelleLien || 'Découvrir en détail →'}
-                        </a>
+              {activites.map((act, i) => {
+                const estOuverte = ouvertes.has(act._id)
+                return (
+                  <article
+                    key={act._id}
+                    className={`carte-act${estOuverte ? ' est-ouverte' : ''}`}
+                    aria-label={`Activité ${i + 1} sur ${total} : ${act.titre}`}
+                  >
+                    <div className="carte-act-media">
+                      {act.image && (
+                        <img src={act.image.src} alt={act.image.alt} loading="lazy" />
                       )}
+                      <span className="carte-act-num">{deuxChiffres(i + 1)}</span>
                     </div>
-                  </div>
-                </article>
-              ))}
+
+                    <div className="carte-act-corps">
+                      <h3>{act.titre}</h3>
+                      <p className="carte-act-accroche">{act.descriptionCourte}</p>
+                      {/* Sur téléphone, la description est limitée à quatre
+                          lignes : entière, elle rendait la carte plus haute
+                          que l'écran (733 px pour 600 visibles). Le texte reste
+                          TOUJOURS dans le HTML — seul le CSS le coupe —, donc
+                          rien n'est perdu pour la copie hors-ligne ni pour
+                          Google. build-standalone.js reproduit ce bouton. */}
+                      <TexteRiche valeur={act.descriptionRiche} className="carte-act-desc" />
+                      <button
+                        type="button"
+                        className="carte-act-suite"
+                        aria-expanded={estOuverte}
+                        onClick={() => basculer(act._id)}
+                      >
+                        {estOuverte ? 'Réduire' : 'Lire la suite'}
+                      </button>
+
+                      <div className="carte-act-bas">
+                        <div className="carte-act-tags">
+                          {(act.motsCles ?? []).map((tag) => (
+                            <span key={tag} className="etape-tag">{tag}</span>
+                          ))}
+                        </div>
+                        {act.lienInterne && (
+                          <a href={act.lienInterne} className="etape-lien">
+                            {act.libelleLien || 'Découvrir en détail →'}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                )
+              })}
             </div>
           </div>
 
-          {/* Indice de départ : disparaît dès la première interaction */}
+          {/* Indice de départ : disparaît dès la première interaction.
+              Les deux formulations sont toujours dans le HTML ; le CSS
+              montre la bonne selon l'appareil (souris ou écran tactile). */}
           <p className={`carrousel-indice${aInteragi ? ' est-masque' : ''}`} aria-hidden="true">
-            <span className="carrousel-indice-molette" />
-            {`Molette, doigt ou flèches — les ${total} activités défilent ici`}
+            <span>
+              <span className="indice-souris">Utilisez les flèches</span>
+              <span className="indice-doigt">Faites glisser du doigt</span>
+              {` — les ${total} activités défilent ici`}
+            </span>
           </p>
 
           {/* Barre de position + commandes */}

@@ -29,6 +29,13 @@ export const apiVersion =
   process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2024-10-01'
 
 /**
+ * L'adresse du back-office. Sert à l'aperçu (clic-pour-modifier : un texte
+ * du site renvoie vers son champ) et à la CSP, qui n'autorise qu'elle à
+ * afficher le site dans un cadre. En local : http://localhost:3333.
+ */
+export const studioUrl = process.env.NEXT_PUBLIC_SANITY_STUDIO_URL || 'https://mgym.sanity.studio'
+
+/**
  * Le CMS est-il branché ? Un seul endroit répond à cette question.
  */
 export const sanityConfigure = Boolean(projectId)

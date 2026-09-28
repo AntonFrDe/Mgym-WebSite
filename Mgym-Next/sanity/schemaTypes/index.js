@@ -13,6 +13,7 @@ import { lien } from './objets/lien.js'
 import { texteRiche, texteSimple } from './objets/texteRiche.js'
 import { imageEditoriale } from './objets/imageEditoriale.js'
 import { tarifSimple, tarifSaison, statistique, reseauSocial } from './objets/tarifs.js'
+import { temoignage } from './objets/temoignage.js'
 
 // Documents : ce que la cliente crée et modifie.
 import { activite } from './activite.js'
@@ -28,7 +29,7 @@ import { seoGlobal } from './seoGlobal.js'
 export const schemaTypes = [
   // objets
   lien, texteRiche, texteSimple, imageEditoriale,
-  tarifSimple, tarifSaison, statistique, reseauSocial,
+  tarifSimple, tarifSaison, statistique, reseauSocial, temoignage,
   // documents
   activite, creneau, exception, fermeture, evenement, article,
   siteContent, infosPratiques, seoGlobal,

@@ -37,13 +37,14 @@
   "dependencies": {
     "@sanity/client": "^7.26.2",
     "@sanity/image-url": "^2.1.1",
-    "@sanity/locale-fr-fr": "^1.2.36",
-    "@sanity/vision": "^4.22.1",
+    "@sanity/locale-fr-fr": "^1.2.37",
+    "@sanity/preview-url-secret": "^3.0.0",
+    "@sanity/vision": "^5.31.2",
     "next": "^15.5.23",
     "next-sanity": "^11.6.13",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0",
-    "sanity": "^4.22.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "sanity": "^5.31.2",
     "styled-components": "^6.5.3"
   },
   "overrides": {

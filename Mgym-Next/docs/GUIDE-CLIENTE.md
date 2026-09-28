@@ -89,10 +89,18 @@ une seule saisie masque tous les cours de la période.
 **Moins de deux minutes.**
 
 1. Menu **Événements & stages** → **À venir** → bouton **+**
-2. Remplissez le titre, la date de début, et cliquez sur **Generate** à côté
-   de l'adresse web
-3. Le reste est facultatif : lieu, tarif, nombre de places, photo, description
-4. **Publier**
+2. Remplissez le titre et la date de début. **L'adresse web se remplit toute
+   seule** quand vous publiez : plus besoin de cliquer sur « Generate ».
+3. **Activité rattachée** : choisissez « Ateliers thématiques » pour un
+   atelier. Il apparaîtra alors AUSSI dans l'onglet *Ateliers* de la section
+   « Plus d'activités », sous « Prochaines dates ».
+4. Le reste est facultatif : lieu, tarif, nombre de places, photo, description
+5. **Publier**. Deux à trois minutes plus tard, le stage apparaît dans la
+   frise **Stages & événements** de la page d'accueil, avec sa propre page
+   que vous pouvez partager sur Facebook ou Instagram.
+
+Un stage passé disparaît tout seul de la frise. Sa page reste accessible (un
+lien déjà partagé ne tombe jamais sur une erreur) et indique qu'il a eu lieu.
 
 **Astuce.** Pour un stage semblable à un précédent : ouvrez l'ancien, menu
 **⋯** → **Dupliquer**. Vous n'avez plus qu'à changer la date. La copie arrive
@@ -110,8 +118,8 @@ doublon par erreur.
 **Environ cinq minutes.**
 
 1. Menu **Articles du blog** → **+**
-2. Titre, puis **Generate** pour l'adresse web
-3. **Résumé** : deux ou trois phrases, affichées dans la liste des articles
+2. Titre (l'adresse web se remplit toute seule à la publication)
+3. **Résumé** : facultatif. Laissé vide, le site reprend le début de l'article
 4. **Image de couverture**
 5. **Texte de l'article** : écrivez normalement. Vous pouvez mettre en gras,
    en italique, faire des listes, poser des liens et créer des sous-titres.
@@ -124,16 +132,75 @@ doublon par erreur.
 
 ---
 
-## Regarder avant de publier
+## Ajouter un témoignage
+
+1. **Textes du site** → onglet **Témoignages** → **Témoignages** → **+**
+2. Recopiez les mots de la personne, sans les réécrire
+3. **Signature** : prénom et initiale (« Martine D. »)
+4. **Provenance** : avis Google, Facebook, ou recueilli directement
+5. Cochez **« La personne est d'accord pour être citée »** : sans cette case,
+   la publication est refusée
+6. **Publier**
+
+Trois témoignages au plus sont affichés, sous la présentation d'Emmanuelle.
+Dans le même onglet : la **note Google** et le **nombre d'avis** (à mettre à
+jour de temps en temps), et le **lien vers vos avis Google**.
+
+> **Uniquement de vrais avis.** Un avis inventé est interdit, et le site
+> indique d'où viennent les avis affichés.
+
+---
+
+## La carte et l'itinéraire
+
+La mini-carte de la section Contact ouvre l'application de cartes du
+téléphone (Plans sur iPhone, Google Maps ou Waze sur Android).
+
+Si le repère n'est pas exactement sur la salle : **Infos pratiques** →
+**Position sur la carte**. Sur Google Maps, faites un clic droit sur la salle,
+puis cliquez sur les deux nombres pour les copier : le premier est la
+latitude, le second la longitude.
+
+---
+
+## Changer une plaquette PDF
+
+**Infos pratiques** → **Plaquette « Groupes, événements & entreprises »** ou
+**Plaquette « Massages bien-être »** → déposez le nouveau PDF → **Publier**.
+
+> Enregistrez vos PDF en **qualité web** (dans Canva : *Télécharger* → *PDF
+> standard*). Un PDF de plusieurs dizaines de Mo ne s'ouvre pas sur un
+> téléphone.
+
+---
+
+## Où s'affiche une activité
+
+Chaque fiche du menu **Les activités** a un choix **« Où l'afficher »** :
+
+- **Cours régulier** : dans le carrousel des activités ;
+- **Ateliers thématiques** ou **Prestations sur mesure** : dans l'onglet
+  correspondant de la section **Plus d'activités**.
+
+---
+
+## Regarder avant de publier : l'Aperçu
 
 C'est l'étape qui enlève la peur de se tromper.
 
-1. Après vos modifications, **enregistrez** (cela se fait tout seul)
-2. Cliquez sur **Voir le site** en haut à droite
-3. Le site s'ouvre **avec vos modifications**, dans un bandeau
-   « Mode prévisualisation »
-4. Si cela vous convient, revenez et cliquez sur **Publier**
-5. Sinon, corrigez et regardez à nouveau
+1. En haut du back-office, cliquez sur **Aperçu** (à côté de *Structure*)
+2. Le site s'affiche **avec vos modifications non publiées**
+3. Modifiez un texte : l'aperçu se met à jour pendant que vous tapez
+4. **Cliquez directement sur un texte du site** : le champ qui le contient
+   s'ouvre, prêt à être modifié
+5. Si cela vous convient, cliquez sur **Publier**
+
+**Sur téléphone**, l'aperçu et le formulaire ne tiennent pas côte à côte :
+deux onglets apparaissent en haut de l'écran, *Presentation* (le site) et
+*Structure* (le formulaire). Passez de l'un à l'autre d'un doigt.
+
+> Depuis la fiche d'un stage ou d'un article, le cadre **« Utilisé sur… »**
+> en haut du formulaire ouvre directement l'aperçu à la bonne page.
 
 > Le site public **n'a pas changé** pendant tout ce temps. Seule l'action
 > **Publier** le met à jour, une à deux minutes plus tard.
@@ -170,6 +237,10 @@ La marche à suivre détaillée est dans `ROLLBACK.md`.
 | Ajouter une activité | **Les activités** → **+** |
 | Retirer une activité sans l'effacer | **Les activités** → décocher « Afficher sur le site » |
 | Annoncer un stage | **Événements & stages** |
+| Ajouter un avis | **Textes du site** → onglet **Témoignages** |
+| Ajouter Instagram (ou un autre réseau) | **Infos pratiques** → **Réseaux sociaux** → **+** |
+| Déplacer le repère de la carte | **Infos pratiques** → **Position sur la carte** |
+| Remplacer une plaquette PDF | **Infos pratiques** → **Plaquette…** |
 | Écrire un article | **Articles du blog** |
 | Changer le téléphone ou l'adresse | **Infos pratiques** |
 | Changer un tarif | **Textes du site** → onglet **Tarifs** |

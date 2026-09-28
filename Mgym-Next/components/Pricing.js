@@ -14,11 +14,14 @@
 
 import LienFormulaire from './LienFormulaire'
 import TexteRiche from './TexteRiche'
+import { Picto } from './pictogrammes'
 
 // Les en-têtes du tableau sont dans le code : ce sont des repères de
 // lecture, pas du contenu. « Famille * » renvoie à la note explicative
 // saisie, elle, dans le back-office.
-const COLONNES_SAISON = ['Une personne', 'Famille *']
+//   = espace insécable : sans elle, l'astérisque passait seul à la
+// ligne sur téléphone.
+const COLONNES_SAISON = ['Une personne', 'Famille *']
 
 /** Une vignette : le prix en grand, le nom dessous. */
 function Vignette({ tarif }) {
@@ -35,7 +38,11 @@ export default function Pricing({ site, infos }) {
   const carte = site.tarifsCarte ?? []
   const saison = site.tarifsSaison ?? []
   const partiels = site.tarifsPartiels ?? []
-  const etapes = site.inscriptionEtapes ?? []
+  // Les lignes vides sont écartées : en vidant la liste dans le back-office,
+  // la cliente a laissé une ligne blanche, qui affichait encore le titre
+  // « Il vous sera demandé : » au-dessus d'une puce vide.
+  const etapes = (site.inscriptionEtapes ?? []).filter((e) => e?.trim())
+  const alerte = site.inscriptionAlerte ?? []
 
   return (
     <section id="tarifs" className="section-pad">
@@ -128,7 +135,10 @@ export default function Pricing({ site, infos }) {
 
         <div className="inscription apparition">
           <p className="inscription-titre">
-            {site.inscriptionTitre} <em>{site.inscriptionTitreItalique}</em> ?
+            {/* &nbsp; : en français, l'espace avant « ? » est insécable.
+                Sans elle, le point d'interrogation finissait seul sur sa
+                ligne sur téléphone. */}
+            {site.inscriptionTitre} <em>{site.inscriptionTitreItalique}</em>&nbsp;?
           </p>
           <p className="inscription-sous-titre">{site.inscriptionSousTitre}</p>
 
@@ -146,7 +156,15 @@ export default function Pricing({ site, infos }) {
             </>
           )}
 
-          <TexteRiche valeur={site.inscriptionAlerte} className="inscription-alerte" />
+          {alerte.length > 0 && (
+            <div className="inscription-alerte">
+              <p className="inscription-alerte-titre">
+                <Picto nom="document" taille={18} />
+                Bon à savoir
+              </p>
+              <TexteRiche valeur={alerte} />
+            </div>
+          )}
 
           <LienFormulaire lien={infos.lienInscription}>
             {site.inscriptionBouton}
