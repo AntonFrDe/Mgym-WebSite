@@ -8,7 +8,7 @@
 // une liste vide plutôt qu'un fichier trompeur.
 
 import { getContenu } from '../lib/contenu'
-import { getArticles } from '../lib/sanity/queries/index.js'
+import { getArticles, getSlugsEvenements } from '../lib/sanity/queries/index.js'
 
 // Ces deux fichiers sont calculés au BUILD, jamais à la requête : ils ne
 // dépendent ni des cookies ni de l'URL. Le déclarer explicitement est
@@ -23,6 +23,7 @@ export default async function sitemap() {
   if (!base) return []
 
   const articles = (await getArticles()) ?? []
+  const evenements = (await getSlugsEvenements()) ?? []
 
   return [
     { url: base, lastModified: new Date(), changeFrequency: 'monthly', priority: 1 },
@@ -33,6 +34,14 @@ export default async function sitemap() {
         lastModified: a.datePublication ? new Date(a.datePublication) : new Date(),
         changeFrequency: 'yearly',
         priority: 0.6,
+      })),
+    ...evenements
+      .filter((e) => e.slug)
+      .map((e) => ({
+        url: `${base}/evenements/${e.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.7,
       })),
   ]
 }

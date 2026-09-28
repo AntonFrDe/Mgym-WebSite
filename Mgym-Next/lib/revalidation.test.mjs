@@ -22,6 +22,7 @@ const PAGES = [
   'app/page.js',
   'app/blog/page.js',
   'app/blog/[slug]/page.js',
+  'app/evenements/[slug]/page.js',
 ]
 
 test('le délai de revalidation est un entier de secondes plausible', () => {

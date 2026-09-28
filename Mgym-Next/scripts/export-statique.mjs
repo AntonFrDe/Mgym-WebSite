@@ -45,7 +45,10 @@ for (const entree of A_COPIER) {
 //              hors-ligne est un document d'UNE page, destiné à être
 //              relu : un blog vide n'y a pas sa place. build-standalone.js
 //              n'assemble d'ailleurs que out/index.html.
-for (const aRetirer of ['api', 'blog']) {
+//   app/evenements  même raison que le blog : les fiches d'événements
+//              n'existent que sur le site en ligne. La frise de la copie
+//              renvoie vers elles (voir Evenements.js).
+for (const aRetirer of ['api', 'blog', 'evenements']) {
   const dossier = path.join(TEMPO, 'app', aRetirer)
   if (existsSync(dossier)) {
     rmSync(dossier, { recursive: true, force: true })

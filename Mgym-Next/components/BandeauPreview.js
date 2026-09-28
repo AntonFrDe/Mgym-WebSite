@@ -37,10 +37,24 @@ function nettoyerAdresse() {
   window.history.replaceState(null, '', url.pathname + url.search + url.hash)
 }
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function BandeauPreview() {
-  useEffect(nettoyerAdresse, [])
+  // Dans l'aperçu du Studio, le site est affiché DANS un cadre : le Studio
+  // dit déjà qu'on regarde un brouillon, et « Revenir au site publié »
+  // casserait l'aperçu. Le bandeau s'efface alors, et le décalage de la
+  // page qu'il réservait avec lui.
+  const [dansLeStudio, setDansLeStudio] = useState(false)
+
+  useEffect(() => {
+    nettoyerAdresse()
+    if (window.self !== window.top) {
+      setDansLeStudio(true)
+      document.body.classList.remove('en-preview')
+    }
+  }, [])
+
+  if (dansLeStudio) return null
 
   return (
     <div className="bandeau-preview" role="status">

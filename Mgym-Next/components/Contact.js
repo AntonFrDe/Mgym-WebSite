@@ -5,7 +5,20 @@
 // vide n'est pas affichée — mieux qu'une carte « Téléphone » sans numéro.
 
 import LienFormulaire from './LienFormulaire'
+import LienItineraire from './LienItineraire'
 import TexteRiche from './TexteRiche'
+import { Picto } from './pictogrammes'
+
+/**
+ * L'adresse du plan OpenStreetMap intégré, centré un peu AU SUD du repère :
+ * le bandeau d'adresse couvre le bas de la carte, et le repère doit rester
+ * visible au-dessus de lui.
+ */
+function urlCarte({ lat, lng }) {
+  const centre = lat - 0.0012
+  const bbox = [lng - 0.008, centre - 0.0045, lng + 0.008, centre + 0.0045].map((n) => n.toFixed(5)).join(',')
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`
+}
 
 // Les pictogrammes sont dans le code : ils font partie du dessin, pas du
 // contenu. La cliente n'a pas à choisir une icône.
@@ -31,10 +44,14 @@ const ICONES = {
 
 export default function Contact({ site, infos }) {
   const telBrut = (infos.telephone ?? '').replace(/[ .]/g, '')
+  const adresseLigne = (infos.adresse ?? '').split('\n').join(', ')
+  // Avec la carte, l'adresse est écrite sur son bandeau : la carte
+  // « Adresse » ferait doublon.
+  const avecCarte = Boolean(infos.positionCarte?.lat && infos.positionCarte?.lng)
 
   // Une carte par information réellement renseignée.
   const cartes = [
-    infos.adresse && {
+    infos.adresse && !avecCarte && {
       cle: 'adresse', libelle: 'Adresse', icone: ICONES.adresse,
       contenu: (
         <span className="contact-addr">
@@ -66,6 +83,37 @@ export default function Contact({ site, infos }) {
           <div className="divider" />
         </div>
 
+        {/* LA MINI-CARTE. Un plan, pas une carte interactive : sur un
+            téléphone, une carte « vivante » capture le doigt et empêche de
+            faire défiler la page. Ici, toucher n'importe où ouvre
+            l'itinéraire dans l'application du téléphone (Plans sur iPhone,
+            Google Maps ou Waze sur Android) — voir LienItineraire.js.
+            Le plan est une iframe OpenStreetMap : ni clé, ni compte, ni
+            cookie publicitaire. Autorisée par la CSP (next.config.js). */}
+        {avecCarte && (
+          <div className="contact-carte apparition">
+            <iframe
+              className="contact-carte-fond"
+              src={urlCarte(infos.positionCarte)}
+              title="Plan d'accès"
+              loading="lazy"
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+            <span className="contact-carte-credit">© OpenStreetMap</span>
+            <div className="contact-carte-bandeau">
+              <span className="contact-carte-adresse">
+                <strong>M&apos;GYM</strong>
+                {adresseLigne}
+              </span>
+              <LienItineraire position={infos.positionCarte} className="contact-carte-bouton">
+                <Picto nom="itineraire" taille={18} />
+                Itinéraire
+              </LienItineraire>
+            </div>
+          </div>
+        )}
+
         <div className="contact-cards">
           {cartes.map((carte, i) => (
             <div key={carte.cle} className={`contact-card apparition retard-${i + 1}`}>
@@ -78,7 +126,8 @@ export default function Contact({ site, infos }) {
 
         <div className="contact-cta apparition">
           <div className="contact-cta-title">
-            {site.contactCtaTitre} <em>{site.contactCtaTitreItalique}</em> ?
+            {/* &nbsp; : espace insécable avant « ? », voir Pricing.js. */}
+            {site.contactCtaTitre} <em>{site.contactCtaTitreItalique}</em>&nbsp;?
           </div>
           <TexteRiche valeur={site.contactCtaSousTitre} className="contact-cta-sub" />
 

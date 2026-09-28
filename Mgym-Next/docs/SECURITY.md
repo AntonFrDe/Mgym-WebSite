@@ -205,16 +205,40 @@ un serveur réel :
 
 ```
 X-Content-Type-Options: nosniff
-X-Frame-Options: SAMEORIGIN
 Referrer-Policy: strict-origin-when-cross-origin
 Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
 Strict-Transport-Security: max-age=63072000; includeSubDomains
 Content-Security-Policy: default-src 'self'; img-src 'self' data: https://cdn.sanity.io;
   font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';
   connect-src 'self' https://*.api.sanity.io https://*.apicdn.sanity.io;
-  frame-ancestors 'self'; frame-src 'none'; object-src 'none';
+  frame-ancestors 'self' https://mgym.sanity.studio https://www.sanity.io;
+  frame-src https://www.openstreetmap.org; object-src 'none';
   base-uri 'self'; form-action 'self'
 ```
+
+### Aperçu du Studio (septembre 2026)
+
+- `X-Frame-Options` est **retiré** : il ne sait autoriser que le même site.
+  La protection contre le détournement de clic passe par
+  `frame-ancestors 'self' https://mgym.sanity.studio https://www.sanity.io` :
+  seul le back-office (et le tableau de bord Sanity qui l'encadre) peut
+  afficher le site dans un cadre.
+- `/api/draft-mode/enable` ne connaît **aucun secret écrit dans le Studio** :
+  le Studio crée un secret à usage limité, au nom de la personne connectée,
+  que la route vérifie avec le jeton de lecture (`@sanity/preview-url-secret`).
+  Session de 8 h, redirection limitée aux pages du site (`cheminInterne`).
+- Cookies : `HttpOnly; Secure; SameSite=None`, plus `Partitioned` dans le
+  cadre du Studio (Safari 18.4+ jette sinon le cookie). Un cookie partitionné
+  ne vaut que dans le Studio : il n'ouvre pas la prévisualisation ailleurs.
+- Le « stega » (marques invisibles du clic-pour-modifier) n'existe que sur le
+  client de prévisualisation ; le site public ne le reçoit jamais.
+
+`frame-src` n'autorise qu'**un** domaine : le plan OpenStreetMap de la section
+Contact (septembre 2026). Il est affiché en lecture seule (`pointer-events:
+none`, hors tabulation) ; OpenStreetMap ne dépose ni cookie publicitaire ni
+traceur. Il reçoit l'adresse IP du visiteur au chargement du plan, comme
+n'importe quel hébergeur d'images. Le plan n'est chargé qu'à l'approche de la
+section (`loading="lazy"`).
 
 ### Risque accepté : `script-src 'unsafe-inline'`
 

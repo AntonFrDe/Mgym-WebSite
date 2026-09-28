@@ -17,14 +17,22 @@ import { TELEPHONE_AFFICHE, EMAIL, LIEN_INSCRIPTION, LIEN_STAGES } from '../../c
 export { activites }
 
 export const infosPratiques = {
-  adresse: 'Route de Layrac-sur-Tarn\n31340 Mirepoix-sur-Tarn',
+  adresse: 'Route de Layrac\n31340 Mirepoix-sur-Tarn',
   telephone: TELEPHONE_AFFICHE,
   email: EMAIL,
   lienInscription: LIEN_INSCRIPTION || undefined,
   lienStages: LIEN_STAGES || undefined,
   reseauxSociaux: [
-    { nom: 'facebook', url: 'https://www.facebook.com/', libelle: "Suivre M'GYM" },
+    { nom: 'facebook', url: 'https://www.facebook.com/mgym31', libelle: "Suivre M'GYM" },
+    { nom: 'instagram', url: 'https://www.instagram.com/asso.mgym/', libelle: '@asso.mgym' },
   ],
+  // Route de Layrac, relevée sur OpenStreetMap : la cliente l'affine dans
+  // « Infos pratiques » si le repère n'est pas exactement sur la salle.
+  positionCarte: { lat: 43.8145262, lng: 1.5699006 },
+  // Les deux plaquettes, compressées pour le web (224 Mo → 0,6 Mo). Un
+  // PDF déposé dans le back-office les remplace.
+  plaquetteGroupes: '/documents/plaquette-groupes-entreprises.pdf',
+  plaquetteMassages: '/documents/plaquette-massages.pdf',
 }
 
 export const seoGlobal = {
@@ -114,6 +122,12 @@ export const siteContent = {
   activitesTitreItalique: 'Bien-être',
   activitesChapo: 'Renforcez votre corps, libérez les tensions et retrouvez une énergie durable.',
 
+  // ── Plus d'activités ────────────────────────────────────────
+  plusEtiquette: "Plus d'activités",
+  plusTitre: 'Ateliers, sur-mesure &',
+  plusTitreItalique: 'plein air',
+  plusChapo: 'Au-delà des cours de la semaine : des ateliers pour approfondir, des interventions pour votre groupe, et des sorties au grand air.',
+
   // ── Marche nordique ─────────────────────────────────────────
   outdoorEtiquette: 'Explorez aussi',
   outdoorTitre: 'Marche nordique &',
@@ -163,6 +177,26 @@ export const siteContent = {
     'Instructrice Marche Nordique',
     'Masseuse bien-être',
   ],
+
+  // ── Témoignages ─────────────────────────────────────────────
+  // Le seul avis recopié ici est RÉEL : c'est celui que Google affiche sur
+  // la fiche de l'association (5 étoiles, 24 avis, relevé le 27/09/2026).
+  avisEtiquette: 'Ils en parlent',
+  avisTitre: 'Vos',
+  avisTitreItalique: 'témoignages',
+  avisNote: '5',
+  avisNombre: '24',
+  avisLienGoogle: "https://www.google.com/maps/search/?api=1&query=M'Gym%20Mirepoix-sur-Tarn",
+  temoignages: [
+    { texte: 'Cours efficaces et variés !', source: 'google', note: 5, accord: true },
+  ],
+
+  // ── Stages & événements ─────────────────────────────────────
+  evenementsEtiquette: 'Au programme',
+  evenementsTitre: 'Stages &',
+  evenementsTitreItalique: 'événements',
+  evenementsChapo: 'Stages, ateliers et sorties à venir. Touchez un événement pour tout savoir et vous inscrire.',
+  evenementsVide: "Aucun stage n'est programmé pour le moment. Les prochaines dates sont annoncées ici et sur nos réseaux.",
 
   // ── Tarifs ──────────────────────────────────────────────────
   tarifsEtiquette: 'Tarifs',

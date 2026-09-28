@@ -16,11 +16,17 @@
 
 
 /**
- * @param {{lien?: string, className?: string, children: any}} props
+ * @param {{lien?: string, className?: string, precision?: string, children: any}} props
  *   `lien` vient d'« Infos pratiques ». Absent, le bouton renvoie vers la
  *   section Contact plutôt que vers le vide.
+ *   `precision` : ce que le lecteur d'écran entend en plus du libellé. Par
+ *   défaut, qu'il s'agit d'un formulaire Google ; pour une plaquette,
+ *   « plaquette PDF ». Même composant : la règle « annoncer qu'on quitte
+ *   le site » vaut pour tous les liens sortants.
  */
-export default function LienFormulaire({ lien, className = 'btn-primary', children }) {
+export default function LienFormulaire({
+  lien, className = 'btn-primary', precision = 'formulaire Google', children,
+}) {
   const destination = lien || '#contact'
   const externe = Boolean(lien)
 
@@ -46,7 +52,7 @@ export default function LienFormulaire({ lien, className = 'btn-primary', childr
         <path d="M9 8.5v2h-7.5V3h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       <span className="visuellement-masque">
-        {' '}(formulaire Google, s&apos;ouvre dans un nouvel onglet)
+        {' '}({precision}, s&apos;ouvre dans un nouvel onglet)
       </span>
     </a>
   )

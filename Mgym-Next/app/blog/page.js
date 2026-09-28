@@ -14,6 +14,7 @@ import { previewActif } from '../../lib/preview'
 import { getContenu } from '../../lib/contenu'
 import { getArticles } from '../../lib/sanity/queries/index.js'
 import { dateLisible } from '../../lib/planning/grille.js'
+import { resume } from '../../lib/resume.js'
 
 // Combien de temps cette page peut rester figée avant de redemander son
 // contenu au CMS. Voir lib/revalidation.js : c'est ce qui permet de
@@ -76,7 +77,7 @@ export default async function Blog() {
                     <div className="blog-carte-corps">
                       <p className="blog-carte-date">{dateLisible(article.datePublication)}</p>
                       <h3 className="blog-carte-titre">{article.titre}</h3>
-                      <p className="blog-carte-extrait">{article.extrait}</p>
+                      <p className="blog-carte-extrait">{article.extrait || resume(article.debut)}</p>
                       <span className="etape-lien">Lire l&apos;article →</span>
                     </div>
                   </Link>

@@ -6,6 +6,7 @@ import { Cormorant_Garamond, Montserrat } from 'next/font/google'
 import Nav from '../components/Nav'
 import ClientLayout from '../components/ClientLayout'
 import BandeauPreview from '../components/BandeauPreview'
+import EditionVisuelle from '../components/EditionVisuelle'
 import { previewActif } from '../lib/preview'
 import { getContenu } from '../lib/contenu'
 import './globals.css'
@@ -98,7 +99,10 @@ export default async function RootLayout({ children }) {
           Sur le site public, elle n'est jamais posée. */}
       <body className={enPreview ? 'en-preview' : undefined}>
         {enPreview && <BandeauPreview />}
-        <Nav />
+        {/* L'aperçu du Studio : cadres cliquables et rafraîchissement en
+            direct. Jamais rendu sur le site public. */}
+        {enPreview && <EditionVisuelle />}
+        <Nav enExport={process.env.MGYM_EXPORT === '1'} />
         {/* ClientLayout gère les animations au défilement (IntersectionObserver) */}
         <ClientLayout>
           {children}

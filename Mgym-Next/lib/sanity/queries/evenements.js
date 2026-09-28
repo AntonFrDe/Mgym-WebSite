@@ -1,7 +1,7 @@
 // evenements.js — stages et ateliers.
 
 import { interroger } from '../fetch.js'
-import { EVENEMENTS_A_VENIR, EVENEMENT_PAR_SLUG } from './groq.js'
+import { EVENEMENTS_A_VENIR, EVENEMENT_PAR_SLUG, SLUGS_EVENEMENTS } from './groq.js'
 
 /**
  * Les événements à venir uniquement : un stage passé n'a rien à faire sur
@@ -32,3 +32,9 @@ export const getEvenementParSlug = (slug, preview = false) =>
     preview,
     siEchec: null,
   })
+
+/** Sert à generateStaticParams : les adresses de TOUS les événements, passés
+ *  compris — un lien partagé sur Facebook ne doit pas mener à une erreur
+ *  le lendemain du stage. */
+export const getSlugsEvenements = () =>
+  interroger({ requete: SLUGS_EVENEMENTS, siEchec: [] })

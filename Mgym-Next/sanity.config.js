@@ -14,11 +14,16 @@
 
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
+import { presentationTool } from 'sanity/presentation'
 import { visionTool } from '@sanity/vision'
 import { frFRLocale } from '@sanity/locale-fr-fr'
 import { schemaTypes } from './sanity/schemaTypes/index.js'
 import { structure, actionsDocument, modelesDocument } from './sanity/lib/structure.js'
-import { actionDupliquer, actionAnnulerUneDate } from './sanity/lib/actions.jsx'
+import { actionDupliquer, actionAnnulerUneDate, avecAdresseAutomatique } from './sanity/lib/actions.jsx'
+import { optionsApercu } from './sanity/lib/presentation.js'
+
+// Les documents dont « Publier » fabrique lui-même l'adresse web.
+const AVEC_ADRESSE_AUTO = ['article', 'evenement']
 
 // Le CLI Sanity n'injecte dans le bundle du Studio que les variables
 // préfixées SANITY_STUDIO_. Celles de Next (NEXT_PUBLIC_) lui sont
@@ -45,6 +50,10 @@ export default defineConfig({
     // Le menu latéral, organisé par tâche et non par type de document.
     structureTool({ structure }),
 
+    // « Aperçu » : le site à côté du formulaire, mis à jour en direct, et
+    // un clic sur un texte du site ouvre son champ. Voir sanity/lib/presentation.js.
+    presentationTool(optionsApercu),
+
     // Le Studio en français : boutons, messages, dates. Sans lui, la
     // cliente lit « Publish », « Unpublish », « Discard changes ».
     frFRLocale(),
@@ -65,7 +74,11 @@ export default defineConfig({
     // Retire « Supprimer » et « Dupliquer » des documents uniques, et
     // ajoute les deux raccourcis du quotidien.
     actions: (actions, contexte) => [
-      ...actionsDocument(actions, contexte),
+      ...actionsDocument(actions, contexte).map((action) =>
+        action.action === 'publish' && AVEC_ADRESSE_AUTO.includes(contexte.schemaType)
+          ? avecAdresseAutomatique(action)
+          : action
+      ),
       actionDupliquer,
       actionAnnulerUneDate,
     ],

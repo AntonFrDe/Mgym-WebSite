@@ -5,6 +5,7 @@
 // rendre modifiables permettrait de pointer vers une section qui n'existe
 // pas.
 
+import { LogoReseau, NOMS_RESEAUX } from './pictogrammes'
 
 // La copie hors-ligne est un document d'une seule page : le blog n'y est
 // pas exporté. Y laisser son lien donnerait un lien mort à la cliente.
@@ -13,9 +14,11 @@ const enExport = process.env.MGYM_EXPORT === '1'
 const navLinks = [
   { href: '/#about',     label: 'À propos'  },
   { href: '/#activites', label: 'Activités' },
+  { href: '/#plus-activites', label: "Plus d'activités" },
   { href: '/#coach',     label: 'Coach'     },
   { href: '/#tarifs',    label: 'Tarifs'    },
   { href: '/#planning',  label: 'Planning'  },
+  { href: '/#evenements', label: 'Stages'   },
   { href: '/#reseaux',   label: 'Réseaux'   },
   { href: '/#contact',   label: 'Contact'   },
   ...(enExport ? [] : [{ href: '/blog', label: 'Blog' }]),
@@ -59,11 +62,11 @@ export default function Footer({ site, infos }) {
                 href={reseau.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`${reseau.nom} M'GYM`}
+                aria-label={`${NOMS_RESEAUX[reseau.nom] ?? reseau.nom} M'GYM`}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
-                </svg>
+                {/* Le logo du réseau lui-même : ce bloc dessinait celui de
+                    Facebook pour TOUS les réseaux. */}
+                <LogoReseau nom={reseau.nom} />
               </a>
             ))}
             {infos.email && (

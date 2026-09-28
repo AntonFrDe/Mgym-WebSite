@@ -35,7 +35,11 @@ export const article = defineType({
         'L\'adresse de l\'article. Une fois l\'article publié et partagé, ' +
         'évitez de la changer : les liens existants cesseraient de marcher.',
       options: { source: 'titre', maxLength: 90 },
-      validation: (Rule) => Rule.required().error('Cliquez sur « Generate ».'),
+      // Un simple AVERTISSEMENT : « Publier » remplit l'adresse tout seul si
+      // elle est vide (voir sanity/lib/actions.jsx). L'erreur d'avant
+      // bloquait la publication tant qu'on n'avait pas cliqué « Generate ».
+      validation: (Rule) =>
+        Rule.required().warning('Elle sera créée automatiquement à la publication.'),
     }),
 
     defineField({
@@ -44,9 +48,9 @@ export const article = defineType({
       type: 'text',
       rows: 3,
       group: 'contenu',
-      description: 'Deux ou trois phrases, affichées dans la liste des articles.',
+      description: 'Facultatif. Deux ou trois phrases, affichées dans la liste des articles. Laissé vide, le site reprend le début de l\'article.',
       validation: (Rule) =>
-        Rule.required().max(220).error('Le résumé est obligatoire, 220 caractères maximum.'),
+        Rule.max(220).warning('Au-delà de 220 caractères, le résumé est coupé dans la liste.'),
     }),
 
     defineField({

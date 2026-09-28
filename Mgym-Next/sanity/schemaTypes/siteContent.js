@@ -22,9 +22,12 @@ export const siteContent = defineType({
     { name: 'accueil', title: 'Accueil', default: true },
     { name: 'apropos', title: 'À propos' },
     { name: 'activites', title: 'Activités' },
+    { name: 'plus', title: 'Plus d\'activités' },
     { name: 'outdoor', title: 'Marche nordique' },
     { name: 'bespoke', title: 'Sur mesure' },
     { name: 'coach', title: 'Coach' },
+    { name: 'avis', title: 'Témoignages' },
+    { name: 'evenements', title: 'Stages & événements' },
     { name: 'tarifs', title: 'Tarifs' },
     { name: 'planning', title: 'Planning' },
     { name: 'contact', title: 'Contact' },
@@ -89,6 +92,15 @@ export const siteContent = defineType({
     defineField({ name: 'activitesChapo', title: 'Phrase d\'introduction', type: 'string', group: 'activites', description: 'La phrase sous le titre. L\'instruction de manipulation (« cliquez sur une étape… ») est ajoutée automatiquement par le site.' }),
 
     // ── MARCHE NORDIQUE ────────────────────────────────────────
+    // ── PLUS D'ACTIVITÉS ─────────────────────────────────────
+    // L'en-tête de la section à trois onglets. Le contenu des onglets vient
+    // de l'activité « Ateliers thématiques », des champs « Sur mesure » et
+    // des champs « Marche nordique » ci-dessous.
+    defineField({ name: 'plusEtiquette', title: 'Petite étiquette', type: 'string', group: 'plus', description: 'Actuellement « Plus d\'activités ».' }),
+    defineField({ name: 'plusTitre', title: 'Titre', type: 'string', group: 'plus', description: 'Actuellement « Ateliers, sur-mesure & ».' }),
+    defineField({ name: 'plusTitreItalique', title: 'Mot en italique', type: 'string', group: 'plus', description: 'Actuellement « plein air ».' }),
+    defineField({ name: 'plusChapo', title: 'Phrase d\'introduction', type: 'string', group: 'plus', description: 'Une phrase sous le titre.' }),
+
     defineField({ name: 'outdoorEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'outdoor', description: 'Actuellement « Explorez aussi ».' }),
     defineField({ name: 'outdoorTitre', title: 'Titre', type: 'string',
       description: 'Actuellement « Marche nordique & activités ».', group: 'outdoor' }),
@@ -134,6 +146,31 @@ export const siteContent = defineType({
     defineField({ name: 'coachTexte', title: 'Présentation', type: 'texteSimple',
       description: 'Quelques phrases de présentation, à la troisième personne.', group: 'coach' }),
     defineField({ name: 'coachCertifications', title: 'Diplômes et certifications', type: 'array', of: [{ type: 'string' }], group: 'coach', description: 'Un par ligne.' }),
+
+    // ── TÉMOIGNAGES ────────────────────────────────────────────
+    defineField({ name: 'avisEtiquette', title: 'Petite étiquette', type: 'string', group: 'avis', description: 'Actuellement « Ils en parlent ».' }),
+    defineField({ name: 'avisTitre', title: 'Titre', type: 'string', group: 'avis', description: 'Actuellement « Vos ».' }),
+    defineField({ name: 'avisTitreItalique', title: 'Mot en italique', type: 'string', group: 'avis', description: 'Actuellement « témoignages ».' }),
+    defineField({ name: 'avisNote', title: 'Note Google', type: 'string', group: 'avis', description: 'La note moyenne affichée par Google, par exemple « 5 » ou « 4,8 ». Laissez vide pour ne pas afficher de note.' }),
+    defineField({ name: 'avisNombre', title: 'Nombre d\'avis Google', type: 'string', group: 'avis', description: 'Par exemple « 24 ». Pensez à le mettre à jour de temps en temps.' }),
+    defineField({
+      name: 'avisLienGoogle', title: 'Lien vers vos avis Google', type: 'url', group: 'avis',
+      description: 'Ouvrez votre fiche Google Maps, « Partager », « Copier le lien ». Laissez vide pour ne pas afficher de lien.',
+      validation: (Rule) => Rule.uri({ scheme: ['https'] }).error('L\'adresse doit commencer par https://'),
+    }),
+    defineField({
+      name: 'temoignages', title: 'Témoignages', type: 'array', of: [{ type: 'temoignage' }], group: 'avis',
+      description: 'Trois au maximum sont affichés. Uniquement de vrais avis, avec l\'accord des personnes.',
+    }),
+
+    // ── STAGES & ÉVÉNEMENTS ────────────────────────────────────
+    // L'en-tête de la frise. Les événements eux-mêmes se créent dans le
+    // menu « Événements & stages ».
+    defineField({ name: 'evenementsEtiquette', title: 'Petite étiquette', type: 'string', group: 'evenements', description: 'Actuellement « Au programme ».' }),
+    defineField({ name: 'evenementsTitre', title: 'Titre', type: 'string', group: 'evenements', description: 'Actuellement « Stages & ».' }),
+    defineField({ name: 'evenementsTitreItalique', title: 'Mot en italique', type: 'string', group: 'evenements', description: 'Actuellement « événements ».' }),
+    defineField({ name: 'evenementsChapo', title: 'Phrase d\'introduction', type: 'string', group: 'evenements' }),
+    defineField({ name: 'evenementsVide', title: 'Message quand rien n\'est prévu', type: 'string', group: 'evenements', description: 'Affiché à la place de la frise quand aucun événement n\'est à venir.' }),
 
     // ── TARIFS ─────────────────────────────────────────────────
     defineField({ name: 'tarifsEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'tarifs', description: 'Actuellement « Tarifs ».' }),

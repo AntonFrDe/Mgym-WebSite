@@ -28,7 +28,7 @@ const ACTIVITE_CHAMPS = `{
   descriptionCourte,
   "descriptionRiche": descriptionRiche${TEXTE_RICHE},
   "image": image${IMAGE},
-  motsCles, ordreAffichage, lienInterne, libelleLien
+  motsCles, ordreAffichage, rubrique, lienInterne, libelleLien
 }`
 
 const EVENEMENT_CHAMPS = `{
@@ -40,9 +40,11 @@ const EVENEMENT_CHAMPS = `{
   "activite": activite->{ _id, titre, "slug": slug.current }
 }`
 
+// « debut » : le texte brut de l'article, pour fabriquer un résumé quand la
+// cliente n'en a pas écrit (voir lib/resume.js).
 const ARTICLE_RESUME = `{
   _id, titre, "slug": slug.current,
-  extrait, auteur, datePublication,
+  extrait, "debut": pt::text(corps), auteur, datePublication,
   "image": image${IMAGE}
 }`
 
@@ -71,6 +73,8 @@ export const SITE_CONTENT = `*[_type == "siteContent"][0]{
 
   activitesEtiquette, activitesTitre, activitesTitreItalique, activitesChapo,
 
+  plusEtiquette, plusTitre, plusTitreItalique, plusChapo,
+
   outdoorEtiquette, outdoorTitre, outdoorTitreSuite, outdoorTitreItalique,
   "outdoorTexte": outdoorTexte${TEXTE_RICHE},
   "outdoorImage": outdoorImage${IMAGE},
@@ -86,6 +90,12 @@ export const SITE_CONTENT = `*[_type == "siteContent"][0]{
   coachStatistiques[]{ nombre, libelle },
   "coachTexte": coachTexte${TEXTE_RICHE},
   coachCertifications,
+
+  avisEtiquette, avisTitre, avisTitreItalique, avisNote, avisNombre, avisLienGoogle,
+  temoignages[]{ texte, auteur, source, note, accord },
+
+  evenementsEtiquette, evenementsTitre, evenementsTitreItalique,
+  evenementsChapo, evenementsVide,
 
   tarifsEtiquette, tarifsTitre, tarifsTitreItalique,
   adhesion{ nom, detail, prix },
@@ -116,7 +126,10 @@ export const SITE_CONTENT = `*[_type == "siteContent"][0]{
 export const INFOS_PRATIQUES = `*[_type == "infosPratiques"][0]{
   adresse, telephone, email, horairesAccueil,
   reseauxSociaux[]{ nom, url, libelle },
-  lienInscription, lienStages
+  lienInscription, lienStages,
+  positionCarte{ lat, lng },
+  "plaquetteGroupes": plaquetteGroupes.asset->url,
+  "plaquetteMassages": plaquetteMassages.asset->url
 }`
 
 export const SEO_GLOBAL = `*[_type == "seoGlobal"][0]{
@@ -163,6 +176,10 @@ export const FERMETURES = `
 export const EVENEMENTS_A_VENIR = `
   *[_type == "evenement" && dateDebut >= $maintenant]
   | order(dateDebut asc) ${EVENEMENT_CHAMPS}
+`
+
+export const SLUGS_EVENEMENTS = `
+  *[_type == "evenement" && defined(slug.current)]{ "slug": slug.current }
 `
 
 export const EVENEMENT_PAR_SLUG = `

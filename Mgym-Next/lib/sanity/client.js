@@ -20,7 +20,8 @@
 
 import 'server-only'
 import { createClient } from 'next-sanity'
-import { apiVersion, dataset, projectId, sanityConfigure } from './env.js'
+import { apiVersion, dataset, projectId, sanityConfigure, studioUrl } from './env.js'
+import { filtreStega } from './stega.js'
 
 // Réglages communs.
 const communs = {
@@ -62,9 +63,12 @@ export const clientBrouillon = sanityConfigure
       useCdn: false,
       perspective: 'drafts',
       token: process.env.SANITY_API_READ_TOKEN,
-      // Pas de couche stega : une prévisualisation doit refléter la
-      // saisie de l'instant, pas une version mise en cache.
-      stega: false,
+      // Le « stega » : des caractères invisibles glissés dans les textes,
+      // qui permettent, dans l'aperçu du Studio, de cliquer sur un texte
+      // du site pour ouvrir son champ. Seulement ici, jamais pour le site
+      // public. Les champs que le code compare en sont exclus : voir
+      // stega.js.
+      stega: { enabled: true, studioUrl, filter: filtreStega },
     })
   : null
 

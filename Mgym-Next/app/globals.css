@@ -15,10 +15,17 @@
    texte si celle-ci change un jour.
 
    Attention : ces valeurs doivent rester cohérentes deux à deux.
-   #D18B8E, c'est exactement rgb(209,139,142). */
+   #D18B8E, c'est exactement rgb(209,139,142).
+
+   CONTRASTE — DEUX ROSES, DEUX RÔLES. Le rose principal est trop clair
+   pour porter du texte : 2,7:1 sur blanc, 2,15:1 sur le rose clair, là
+   où le minimum lisible (WCAG AA) est 4,5:1. Tout TEXTE rose sur fond
+   clair, et tout bouton rose à texte blanc, utilise donc --rose-fonce.
+   --rose reste la couleur du DÉCOR : filets, étoiles, pictogrammes,
+   bordures, texte sur le bandeau prune. */
 :root {
-  --rose:        #D18B8E;   /* couleur principale : titres, boutons, liens */
-  --rose-fonce:  #B8737A;   /* survol des boutons roses */
+  --rose:        #D18B8E;   /* décor : filets, ✦, pictogrammes, bordures */
+  --rose-fonce:  #985258;   /* texte rose et fond des boutons — 5,7:1 sur blanc, 4,55:1 sur rose clair */
   --rose-clair:  #F4E1E6;   /* fond des sections paires */
   --rose-pale:   #F4C4C7;   /* mot en italique du grand titre d'accueil */
   --creme:       #FFF7F8;   /* fond des sections impaires */
@@ -30,11 +37,48 @@
   --creme-rgb:       255,247,248;
   --prune-rgb:       74,59,66;
   --blanc-rgb:       255,255,255;
+
+  /* Texte secondaire : le prune à 80 %. C'est le minimum lisible sur le
+     rose clair (4,8:1) — à 60 ou 55 %, comme certains textes l'étaient,
+     on tombait à 3:1.
+     Une COULEUR et non une `opacity` : l'opacité s'applique aussi aux
+     liens et aux mots en gras du paragraphe, qu'elle délavait avec lui —
+     et un enfant ne peut pas l'annuler. */
+  --texte-doux:  rgba(var(--prune-rgb), .8);
+
+  /* AMBIANCES — trois teintes d'appoint pour que la page ne soit plus une
+     alternance crème/rose répétée onze fois. Chaque « -fonce » est la
+     seule variante autorisée pour du TEXTE sur fond clair (≥ 5:1 sur
+     crème, lin, sauge et lavande — mesuré). */
+  --lin:            #F6EFE5;   /* fond chaud neutre : coach, tarifs, réseaux */
+  --sauge-clair:    #E7EEE4;   /* fond « plus d'activités » : plein air, ateliers */
+  --sauge:          #9DB39F;   /* décor vert : filets, ✦ */
+  --sauge-fonce:    #4B6653;   /* texte vert */
+  --lavande-clair:  #ECE8F3;   /* fond « stages & événements » */
+  --lavande:        #A99BCB;   /* décor lavande */
+  --lavande-fonce:  #5A5080;   /* texte lavande */
+  --or:             #D4A23A;   /* étoiles des avis — décor, jamais du texte */
+
+  /* L'accent d'une section : étiquette, mot en italique du titre, filet,
+     étiquettes et ✦. Rose par défaut ; une section d'ambiance le
+     redéfinit (voir #plus-activites, #evenements). Les BOUTONS, eux,
+     restent roses partout : une action a toujours la même couleur. */
+  --accent-texte:   var(--rose-fonce);
+  --accent-decor:   var(--rose);
 }
 
 /* ── RESET & BASE ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; font-size: 16px; }
+/* -webkit-text-size-adjust : sans lui, Safari sur iPhone GROSSIT le texte
+   de lui-même quand on tourne le téléphone en paysage — les blocs ne
+   suivent pas et les lignes se chevauchent.
+   scroll-padding-top : la nav est fixe et fait ~72 px. Sans ce dégagement,
+   un clic dans le menu amenait le titre de la section SOUS la nav. */
+html {
+  scroll-behavior: smooth; font-size: 16px;
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  scroll-padding-top: 5rem;
+}
 body {
   background: var(--creme);
   color: var(--prune);
@@ -89,13 +133,13 @@ body {
 }
 .bandeau-preview strong { color: var(--rose-pale); font-weight: 700; }
 .bandeau-preview-sortie {
-  color: var(--blanc); background: var(--rose);
+  color: var(--blanc); background: var(--rose-fonce);
   font-weight: 700; font-size: .78rem; letter-spacing: .1em;
   text-transform: uppercase; text-decoration: none;
   padding: .4rem 1rem; border-radius: 2rem;
   transition: background .25s;
 }
-.bandeau-preview-sortie:hover { background: var(--rose-fonce); }
+.bandeau-preview-sortie:hover { box-shadow: 0 0 0 2px var(--rose-pale); }
 /* Le site entier descend pour laisser la place au bandeau. */
 body.en-preview #nav { top: 2.6rem; }
 body.en-preview { padding-top: 2.6rem; }
@@ -122,25 +166,42 @@ body.en-preview { padding-top: 2.6rem; }
 .nav-logo img { height: 2.4rem; width: 2.4rem; border-radius: 50%; object-fit: cover; }
 .nav-logo-text { font-family: var(--font-serif), serif; font-size: 1.6rem; font-weight: 500; color: var(--prune); letter-spacing: .04em; }
 .nav-links {
-  display: flex; align-items: center; gap: 2rem; list-style: none;
+  display: flex; align-items: center; gap: 1.6rem; list-style: none;
 }
 /* LISIBILITÉ : 0.85rem = 13.6px, bien lisible pour tous les âges */
 .nav-links a {
   font-family: var(--font-sans), sans-serif;
   font-size: .85rem; font-weight: 600;
-  letter-spacing: .12em; text-transform: uppercase;
-  color: var(--prune); text-decoration: none;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--prune); text-decoration: none; white-space: nowrap;
   transition: color .25s;
 }
-.nav-links a:hover { color: var(--rose); }
+.nav-links a:hover { color: var(--rose-fonce); }
 .nav-links .btn-contact {
-  background: var(--rose); color: var(--blanc);
+  background: var(--rose-fonce); color: var(--blanc);
   padding: .65rem 1.5rem; border-radius: 2rem;
   transition: background .25s, transform .25s;
 }
-.nav-links .btn-contact:hover { background: var(--rose-fonce); transform: translateY(-1px); }
-.ham { display:none; flex-direction:column; gap:5px; padding:.5rem; background:none; border:none; cursor:pointer; }
-.ham span { display:block; width:24px; height:1.5px; background:var(--prune); transition:all .3s; }
+.nav-links .btn-contact:hover { background: var(--prune); transform: translateY(-1px); }
+/* 44 × 44 px : la taille minimale d'une cible au doigt. Le bouton en
+   faisait 40 × 31. La marge négative garde les trois traits alignés sur
+   le bord du contenu, comme avant. */
+.ham {
+  display:none; flex-direction:column; align-items:center; justify-content:center; gap:5px;
+  width:44px; height:44px; margin-right:-10px;
+  background:none; border:none; cursor:pointer;
+}
+.ham span { display:block; width:24px; height:2px; background:var(--prune); transition:all .3s; }
+
+/* Tant que la nav est transparente AU-DESSUS DE LA PHOTO d'accueil, son
+   texte passe en clair : en prune, sur une photo assombrie, le logo et le
+   bouton menu ne se voyaient presque plus. Dès qu'on défile, la nav prend
+   son fond crème (.scrolled) et le prune revient.
+   :has(#hero) limite la règle à la page d'accueil : sur le blog, la nav
+   repose sur du crème dès le départ, un texte clair y serait invisible. */
+body:has(#hero) #nav:not(.scrolled) .nav-logo-text,
+body:has(#hero) #nav:not(.scrolled) .nav-links a:not(.btn-contact) { color:var(--creme); }
+body:has(#hero) #nav:not(.scrolled) .ham span { background:var(--creme); }
 #mob-menu {
   display:none; position:absolute; top:100%; left:1rem; right:1rem;
   background:var(--blanc); border-radius:1.25rem; box-shadow:0 8px 40px rgba(var(--prune-rgb),.12);
@@ -155,12 +216,17 @@ body.en-preview { padding-top: 2.6rem; }
 }
 /* Contact est le dernier lien du menu mobile : il est en rose pour se
    distinguer, comme le bouton .btn-contact du menu de bureau. */
-#mob-menu a.mob-contact { color:var(--rose); }
+#mob-menu a.mob-contact { color:var(--rose-fonce); }
 
 /* ── HERO ───────────────────────────────────────────────────── */
 #hero {
   position: relative;
+  /* svh = la hauteur VISIBLE, barres du navigateur affichées. Avec vh
+     seul, Safari sur iPhone compte l'écran barres masquées : le bas du
+     hero passait sous la barre d'outils. La ligne vh reste pour les
+     navigateurs qui ignorent svh. */
   min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -203,14 +269,14 @@ body.en-preview { padding-top: 2.6rem; }
 .hero-h1-ligne { display: block; }
 .btn-primary {
   display: inline-block;
-  background: var(--rose); color: var(--blanc);
+  background: var(--rose-fonce); color: var(--blanc);
   font-family: var(--font-sans),sans-serif; font-size: .85rem;
   font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
   text-decoration: none;
   padding: 1.1rem 2.4rem; border-radius: 3rem;
   transition: background .25s, transform .25s, box-shadow .25s;
 }
-.btn-primary:hover { background: var(--rose-fonce); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(var(--rose-rgb),.45); }
+.btn-primary:hover { background: var(--prune); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(var(--rose-rgb),.45); }
 .btn-secondary {
   display: inline-block;
   border: 1.5px solid rgba(var(--creme-rgb),.45); color: var(--creme);
@@ -232,14 +298,14 @@ body.en-preview { padding-top: 2.6rem; }
 /* Bouton outline pour usage sur fonds clairs (hors hero) */
 .btn-outline {
   display: inline-block;
-  border: 1.5px solid var(--rose); color: var(--rose);
+  border: 1.5px solid var(--rose-fonce); color: var(--rose-fonce);
   font-family: var(--font-sans),sans-serif; font-size: .85rem;
   font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
   text-decoration: none;
   padding: 1.05rem 2.3rem; border-radius: 3rem;
   transition: background .25s, color .25s, transform .25s;
 }
-.btn-outline:hover { background: var(--rose); color: var(--blanc); transform: translateY(-2px); }
+.btn-outline:hover { background: var(--rose-fonce); color: var(--blanc); transform: translateY(-2px); }
 /* Animation d'apparition du hero : fade + monte, staggered par élément */
 @keyframes heroFadeUp {
   from { opacity: 0; transform: translateY(30px); }
@@ -302,19 +368,19 @@ body.en-preview { padding-top: 2.6rem; }
 /* LISIBILITÉ : .75rem = 12px pour les petites étiquettes */
 .section-label {
   font-family:var(--font-sans),sans-serif; font-size:.75rem; font-weight:700;
-  letter-spacing:.35em; text-transform:uppercase; color:var(--rose); margin-bottom:1rem;
+  letter-spacing:.35em; text-transform:uppercase; color:var(--accent-texte); margin-bottom:1rem;
 }
 .section-title {
   font-family:var(--font-serif),serif;
   font-size: clamp(2.5rem, 4.5vw, 4rem);
   font-weight:300; line-height:1.08; color:var(--prune);
 }
-.section-title em { font-style:italic; color:var(--rose); }
-.divider { width:48px; height:1.5px; background:var(--rose); margin:1.5rem 0; }
+.section-title em { font-style:italic; color:var(--accent-texte); }
+.divider { width:48px; height:1.5px; background:var(--accent-decor); margin:1.5rem 0; }
 /* LISIBILITÉ : 1rem = 16px — taille standard confortable */
 .lead {
   font-family:var(--font-sans),sans-serif; font-size:1rem; font-weight:300;
-  line-height:1.95; color:var(--prune); opacity:.75;
+  line-height:1.95; color:var(--texte-doux);
 }
 
 /* ── À PROPOS ───────────────────────────────────────────────── */
@@ -324,7 +390,7 @@ body.en-preview { padding-top: 2.6rem; }
   gap: 5rem; align-items: center;
 }
 .about-img-wrap { position: relative; }
-.about-img-wrap img { width:100%; height:520px; object-fit:cover; border-radius:1.5rem; display:block; }
+.about-img-wrap img { width:100%; height:auto; border-radius:1.5rem; display:block; }
 .about-deco {
   position:absolute; bottom:-1.5rem; left:-1.5rem;
   width:7rem; height:7rem; border-radius:1.25rem; background:var(--rose-clair); z-index:-1;
@@ -336,15 +402,15 @@ body.en-preview { padding-top: 2.6rem; }
   box-shadow:0 4px 20px rgba(var(--prune-rgb),.1);
 }
 .about-badge-num { font-family:var(--font-serif),serif; font-size:2.5rem; font-weight:300; color:var(--prune); line-height:1; }
-.about-badge-label { font-family:var(--font-sans),sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--rose); margin-top:.25rem; }
+.about-badge-label { font-family:var(--font-sans),sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--rose-fonce); margin-top:.25rem; }
 /* Mot ou expression mis en avant dans un paragraphe courant. Le rose et le
    demi-gras suffisent : pas d'italique ni de taille différente, la ligne doit
    rester lisible d'un trait. */
-.accent { color:var(--rose); font-weight:600; }
+.accent { color:var(--rose-fonce); font-weight:600; }
 .value-list { list-style:none; margin-top:1.5rem; display:flex; flex-direction:column; gap:.85rem; }
 /* LISIBILITÉ : 1rem = 16px */
-.value-list li { display:flex; align-items:flex-start; gap:.9rem; font-family:var(--font-sans),sans-serif; font-size:1rem; font-weight:400; color:var(--prune); opacity:.78; line-height:1.6; }
-.value-list li::before { content:'✦'; color:var(--rose); font-size:.6rem; margin-top:.45rem; flex-shrink:0; }
+.value-list li { display:flex; align-items:flex-start; gap:.9rem; font-family:var(--font-sans),sans-serif; font-size:1rem; font-weight:400; color:var(--texte-doux); line-height:1.6; }
+.value-list li::before { content:'✦'; color:var(--accent-decor); font-size:.6rem; margin-top:.45rem; flex-shrink:0; }
 /* Les trois blocs de texte de la section : l'intro, l'intertitre qui
    annonce la liste, et le paragraphe de conclusion. */
 .about-intro      { margin-bottom:1rem; }
@@ -393,21 +459,21 @@ body.en-preview { padding-top: 2.6rem; }
 }
 .etape-media img { width:100%; height:100%; object-fit:cover; display:block; }
 
-.etape-num { display:block; font-family:var(--font-sans),sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.15em; color:var(--rose); margin-bottom:.35rem; }
+.etape-num { display:block; font-family:var(--font-sans),sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.15em; color:var(--rose-fonce); margin-bottom:.35rem; }
 .etape-contenu h3 { font-family:var(--font-serif),serif; font-weight:500; font-size:1.3rem; color:var(--prune); margin-bottom:.3rem; }
 /* LISIBILITÉ : .85rem ≈ 13.6px */
-.etape-accroche { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--prune); opacity:.65; line-height:1.6; margin-bottom:.75rem; }
+.etape-accroche { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--texte-doux); line-height:1.6; margin-bottom:.75rem; }
 
 .etape-toggle {
   display:inline-flex; align-items:center; gap:.4rem;
   font-family:var(--font-sans),sans-serif; font-size:.72rem; font-weight:700;
-  letter-spacing:.1em; text-transform:uppercase; color:var(--rose);
+  letter-spacing:.1em; text-transform:uppercase; color:var(--rose-fonce);
   background:none; border:none; padding:0; cursor:pointer;
   transition: color .25s;
 }
 .etape--droite .etape-toggle { flex-direction:row-reverse; }
 .etape-toggle:hover { color:var(--prune); }
-.etape-toggle:focus-visible { outline:2px solid var(--rose); outline-offset:4px; border-radius:2px; }
+.etape-toggle:focus-visible { outline:2px solid var(--rose-fonce); outline-offset:4px; border-radius:2px; }
 .etape-toggle svg { flex-shrink:0; transition:transform .3s; }
 .etape-toggle[aria-expanded="true"] svg { transform:rotate(180deg); }
 
@@ -424,11 +490,11 @@ body.en-preview { padding-top: 2.6rem; }
 .etape-panneau:not([hidden]) { animation: sentier-deplier .35s ease; }
 .etape--droite .etape-panneau { text-align:right; }
 /* LISIBILITÉ : .85rem ≈ 13.6px */
-.etape-panneau p { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--prune); opacity:.75; line-height:1.8; }
+.etape-panneau p { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--texte-doux); line-height:1.8; }
 .etape-tags { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.85rem; }
 .etape--droite .etape-tags { justify-content:flex-end; }
-.etape-tag { font-family:var(--font-sans),sans-serif; font-size:.65rem; font-weight:600; letter-spacing:.08em; background:var(--rose-clair); color:var(--rose); padding:.28rem .7rem; border-radius:2rem; }
-.etape-lien { display:inline-block; margin-top:.9rem; font-family:var(--font-sans),sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--rose); text-decoration:none; }
+.etape-tag { font-family:var(--font-sans),sans-serif; font-size:.65rem; font-weight:600; letter-spacing:.08em; background:var(--rose-clair); color:var(--accent-texte); padding:.28rem .7rem; border-radius:2rem; }
+.etape-lien { display:inline-block; margin-top:.9rem; font-family:var(--font-sans),sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--rose-fonce); text-decoration:none; }
 .etape-lien:hover { color:var(--prune); }
 
 @keyframes sentier-deplier {
@@ -438,7 +504,7 @@ body.en-preview { padding-top: 2.6rem; }
 
 /* ── ACTIVITÉS : carrousel horizontal (branche teste-template) ──
    Variante testée du bloc « Activités » : les 8 activités deviennent
-   des cartes qui défilent latéralement (molette, doigt, flèches).
+   des cartes qui défilent latéralement (doigt, pavé tactile, flèches).
    Trois affordances CSS complètent le JS de CarrouselActivites.js :
      · la piste est plus large que l'écran → une carte est toujours
        coupée à droite, ce qui annonce la suite ;
@@ -471,7 +537,7 @@ body.en-preview { padding-top: 2.6rem; }
   scrollbar-width:none;           /* Firefox */
 }
 .carrousel-piste::-webkit-scrollbar { display:none; }
-.carrousel-piste:focus-visible { outline:2px solid var(--rose); outline-offset:6px; border-radius:1.5rem; }
+.carrousel-piste:focus-visible { outline:2px solid var(--rose-fonce); outline-offset:6px; border-radius:1.5rem; }
 
 /* Dégradés de bord : signalent qu'il reste du contenu de ce côté. */
 .carrousel-scene::before, .carrousel-scene::after {
@@ -498,7 +564,7 @@ body.en-preview { padding-top: 2.6rem; }
 .carte-act-num {
   position:absolute; left:1.1rem; bottom:-1.1rem;
   width:2.6rem; height:2.6rem; border-radius:50%;
-  background:var(--blanc); color:var(--rose);
+  background:var(--blanc); color:var(--rose-fonce);
   display:flex; align-items:center; justify-content:center;
   font-family:var(--font-sans),sans-serif; font-size:.8rem; font-weight:700; letter-spacing:.05em;
   box-shadow:0 6px 18px rgba(var(--prune-rgb),.14);
@@ -512,12 +578,21 @@ body.en-preview { padding-top: 2.6rem; }
 /* LISIBILITÉ : .85rem ≈ 13.6px, comme le reste du site */
 .carte-act-accroche {
   font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:600;
-  color:var(--rose); line-height:1.6; margin-bottom:.85rem;
+  color:var(--rose-fonce); line-height:1.6; margin-bottom:.85rem;
 }
 .carte-act-desc {
   font-family:var(--font-sans),sans-serif; font-size:.85rem;
-  color:var(--prune); opacity:.75; line-height:1.8;
+  color:var(--texte-doux); line-height:1.8;
 }
+/* « Lire la suite » : téléphone seulement (voir la media query). Sur
+   grand écran la description est entière, le bouton n'a rien à faire. */
+.carte-act-suite {
+  display:none; align-self:flex-start; margin-top:.35rem; padding:.7rem 0;
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--rose-fonce);
+  background:none; border:none; cursor:pointer;
+}
+.carte-act-suite:focus-visible { outline:2px solid var(--rose-fonce); outline-offset:2px; border-radius:2px; }
 /* margin-top:auto → tags et lien restent collés en bas, quelle que
    soit la longueur de la description : les cartes s'alignent. */
 .carte-act-bas { margin-top:auto; padding-top:1.25rem; }
@@ -533,18 +608,13 @@ body.en-preview { padding-top: 2.6rem; }
   transition:opacity .4s ease, transform .4s ease;
 }
 .carrousel-indice.est-masque { opacity:0; transform:translateY(-4px); pointer-events:none; }
-.carrousel-indice-molette {
-  width:15px; height:23px; flex-shrink:0;
-  border:1.5px solid var(--rose); border-radius:8px; position:relative;
-}
-.carrousel-indice-molette::after {
-  content:''; position:absolute; left:50%; top:4px; margin-left:-1px;
-  width:2px; height:5px; border-radius:1px; background:var(--rose);
-  animation: molette-descend 1.6s ease-in-out infinite;
-}
-@keyframes molette-descend {
-  0%, 100% { transform:translateY(0); opacity:1; }
-  60%      { transform:translateY(7px); opacity:.2; }
+/* L'indice parle des flèches à la souris, du doigt sur écran tactile.
+   (Il n'évoque plus la molette : elle fait défiler la PAGE, jamais les
+   cartes — voir CarrouselActivites.js.) */
+.indice-doigt { display:none; }
+@media (hover: none) and (pointer: coarse) {
+  .indice-souris { display:none; }
+  .indice-doigt { display:inline; }
 }
 
 .carrousel-commandes { display:flex; align-items:center; gap:1.5rem; }
@@ -556,55 +626,156 @@ body.en-preview { padding-top: 2.6rem; }
 }
 .carrousel-compteur {
   font-family:var(--font-sans),sans-serif; font-size:.8rem; font-weight:500;
-  letter-spacing:.12em; color:var(--prune); opacity:.85; white-space:nowrap;
+  letter-spacing:.12em; color:var(--texte-doux); white-space:nowrap;
 }
-.carrousel-compteur strong { color:var(--rose); font-weight:700; }
+.carrousel-compteur strong { color:var(--rose-fonce); font-weight:700; }
 .carrousel-fleches { display:flex; gap:.5rem; }
 .carrousel-fleche {
-  width:2.6rem; height:2.6rem; border-radius:50%;
+  width:2.75rem; height:2.75rem; border-radius:50%;   /* 44 px : la taille minimale d'une cible au doigt */
   display:flex; align-items:center; justify-content:center;
-  background:var(--blanc); color:var(--rose); border:none; cursor:pointer;
+  background:var(--blanc); color:var(--rose-fonce); border:none; cursor:pointer;
   box-shadow:0 4px 16px rgba(var(--prune-rgb),.10);
   transition:background .25s, color .25s, transform .25s, opacity .25s;
 }
-.carrousel-fleche:hover:not(:disabled) { background:var(--rose); color:var(--blanc); transform:translateY(-2px); }
-.carrousel-fleche:focus-visible { outline:2px solid var(--rose); outline-offset:3px; }
+.carrousel-fleche:hover:not(:disabled) { background:var(--rose-fonce); color:var(--blanc); transform:translateY(-2px); }
+.carrousel-fleche:focus-visible { outline:2px solid var(--rose-fonce); outline-offset:3px; }
 .carrousel-fleche:disabled { opacity:.3; cursor:default; }
 
-/* ── OUTDOOR ────────────────────────────────────────────────────
-   Le bloc « Explorez aussi » qui prolonge les activités. Même fond
-   rose que #activites, et un padding haut réduit : les deux sections
-   doivent se lire comme un seul ensemble. L'alternance crème/rose
-   reprend ensuite normalement avec #bespoke. */
-#outdoor { background: var(--rose-clair); padding-top: 0; }
-.outdoor-grid {
-  display:grid; grid-template-columns:1fr 1fr;
-  gap:5rem; align-items:center;
+/* ── PLUS D'ACTIVITÉS : trois onglets ─────────────────────────────
+   Ateliers thématiques · Prestations sur mesure · Plein air, dans une
+   seule section à onglets (voir PlusActivites.js). Elle remplace les
+   anciennes sections #outdoor et #bespoke, dont les identifiants sont
+   repris par les boutons d'onglets pour que les anciens liens marchent.
+   Ambiance SAUGE : l'accent de la section (étiquettes, filets, étoiles)
+   passe au vert ; les boutons d'action restent roses, comme partout. */
+#plus-activites {
+  background: var(--sauge-clair);
+  --accent-texte: var(--sauge-fonce);
+  --accent-decor: var(--sauge);
 }
-.outdoor-img {
-  width:100%; height:420px; object-fit:cover;
-  border-radius:1.5rem; display:block;
-  box-shadow:0 12px 40px rgba(var(--prune-rgb),.12);
+.plus-entete { text-align:center; margin-bottom:2.5rem; }
+.plus-entete .divider { margin:1.5rem auto; }
+.plus-entete .lead { max-width:560px; margin:0 auto; }
+
+/* La barre d'onglets : trois boutons de même largeur dans un rail clair.
+   L'onglet actif est une carte blanche en relief — il se distingue par
+   la forme, le fond ET la couleur, pas par la couleur seule. */
+.onglets {
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:.4rem;
+  max-width:720px; margin:0 auto 1.5rem; padding:.4rem;
+  background:rgba(var(--blanc-rgb), .55); border-radius:1.25rem;
 }
-.outdoor-texte { margin-bottom:1.5rem; }
-.outdoor-tags { display:flex; flex-wrap:wrap; gap:.5rem; }
-/* Les étiquettes réutilisent .etape-tag, mais sur fond rose il faut un
-   fond clair pour rester lisibles (rose sur rose serait trop faible). */
-#outdoor .etape-tag { background:var(--creme); }
+.onglet {
+  display:flex; align-items:center; justify-content:center; gap:.6rem;
+  min-height:56px; padding:.6rem .75rem;
+  border:none; border-radius:.95rem; background:transparent; cursor:pointer;
+  font-family:var(--font-sans),sans-serif; font-size:.95rem; font-weight:700;
+  letter-spacing:.03em; color:var(--sauge-fonce);
+  transition:background .25s, box-shadow .25s, color .25s;
+}
+.onglet:hover:not(.est-actif) { background:rgba(var(--blanc-rgb), .7); }
+.onglet.est-actif { background:var(--blanc); color:var(--prune); box-shadow:0 6px 18px rgba(var(--prune-rgb), .10); }
+.onglet.est-actif svg { color:var(--sauge-fonce); }
+.onglet:focus-visible { outline:2px solid var(--sauge-fonce); outline-offset:2px; }
+
+/* Le panneau : une carte blanche. Sur grand écran, la photo à gauche et
+   le texte à droite ; le titre coiffe le texte (grid-template-areas). */
+.panneau {
+  display:grid; grid-template-columns:5fr 7fr;
+  grid-template-areas: "media titre" "media texte";
+  grid-template-rows:auto 1fr; gap:.75rem 3rem; align-items:start;
+  background:var(--blanc); border-radius:1.75rem; padding:2.5rem;
+  box-shadow:0 14px 40px rgba(var(--prune-rgb), .08);
+}
+.panneau[hidden] { display:none; }
+.panneau:not([hidden]) { animation: panneau-arrive .35s ease; }
+@keyframes panneau-arrive { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+/* min-width:0 : un enfant de grille ne rétrécit pas sous la largeur de son
+   plus long mot sans cette règle — le panneau débordait de l'écran. */
+.panneau > * { min-width:0; }
+.panneau-titre-bloc { grid-area:titre; }
+.panneau-media { grid-area:media; }
+.panneau-media img { width:100%; height:auto; border-radius:1.25rem; display:block; }
+.panneau-texte { grid-area:texte; }
+.panneau-etiquette {
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700;
+  letter-spacing:.2em; text-transform:uppercase; color:var(--accent-texte); margin-bottom:.4rem;
+}
+.panneau-titre {
+  font-family:var(--font-serif),serif; font-size:clamp(1.9rem, 3vw, 2.5rem);
+  font-weight:400; line-height:1.15; color:var(--prune);
+}
+.panneau-titre em { font-style:italic; color:var(--accent-texte); }
+.panneau-accroche {
+  font-family:var(--font-sans),sans-serif; font-size:1rem; font-weight:600;
+  color:var(--accent-texte); margin-top:.35rem;
+}
+.panneau-sous-titre {
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--prune); margin:1.5rem 0 .75rem;
+}
+/* Thèmes des ateliers et publics des prestations : de petites cartes, sur
+   deux colonnes. Ce ne sont PAS des boutons : pas d'ombre au survol, pas
+   de pointeur — rien ne doit inviter à cliquer ce qui ne mène nulle part. */
+/* auto-fit : deux colonnes quand la place le permet, une seule sinon. En
+   deux colonnes figées, à 260 px (un iPhone réglé en « texte très grand »),
+   la grille imposait sa largeur minimale et le panneau débordait. */
+.themes, .publics {
+  list-style:none; display:grid; grid-template-columns:repeat(auto-fit, minmax(9.5rem, 1fr)); gap:.6rem;
+}
+.theme {
+  display:flex; align-items:center; gap:.6rem;
+  background:var(--sauge-clair); border-radius:.9rem; padding:.8rem .95rem;
+  font-family:var(--font-sans),sans-serif; font-size:1rem; font-weight:600; color:var(--prune);
+}
+.theme svg { color:var(--sauge-fonce); flex-shrink:0; }
+.publics { margin-top:1.5rem; }
+.public-carte {
+  display:flex; align-items:center; gap:.75rem;
+  background:var(--lin); border-radius:1rem; padding:.75rem .9rem;
+  font-family:var(--font-serif),serif; font-size:1.15rem; font-weight:500; color:var(--prune);
+}
+.public-picto {
+  display:grid; place-items:center; flex-shrink:0;
+  width:2.5rem; height:2.5rem; border-radius:50%;
+  background:var(--blanc); color:var(--sauge-fonce);
+}
+.outdoor-tags { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1.25rem; }
+#plus-activites .etape-tag { background:var(--sauge-clair); }
+/* Les prochains ateliers : des lignes-liens vers leurs fiches. */
+.prochains { list-style:none; display:flex; flex-direction:column; gap:.5rem; }
+.prochain {
+  display:flex; align-items:center; gap:.85rem; min-height:44px;
+  background:var(--lavande-clair); border-radius:1rem; padding:.75rem 1rem;
+  color:var(--prune); text-decoration:none; transition:box-shadow .25s;
+}
+.prochain:hover { box-shadow:inset 0 0 0 2px var(--lavande); }
+.prochain svg { color:var(--lavande-fonce); flex-shrink:0; }
+.prochain > span { display:flex; flex-direction:column; }
+.prochain strong { font-family:var(--font-serif),serif; font-size:1.15rem; font-weight:500; }
+.prochain span span { font-family:var(--font-sans),sans-serif; font-size:.9rem; font-weight:600; color:var(--lavande-fonce); }
+.panneau-actions { display:flex; flex-wrap:wrap; gap:.75rem; margin-top:1.75rem; }
+/* Le renvoi vers la seconde plaquette : un lien de texte, pas un troisième
+   bouton — trois boutons côte à côte, on ne sait plus lequel choisir. */
+.panneau-renvoi {
+  display:flex; align-items:center; flex-wrap:wrap; gap:.4rem;
+  margin-top:1.25rem; font-family:var(--font-sans),sans-serif; font-size:.95rem; color:var(--texte-doux);
+}
+.panneau-renvoi svg { color:var(--accent-texte); }
 
 /* ── TARIFS ─────────────────────────────────────────────────────
    Trois formes différentes plutôt qu'une liste de dix lignes jumelles :
    un bandeau pour l'adhésion obligatoire, des vignettes « prix d'abord »
    pour les formules à la carte, un tableau une personne / famille pour
    la saison. Voir l'en-tête de Pricing.js pour le pourquoi. */
-#tarifs { background: var(--creme); }
+#tarifs { background: var(--lin); }
 .tarifs-entete { text-align:center; margin-bottom:3.5rem; }
 .tarifs-entete .divider { margin:1.5rem auto; }
 .tarifs { max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:3rem; }
 
 /* L'adhésion : seule de son espèce, en rose plein, on ne peut pas la rater. */
 .tarif-adhesion {
-  background:linear-gradient(135deg, var(--rose) 0%, var(--rose-fonce) 100%);
+  background:var(--rose-fonce);   /* le dégradé partait du rose clair : texte blanc à 2,7:1 */
   border-radius:1.25rem; padding:1.5rem 1.75rem;
   display:flex; align-items:center; justify-content:space-between; gap:1rem;
 }
@@ -616,23 +787,29 @@ body.en-preview { padding-top: 2.6rem; }
 /* Intertitre de groupe : « À la carte », « À la saison ». */
 .tarif-groupe {
   font-family:var(--font-sans),sans-serif; font-size:.75rem; font-weight:700;
-  letter-spacing:.25em; text-transform:uppercase; color:var(--rose);
+  letter-spacing:.25em; text-transform:uppercase; color:var(--rose-fonce);
   text-align:center; margin-bottom:1.25rem;
 }
 
 /* Vignettes : le prix en premier et en grand. On compare trois nombres,
-   pas trois phrases. */
-.tarif-vignettes { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
-.tarif-vignettes--duo { grid-template-columns:repeat(2,1fr); margin-top:1.25rem; }
+   pas trois phrases.
+   ALIGNEMENT AUTOMATIQUE : elles se CENTRENT quel que soit leur nombre.
+   En grille figée à trois colonnes, la cliente a retiré un forfait et
+   deux vignettes laissaient un trou à droite. En flex centré, de une à six
+   vignettes restent alignées sans rien toucher au code. */
+.tarif-vignettes { display:flex; flex-wrap:wrap; justify-content:center; gap:1rem; }
+.tarif-vignettes--duo { margin-top:1.25rem; }
 .tarif-vignette {
+  flex:0 1 calc((100% - 2rem) / 3);
   background:var(--blanc); border-radius:1.25rem; padding:1.75rem 1rem;
   text-align:center; transition:box-shadow .3s, transform .3s;
 }
+.tarif-vignettes--duo .tarif-vignette { flex-basis:calc((100% - 1rem) / 2); }
 .tarif-vignette:hover { box-shadow:0 8px 32px rgba(var(--prune-rgb),.08); transform:translateY(-2px); }
-.tarif-vignette-prix { font-family:var(--font-serif),serif; font-size:2.6rem; font-weight:300; color:var(--rose); line-height:1; }
+.tarif-vignette-prix { font-family:var(--font-serif),serif; font-size:2.6rem; font-weight:300; color:var(--rose-fonce); line-height:1; }
 .tarif-vignette-nom { font-family:var(--font-serif),serif; font-size:1.15rem; font-weight:500; color:var(--prune); margin-top:.6rem; }
 /* LISIBILITÉ : .85rem = 13.6px */
-.tarif-vignette-detail { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--prune); opacity:.6; margin-top:.25rem; }
+.tarif-vignette-detail { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--texte-doux); margin-top:.25rem; }
 
 /* Tableau saison : deux colonnes de prix, la comparaison saute aux yeux. */
 .tarif-tableau-cadre { overflow-x:auto; }
@@ -641,26 +818,28 @@ body.en-preview { padding-top: 2.6rem; }
 .tarif-tableau thead th {
   font-family:var(--font-sans),sans-serif; font-size:.78rem; font-weight:700;
   letter-spacing:.12em; text-transform:uppercase; color:var(--blanc);
-  background:var(--rose); padding:.85rem 1rem; text-align:center;
+  background:var(--rose-fonce); padding:.85rem 1rem; text-align:center;
 }
 .tarif-tableau tbody th { text-align:left; padding:1.25rem 1.5rem; }
 .tarif-tableau tbody tr + tr th, .tarif-tableau tbody tr + tr td { border-top:1px solid var(--rose-clair); }
 .tarif-tableau-nom { display:block; font-family:var(--font-serif),serif; font-size:1.15rem; font-weight:500; color:var(--prune); }
 /* LISIBILITÉ : .85rem = 13.6px */
-.tarif-tableau-detail { display:block; font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:400; color:var(--prune); opacity:.6; margin-top:.2rem; }
+.tarif-tableau-detail { display:block; font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:400; color:var(--texte-doux); margin-top:.2rem; }
 .tarif-tableau td {
   font-family:var(--font-serif),serif; font-size:2rem; font-weight:300;
-  color:var(--rose); text-align:center; padding:1.25rem .75rem; white-space:nowrap;
+  color:var(--rose-fonce); text-align:center; padding:1.25rem .75rem; white-space:nowrap;
 }
 
 /* LISIBILITÉ : .85rem = 13.6px pour les notes */
-.tarif-note { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--prune); opacity:.7; font-style:italic; text-align:center; margin-top:1rem; line-height:1.65; }
-.tarif-sur-mesure a { opacity:1; }
-.tarif-sur-mesure { font-family:var(--font-sans),sans-serif; font-size:.95rem; color:var(--prune); opacity:.85; text-align:center; line-height:1.8; }
+.tarif-note { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--texte-doux); font-style:italic; text-align:center; margin-top:1rem; line-height:1.65; }
+.tarif-sur-mesure { font-family:var(--font-sans),sans-serif; font-size:.95rem; color:var(--texte-doux); text-align:center; line-height:1.8; }
 .price-lien,
 .tarif-sur-mesure a,
 .lead a,
 .contact-cta-sub a { color:var(--rose-fonce); font-weight:600; text-decoration:underline; }
+/* Un numéro de téléphone ne se coupe jamais : « 06 09 31 61 / 45 » sur
+   deux lignes, constaté sur téléphone, se relit mal et se recopie faux. */
+a[href^="tel:"] { white-space:nowrap; }
 .price-lien:hover,
 .tarif-sur-mesure a:hover,
 .lead a:hover,
@@ -675,11 +854,11 @@ body.en-preview { padding-top: 2.6rem; }
   padding:2.75rem 2rem; text-align:center;
 }
 .inscription-titre { font-family:var(--font-serif),serif; font-size:1.9rem; font-weight:400; color:var(--prune); }
-.inscription-titre em { font-style:italic; color:var(--rose); }
+.inscription-titre em { font-style:italic; color:var(--rose-fonce); }
 /* LISIBILITÉ : .95rem ≈ 15.2px */
 .inscription-sous-titre {
   font-family:var(--font-sans),sans-serif; font-size:.95rem; font-weight:300;
-  line-height:1.8; color:var(--prune); opacity:.78;
+  line-height:1.8; color:var(--texte-doux);
   max-width:420px; margin:.75rem auto 0;
 }
 /* Ce que le formulaire demande : annoncé avant le clic pour que personne
@@ -694,11 +873,11 @@ body.en-preview { padding-top: 2.6rem; }
   font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--prune);
   background:var(--creme); padding:.5rem 1rem; border-radius:2rem;
 }
-.inscription-etapes li::before { content:'✦'; color:var(--rose); font-size:.6rem; }
+.inscription-etapes li::before { content:'✦'; color:var(--accent-decor); font-size:.6rem; }
 /* LISIBILITÉ : .85rem ≈ 13.6px — annonce ce que contient la liste. */
 .inscription-annonce {
   font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700;
-  letter-spacing:.12em; text-transform:uppercase; color:var(--rose);
+  letter-spacing:.12em; text-transform:uppercase; color:var(--rose-fonce);
   margin-top:1.75rem;
 }
 /* Décolle le bouton de la liste, puisque la liste a maintenant son annonce. */
@@ -706,21 +885,31 @@ body.en-preview { padding-top: 2.6rem; }
 /* LISIBILITÉ : .85rem ≈ 13.6px, le plancher du projet. Ce texte dit ce que
    le bouton ne peut pas dire : que la page ne disparaît pas, et qu'on peut
    passer par le téléphone. */
-/* Le point de blocage du formulaire, annoncé avant le clic. Encadré plutôt
-   qu'en simple italique : c'est la seule chose qui oblige à tout recommencer
-   si on l'apprend trop tard.
-   LISIBILITÉ : .9rem = 14.4px, au-dessus du plancher du projet. */
+/* « Bon à savoir » : ce qu'il faut savoir AVANT de remplir le formulaire.
+   La cliente y écrit plusieurs paragraphes (documents à télécharger, copie
+   par e-mail, groupe WhatsApp…). Chacun devient une ligne à puce, espacée
+   de la suivante : en un seul bloc serré, on ne les lisait pas.
+   LISIBILITÉ : .95rem = 15,2 px. */
 .inscription-alerte {
-  font-family:var(--font-sans),sans-serif; font-size:.9rem; line-height:1.7;
+  font-family:var(--font-sans),sans-serif; font-size:.95rem; line-height:1.65;
   color:var(--prune); text-align:left;
-  max-width:480px; margin:1.75rem auto 2rem;
-  background:var(--blanc); border-left:3px solid var(--rose);
-  border-radius:.75rem; padding:.9rem 1.1rem;
+  max-width:520px; margin:1.75rem auto 2rem;
+  background:var(--blanc); border-radius:1rem; padding:1.15rem 1.3rem 1.25rem;
+  box-shadow:0 6px 20px rgba(var(--prune-rgb),.06);
+}
+.inscription-alerte-titre {
+  display:flex; align-items:center; gap:.5rem; margin-bottom:.75rem;
+  font-size:.85rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--rose-fonce);
+}
+.inscription-alerte p:not(.inscription-alerte-titre) { position:relative; padding-left:1.4rem; }
+.inscription-alerte p:not(.inscription-alerte-titre) + p { margin-top:.65rem; }
+.inscription-alerte p:not(.inscription-alerte-titre)::before {
+  content:'✦'; position:absolute; left:.1rem; top:.1em; font-size:.7rem; color:var(--rose);
 }
 .inscription-alerte strong { color:var(--rose-fonce); font-weight:700; }
 .inscription-precision {
   font-family:var(--font-sans),sans-serif; font-size:.85rem; line-height:1.7;
-  color:var(--prune); opacity:.7; margin-top:1.25rem;
+  color:var(--texte-doux); margin-top:1.25rem;
 }
 
 /* ── PLANNING ───────────────────────────────────────────────────
@@ -752,19 +941,26 @@ body.en-preview { padding-top: 2.6rem; }
   font-family:var(--font-serif),serif; font-size:1.35rem; font-weight:500;
   color:var(--prune); text-align:center; margin-bottom:.4rem;
 }
-/* Indice de défilement : inutile tant que le tableau tient à l'écran, on ne
-   l'affiche donc qu'en dessous de 700px (voir la media query plus bas). */
-.planning-indice { display:none; }
+/* Liste jour par jour : la version TÉLÉPHONE du planning (voir la media
+   query plus bas et Planning.js). Masquée tant que le tableau tient. */
+.planning-jours { display:none; gap:.75rem; list-style:none; }
+.planning-jour-carte { background:var(--blanc); border-radius:1.25rem; padding:1rem 1.25rem; }
+.planning-jour-titre { font-family:var(--font-serif),serif; font-size:1.35rem; font-weight:500; color:var(--prune); margin-bottom:.25rem; }
+.planning-jour-liste { list-style:none; }
+/* L'heure d'abord, alignée en colonne : on cherche un créneau, puis le cours. */
+.planning-jour-liste li { display:flex; align-items:baseline; gap:1rem; padding:.55rem 0; }
+.planning-jour-liste li + li { border-top:1px solid var(--rose-clair); }
+.planning-jour-liste .planning-heure { margin-top:0; min-width:3.5rem; font-size:1rem; }
 /* LISIBILITÉ : .78rem en capitales espacées — c'est une étiquette de
    colonne, comme .section-label, pas du texte courant. */
 .planning-jour {
   font-family:var(--font-sans),sans-serif; font-size:.78rem; font-weight:700;
   letter-spacing:.15em; text-transform:uppercase; color:var(--blanc);
-  background:var(--rose); border-radius:.85rem; padding:.85rem .5rem;
+  background:var(--rose-fonce); border-radius:.85rem; padding:.85rem .5rem;
 }
 .planning-moment {
   font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700;
-  letter-spacing:.12em; text-transform:uppercase; color:var(--rose);
+  letter-spacing:.12em; text-transform:uppercase; color:var(--rose-fonce);
   text-align:right; padding-right:.75rem; white-space:nowrap; width:1%;
 }
 .planning-table td {
@@ -777,7 +973,7 @@ body.en-preview { padding-top: 2.6rem; }
 .planning-cours + .planning-cours { margin-top:.85rem; padding-top:.85rem; border-top:1px solid var(--rose-clair); }
 /* LISIBILITÉ : 1rem = 16px pour le nom du cours, .9rem pour l'heure */
 .planning-nom { display:block; font-family:var(--font-serif),serif; font-size:1.1rem; font-weight:500; color:var(--prune); line-height:1.3; }
-.planning-heure { display:block; font-family:var(--font-sans),sans-serif; font-size:.9rem; font-weight:600; color:var(--rose); margin-top:.2rem; }
+.planning-heure { display:block; font-family:var(--font-sans),sans-serif; font-size:.9rem; font-weight:600; color:var(--rose-fonce); margin-top:.2rem; }
 
 /* Stages : encart qui n'apparaît que si des dates sont renseignées. */
 .planning-stages { max-width:700px; margin:3rem auto 0; }
@@ -787,19 +983,128 @@ body.en-preview { padding-top: 2.6rem; }
   background:var(--blanc); border-radius:1rem; padding:1.1rem 1.4rem;
   display:flex; flex-wrap:wrap; align-items:center; gap:.4rem 1rem;
 }
-.planning-stage-date { font-family:var(--font-sans),sans-serif; font-size:.9rem; font-weight:700; color:var(--rose); }
+.planning-stage-date { font-family:var(--font-sans),sans-serif; font-size:.9rem; font-weight:700; color:var(--rose-fonce); }
 .planning-stage-titre { font-family:var(--font-serif),serif; font-size:1.15rem; color:var(--prune); flex:1 1 12rem; }
-.planning-stage-horaire { font-family:var(--font-sans),sans-serif; font-size:.9rem; color:var(--prune); opacity:.7; }
+.planning-stage-horaire { font-family:var(--font-sans),sans-serif; font-size:.9rem; color:var(--texte-doux); }
 .planning-stage-lien {
   font-family:var(--font-sans),sans-serif; font-size:.78rem; font-weight:700;
   letter-spacing:.1em; text-transform:uppercase; color:var(--blanc);
-  background:var(--rose); padding:.55rem 1.2rem; border-radius:3rem;
+  background:var(--rose-fonce); padding:.55rem 1.2rem; border-radius:3rem;
   text-decoration:none; transition:background .25s;
 }
-.planning-stage-lien:hover { background:var(--rose-fonce); }
+.planning-stage-lien:hover { background:var(--prune); }
+
+/* ── STAGES & ÉVÉNEMENTS : la frise ───────────────────────────────
+   Frise verticale groupée par mois (voir Evenements.js). Ambiance
+   LAVANDE : elle distingue d'emblée « ce qui arrive bientôt » des
+   cours réguliers, restés roses. */
+#evenements {
+  background: var(--lavande-clair);
+  --accent-texte: var(--lavande-fonce);
+  --accent-decor: var(--lavande);
+}
+.evenements-entete { text-align:center; margin-bottom:3rem; }
+.evenements-entete .divider { margin:1.5rem auto; }
+.evenements-entete .lead { max-width:560px; margin:0 auto; }
+
+.frise { list-style:none; max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:2rem; }
+.frise-mois-titre {
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700;
+  letter-spacing:.2em; text-transform:uppercase; color:var(--lavande-fonce);
+  margin:0 0 1rem 2.25rem;
+}
+/* Le rail : un trait vertical à gauche, et une pastille par événement. */
+.frise-liste { list-style:none; position:relative; padding-left:2.25rem; display:flex; flex-direction:column; gap:1rem; }
+.frise-liste::before {
+  content:''; position:absolute; left:.7rem; top:.75rem; bottom:.75rem;
+  width:2px; border-radius:2px; background:var(--lavande);
+}
+.frise-item { position:relative; }
+.frise-item::before {
+  content:''; position:absolute; left:-1.95rem; top:1.9rem;
+  width:1rem; height:1rem; border-radius:50%;
+  background:var(--blanc); border:3px solid var(--lavande-fonce);
+}
+/* La carte ENTIÈRE est le lien : une grande cible, facile à toucher. */
+.frise-carte {
+  display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:1.1rem;
+  background:var(--blanc); border-radius:1.25rem; padding:1rem 1.25rem 1rem 1rem;
+  color:var(--prune); text-decoration:none;
+  box-shadow:0 8px 24px rgba(var(--prune-rgb), .07);
+  transition:transform .25s, box-shadow .25s;
+}
+.frise-carte:hover { transform:translateY(-2px); box-shadow:0 14px 34px rgba(var(--prune-rgb), .12); }
+.frise-carte:focus-visible { outline:2px solid var(--lavande-fonce); outline-offset:3px; }
+.frise-date {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  width:4.5rem; min-height:4.75rem; border-radius:1rem; padding:.4rem;
+  background:var(--lavande-clair); color:var(--lavande-fonce);
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:.06em; line-height:1.2;
+}
+.frise-date strong { font-family:var(--font-serif),serif; font-size:2rem; font-weight:500; letter-spacing:0; line-height:1; }
+.frise-corps { display:flex; flex-direction:column; gap:.3rem; min-width:0; }
+.frise-titre { font-family:var(--font-serif),serif; font-size:1.35rem; font-weight:500; line-height:1.2; }
+.frise-quand { font-family:var(--font-sans),sans-serif; font-size:.95rem; font-weight:600; color:var(--lavande-fonce); }
+.frise-infos {
+  display:flex; flex-wrap:wrap; gap:.3rem 1rem;
+  font-family:var(--font-sans),sans-serif; font-size:.95rem; color:var(--texte-doux);
+}
+.frise-infos > span { display:inline-flex; align-items:center; gap:.35rem; }
+.frise-infos svg { color:var(--lavande-fonce); flex-shrink:0; }
+.frise-fleche { color:var(--lavande-fonce); }
+/* L'état des inscriptions : une étiquette, jamais la couleur seule — le
+   mot est écrit. */
+.frise-statut {
+  align-self:flex-start; display:inline-block; margin-top:.2rem;
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700;
+  padding:.25rem .7rem; border-radius:2rem;
+}
+.frise-statut.est-ouvert  { background:var(--sauge-clair); color:var(--sauge-fonce); }
+.frise-statut.est-complet { background:var(--lin); color:var(--prune); }
+.frise-statut.est-annule  { background:var(--rose-clair); color:var(--rose-fonce); }
+.frise-item.est-annule .frise-quand { text-decoration:line-through; }
+.frise-item.est-annule .frise-carte { opacity:.8; }
+
+/* Rien de prévu : un encart d'attente, pas une frise vide. */
+.frise-vide {
+  max-width:520px; margin:0 auto; text-align:center;
+  background:var(--blanc); border-radius:1.5rem; padding:2rem 1.5rem;
+  font-family:var(--font-sans),sans-serif; font-size:1rem; line-height:1.7; color:var(--prune);
+}
+.frise-vide-picto {
+  display:inline-grid; place-items:center; width:3.5rem; height:3.5rem; margin-bottom:.75rem;
+  border-radius:50%; background:var(--lavande-clair); color:var(--lavande-fonce);
+}
+.frise-vide .btn-outline { margin-top:1.25rem; }
+
+/* ── FICHE D'UN ÉVÉNEMENT (/evenements/…) ─────────────────────────
+   Réutilise la grammaire du blog (.blog-retour, .blog-article-corps) et
+   l'encadré prune du contact : aucune forme nouvelle à apprendre. */
+.evenement-page { padding-top:9rem; background:var(--lavande-clair); min-height:100vh;
+  --accent-texte: var(--lavande-fonce); --accent-decor: var(--lavande); }
+.evenement-fiche { max-width:42rem; margin:0 auto; }
+.evenement-titre { font-size:clamp(2.2rem, 5vw, 3.2rem); margin:.25rem 0 .75rem; }
+.evenement-alerte {
+  background:var(--blanc); border-radius:1rem; padding:.9rem 1.1rem; margin:0 0 1.5rem;
+  font-family:var(--font-sans),sans-serif; font-size:1rem; color:var(--prune);
+}
+.evenement-infos {
+  display:grid; gap:.75rem; margin:1.75rem 0;
+  background:var(--blanc); border-radius:1.25rem; padding:1.25rem 1.4rem;
+}
+.evenement-infos > div { display:grid; grid-template-columns:7rem 1fr; gap:1rem; align-items:baseline; }
+.evenement-infos dt {
+  display:flex; align-items:center; gap:.5rem;
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--lavande-fonce);
+}
+.evenement-infos dd { font-family:var(--font-sans),sans-serif; font-size:1.05rem; color:var(--prune); line-height:1.5; }
+.evenement-image { width:100%; height:auto; border-radius:1.5rem; display:block; margin-bottom:2rem; }
+.evenement-cta { max-width:none; margin:2.5rem 0 0; }
 
 /* ── RÉSEAUX ────────────────────────────────────────────────── */
-#reseaux { background: var(--creme); }
+#reseaux { background: var(--lin); }
 /* Une seule carte pour l'instant (Facebook) : elle reprend la mise en forme
    des cartes de contact, mais sur une seule colonne et centrée. Ajouter un
    second réseau ici suffira à repasser sur deux colonnes.
@@ -808,45 +1113,129 @@ body.en-preview { padding-top: 2.6rem; }
    qui gagne — une simple classe .reseaux-cards serait donc ignorée. */
 #reseaux .contact-cards { max-width:320px; grid-template-columns:1fr; }
 
-/* ── PRESTATIONS ────────────────────────────────────────────── */
-#bespoke { background: var(--creme); }
-.bespoke-grid { display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:center; }
-.bespoke-img { height:500px; object-fit:cover; border-radius:1.75rem; width:100%; display:block; }
-.bespoke-types { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin:1.75rem 0; }
-/* LISIBILITÉ : 1.15rem = 18.4px pour les types de prestations */
-.bespoke-type { background:var(--rose-clair); border-radius:1rem; padding:1rem 1.25rem; text-align:center; font-family:var(--font-serif),serif; font-size:1.15rem; color:var(--prune); }
-.bespoke-texte { margin-bottom:1.5rem; }
-/* Les deux boutons passent à la ligne ensemble si la place manque. */
-.bespoke-actions { display:flex; flex-wrap:wrap; gap:1rem; }
-
 /* ── COACH ──────────────────────────────────────────────────── */
-#coach { background: var(--rose-clair); }
+#coach { background: var(--lin); }
 .coach-grid { display:grid; grid-template-columns:2fr 3fr; gap:4.5rem; align-items:center; }
 .coach-img-wrap { position:relative; }
-/* object-position remonte légèrement le cadrage : centré, la photo coupait
-   le haut du visage. */
-.coach-img-wrap img { width:100%; height:580px; object-fit:cover; object-position:center 15%; border-radius:1.75rem; display:block; }
+/* IMAGES — les photos éditoriales (à propos, coach, plus d'activités)
+   s'affichent à leurs PROPORTIONS NATURELLES : height:auto, jamais de
+   hauteur imposée. Une hauteur fixe recadrait : le portrait en pied de la
+   coach (3:4) perdait la tête ou les pieds, et l'illustration
+   « Bien-être / Mouvement / Équilibre » perdait son texte. */
+.coach-img-wrap img { width:100%; height:auto; border-radius:1.75rem; display:block; }
 /* Prénom et nom sur deux lignes serrées, comme une signature. */
 .coach-titre { line-height:1; }
 .coach-texte { margin-bottom:1.5rem; }
 .coach-deco { position:absolute; bottom:-1.5rem; right:-1.5rem; width:6rem; height:6rem; border-radius:1.25rem; background:rgba(var(--rose-rgb),.2); z-index:-1; }
 .coach-stats { display:flex; gap:2.5rem; margin:1.75rem 0; padding:1.5rem 2rem; background:var(--blanc); border-radius:1.25rem; }
 .coach-stat { text-align:center; }
-.coach-stat-num { font-family:var(--font-serif),serif; font-size:2.8rem; font-weight:300; color:var(--rose); line-height:1; }
-.coach-stat-label { font-family:var(--font-sans),sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--prune); opacity:.55; margin-top:.35rem; }
+.coach-stat-num { font-family:var(--font-serif),serif; font-size:2.8rem; font-weight:300; color:var(--rose-fonce); line-height:1; }
+.coach-stat-label { font-family:var(--font-sans),sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--texte-doux); margin-top:.35rem; }
 .coach-stat-sep { width:1px; background:rgba(var(--rose-rgb),.25); }
 .cert-grid { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-top:1.5rem; }
 .cert-item { display:flex; align-items:center; gap:.75rem; background:var(--blanc); border-radius:.9rem; padding:.9rem 1.1rem; }
-.cert-icon { color:var(--rose); font-size:.8rem; flex-shrink:0; }
+.cert-icon { color:var(--accent-decor); font-size:.8rem; flex-shrink:0; }
 /* LISIBILITÉ : .9rem = 14.4px */
 .cert-text { font-family:var(--font-sans),sans-serif; font-size:.9rem; color:var(--prune); line-height:1.4; }
 .cert-item.full { grid-column:1/-1; }
+
+/* ── TÉMOIGNAGES ────────────────────────────────────────────────
+   Sous la coach (voir Temoignages.js). Cartes blanches à largeur fixe,
+   centrées : un avis court ne s'étire pas sur toute la page. */
+#temoignages { background: var(--creme); }
+.temoignages-entete { text-align:center; margin-bottom:2.5rem; }
+.temoignages-entete .divider { margin:1.5rem auto; }
+.etoiles { color:rgba(var(--prune-rgb),.2); letter-spacing:.05em; }
+.etoiles .est-pleine, .coach-avis .etoiles { color:var(--or); }
+.avis-resume {
+  display:inline-flex; align-items:center; flex-wrap:wrap; justify-content:center; gap:.5rem;
+  background:var(--blanc); border-radius:2rem; padding:.55rem 1.1rem;
+  box-shadow:0 6px 18px rgba(var(--prune-rgb),.07);
+  font-family:var(--font-sans),sans-serif; font-size:1rem; color:var(--prune);
+}
+.avis-resume .etoiles { font-size:1.15rem; }
+.avis-resume > span:last-child { color:var(--texte-doux); }
+.temoignages {
+  list-style:none; display:grid; justify-content:center; gap:1.25rem;
+  grid-template-columns:repeat(auto-fit, minmax(260px, 340px));
+}
+.temoignage {
+  position:relative; display:flex; flex-direction:column;
+  background:var(--blanc); border-radius:1.5rem; padding:2.6rem 1.6rem 1.5rem;
+  box-shadow:0 10px 30px rgba(var(--prune-rgb),.07);
+}
+.temoignage-guillemet {
+  position:absolute; top:.35rem; left:1.2rem;
+  font-family:var(--font-serif),serif; font-size:4.5rem; line-height:1; color:var(--rose);
+}
+.temoignage-texte p {
+  font-family:var(--font-serif),serif; font-size:1.4rem; font-style:italic;
+  line-height:1.45; color:var(--prune);
+}
+.temoignage-auteur {
+  display:flex; flex-direction:column; gap:.2rem; margin-top:auto; padding-top:1.1rem;
+  font-family:var(--font-sans),sans-serif; font-size:.9rem; color:var(--texte-doux);
+}
+.temoignage-auteur strong { font-size:1rem; color:var(--prune); }
+.temoignages-vide {
+  max-width:520px; margin:0 auto; text-align:center;
+  background:var(--blanc); border-radius:1.5rem; padding:1.5rem;
+  font-family:var(--font-sans),sans-serif; font-size:1.05rem; line-height:1.7; color:var(--prune);
+}
+.temoignages-actions { text-align:center; margin-top:2rem; }
+.temoignages-mention {
+  text-align:center; margin-top:1rem;
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; font-style:italic; color:var(--texte-doux);
+}
+/* Le lien du coach vers les avis. */
+.coach-avis {
+  display:inline-flex; align-items:center; gap:.5rem; min-height:44px; margin:0 0 1rem;
+  font-family:var(--font-sans),sans-serif; font-size:.95rem; font-weight:700;
+  color:var(--rose-fonce); text-decoration:none;
+}
+.coach-avis:hover { text-decoration:underline; }
 
 /* ── CONTACT ────────────────────────────────────────────────── */
 #contact { background:var(--rose-clair); }
 .contact-header { text-align:center; margin-bottom:3.5rem; }
 .contact-header .divider { margin:1.5rem auto; }
-.contact-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; max-width:860px; margin:0 auto 3.5rem; }
+/* La mini-carte (voir Contact.js). Le plan est une iframe NON
+   interactive (pointer-events:none) : c'est le bouton « Itinéraire », dont
+   la zone cliquable (::after) couvre toute la carte, qui reçoit le doigt. */
+.contact-carte {
+  position:relative; max-width:860px; height:280px; margin:0 auto 1.25rem;
+  border-radius:1.5rem; overflow:hidden; background:var(--sauge-clair);
+  box-shadow:0 10px 30px rgba(var(--prune-rgb),.10);
+}
+.contact-carte-fond { position:absolute; inset:0; width:100%; height:100%; border:0; pointer-events:none; }
+/* L'attribution d'OpenStreetMap est obligatoire : le bandeau recouvre
+   celle du plan, on la réécrit en haut. */
+.contact-carte-credit {
+  position:absolute; top:.6rem; right:.6rem;
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--prune);
+  background:rgba(var(--blanc-rgb),.85); padding:.15rem .5rem; border-radius:1rem;
+}
+.contact-carte-bandeau {
+  position:absolute; left:0; right:0; bottom:0;
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  background:rgba(var(--blanc-rgb),.96); padding:.9rem 1.1rem;
+}
+.contact-carte-adresse {
+  display:flex; flex-direction:column; text-align:left;
+  font-family:var(--font-sans),sans-serif; font-size:.95rem; line-height:1.4; color:var(--prune);
+}
+.contact-carte-adresse strong { font-family:var(--font-serif),serif; font-size:1.15rem; font-weight:500; }
+.contact-carte-bouton {
+  display:inline-flex; align-items:center; gap:.45rem; flex-shrink:0; min-height:44px;
+  background:var(--rose-fonce); color:var(--blanc); border-radius:3rem; padding:.6rem 1.2rem;
+  font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase; text-decoration:none;
+  transition:background .25s;
+}
+.contact-carte-bouton::after { content:''; position:absolute; inset:0; }
+.contact-carte-bouton:hover { background:var(--prune); }
+.contact-carte-bouton:focus-visible { outline:2px solid var(--prune); outline-offset:3px; }
+.contact-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.25rem; max-width:860px; margin:0 auto 3.5rem; }
 .contact-card {
   background:var(--rose-clair); border-radius:1.5rem; padding:2.5rem 2rem; text-align:center;
   transition:transform .3s, box-shadow .3s;
@@ -856,9 +1245,9 @@ body.en-preview { padding-top: 2.6rem; }
 .contact-icon svg { width:1.1rem; height:1.1rem; color:var(--blanc); }
 .contact-label { font-family:var(--font-serif),serif; font-size:1.15rem; font-weight:500; color:var(--prune); margin-bottom:.5rem; }
 /* LISIBILITÉ : 1rem = 16px pour les coordonnées */
-.contact-value { font-family:var(--font-sans),sans-serif; font-size:1rem; color:var(--rose); font-weight:600; text-decoration:none; word-break:break-all; }
-.contact-value:hover { color:var(--rose-fonce); }
-.contact-addr { font-family:var(--font-sans),sans-serif; font-size:.95rem; color:var(--prune); opacity:.75; line-height:1.7; }
+.contact-value { font-family:var(--font-sans),sans-serif; font-size:1rem; color:var(--rose-fonce); font-weight:600; text-decoration:none; word-break:break-all; }
+.contact-value:hover { color:var(--prune); }
+.contact-addr { font-family:var(--font-sans),sans-serif; font-size:.95rem; color:var(--texte-doux); line-height:1.7; }
 .contact-cta {
   max-width:480px; margin:0 auto; background:var(--prune); border-radius:2rem;
   padding:3rem 3.5rem; text-align:center;
@@ -867,10 +1256,11 @@ body.en-preview { padding-top: 2.6rem; }
 .contact-cta-title em { font-style:italic; color:var(--rose); }
 .contact-cta-sub { font-family:var(--font-sans),sans-serif; font-size:1rem; color:rgba(var(--blanc-rgb),.6); margin-bottom:2rem; line-height:1.8; }
 .cta-btns { display:flex; flex-wrap:wrap; justify-content:center; gap:.75rem; }
-.cta-btn-rose { display:inline-block; background:var(--rose); color:var(--blanc); font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; text-decoration:none; padding:.95rem 2rem; border-radius:3rem; transition:background .25s; }
-.cta-btn-rose:hover { background:var(--rose-fonce); }
+.cta-btn-rose { display:inline-block; background:var(--rose-fonce); color:var(--blanc); font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; text-decoration:none; padding:.95rem 2rem; border-radius:3rem; transition:background .25s; }
+/* Sur le bandeau prune, un survol « plus foncé » se confondrait avec le fond : le bouton s'entoure d'un liseré clair. */
+.cta-btn-rose:hover { box-shadow: 0 0 0 2px var(--rose-pale); }
 .cta-btn-outline { display:inline-block; border:1.5px solid rgba(var(--blanc-rgb),.2); color:var(--blanc); font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; text-decoration:none; padding:.95rem 2rem; border-radius:3rem; transition:border-color .25s, color .25s; }
-.cta-btn-outline:hover { border-color:var(--rose); color:var(--rose); }
+.cta-btn-outline:hover { border-color:var(--rose-pale); color:var(--rose-pale); }
 /* LISIBILITÉ : .85rem ≈ 13.6px. Sur le bandeau prune, le blanc à 55 %
    reste largement au-dessus du seuil de contraste. */
 .cta-btns-aide {
@@ -885,7 +1275,7 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
 .footer-brand img { height:2.2rem; width:2.2rem; border-radius:50%; object-fit:cover; }
 .footer-brand-name { font-family:var(--font-serif),serif; font-size:1.4rem; font-weight:300; color:var(--blanc); }
 .footer-brand-sub { font-family:var(--font-sans),sans-serif; font-size:.7rem; font-style:italic; color:rgba(var(--blanc-rgb),.6); margin-top:.1rem; }
-.footer-tagline { font-family:var(--font-serif),serif; font-size:1.2rem; font-style:italic; color:var(--rose); text-align:center; }
+.footer-tagline { font-family:var(--font-serif),serif; font-size:1.2rem; font-style:italic; color:var(--rose-pale); text-align:center; }
 .footer-tagline small { display:block; font-family:var(--font-sans),sans-serif; font-size:.65rem; font-style:normal; color:rgba(var(--blanc-rgb),.68); margin-top:.25rem; letter-spacing:.1em; }
 .footer-right { display:flex; flex-direction:column; align-items:flex-end; gap:1rem; }
 /* Huit liens ne tiennent plus toujours sur une ligne. `nowrap` empêche
@@ -895,10 +1285,10 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
 .footer-nav { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.6rem 1.5rem; }
 /* LISIBILITÉ : .78rem = 12.5px pour les liens du footer */
 .footer-nav a { white-space:nowrap; font-family:var(--font-sans),sans-serif; font-size:.78rem; font-weight:600; letter-spacing:.15em; text-transform:uppercase; color:rgba(var(--blanc-rgb),.72); text-decoration:none; transition:color .25s; }
-.footer-nav a:hover { color:var(--rose); }
+.footer-nav a:hover { color:var(--rose-pale); }
 .footer-socials { display:flex; gap:.75rem; }
 .footer-socials a { color:rgba(var(--blanc-rgb),.7); transition:color .25s; }
-.footer-socials a:hover { color:var(--rose); }
+.footer-socials a:hover { color:var(--rose-pale); }
 .footer-bottom { border-top:1px solid rgba(var(--blanc-rgb),.07); padding-top:2rem; margin-top:2rem; text-align:center; font-family:var(--font-sans),sans-serif; font-size:.72rem; color:rgba(var(--blanc-rgb),.68); max-width:1400px; margin-left:auto; margin-right:auto; }
 
 /* ── BLOG ───────────────────────────────────────────────────────
@@ -909,12 +1299,16 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
    passerait dessous. */
 .blog-page { padding-top: 10rem; background: var(--creme); min-height: 100vh; }
 .blog-entete { text-align: center; margin-bottom: 3.5rem; }
+/* L'aperçu sur l'accueil : fond crème, entre la frise lavande et les
+   réseaux sur lin — jamais deux fonds identiques côte à côte. */
+#blog-apercu { background: var(--creme); }
+.blog-apercu-tous { text-align: center; margin-top: 2.5rem; }
 .blog-entete .divider { margin: 1.5rem auto; }
 
 /* LISIBILITÉ : 1rem = 16px, comme le reste du texte courant. */
 .blog-vide {
   font-family: var(--font-sans), sans-serif; font-size: 1rem;
-  line-height: 2; color: var(--prune); opacity: .75;
+  line-height: 2; color:var(--texte-doux);
   text-align: center; margin: 4rem auto; max-width: 30rem;
 }
 
@@ -935,7 +1329,7 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
 /* LISIBILITÉ : .78rem en capitales espacées — c'est une étiquette. */
 .blog-carte-date {
   font-family: var(--font-sans), sans-serif; font-size: .78rem; font-weight: 700;
-  letter-spacing: .12em; text-transform: uppercase; color: var(--rose);
+  letter-spacing: .12em; text-transform: uppercase; color: var(--rose-fonce);
   margin-bottom: .5rem;
 }
 .blog-carte-titre {
@@ -945,7 +1339,7 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
 /* LISIBILITÉ : .9rem = 14.4px */
 .blog-carte-extrait {
   font-family: var(--font-sans), sans-serif; font-size: .9rem;
-  line-height: 1.75; color: var(--prune); opacity: .75; margin-bottom: 1rem;
+  line-height: 1.75; color:var(--texte-doux); margin-bottom: 1rem;
 }
 
 /* L'article lui-même : une colonne étroite. Au-delà de ~34rem, l'œil perd
@@ -962,7 +1356,7 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
 /* LISIBILITÉ : .9rem = 14.4px */
 .blog-article-meta {
   font-family: var(--font-sans), sans-serif; font-size: .9rem;
-  color: var(--prune); opacity: .7; margin-top: .75rem;
+  color:var(--texte-doux); margin-top: .75rem;
 }
 .blog-article-image {
   width: 100%; height: 380px; object-fit: cover;
@@ -995,13 +1389,13 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
 
 /* ── RESPONSIVE ─────────────────────────────────────────────── */
 /* ── NAVIGATION : bascule vers le menu hamburger ──────────────
-   La barre complète tient jusqu'à ~1000 px : sept liens, le bouton
-   CONTACT et le logo. En dessous, elle débordait — « À PROPOS »
-   repassait sur deux lignes PAR-DESSUS le logo, et le bouton CONTACT
-   sortait de l'écran.
-   Le hamburger n'arrivait qu'à 700 px : entre 700 et 1000, la nav
-   était cassée. Constaté sur le site en ligne à 820 px. */
-@media (max-width: 1024px) {
+   La barre complète compte huit liens, le bouton CONTACT et le logo.
+   Mesuré : elle tient à partir de 1200 px. En dessous, les libellés
+   passaient sur deux lignes et le bouton CONTACT sortait de l'écran.
+   Si l'on ajoute un lien, refaire la mesure : ce seuil en dépend.
+   Historique : la barre n'avait que sept liens et basculait à 1024 px ;
+   avant encore, à 700 px, ce qui la cassait entre 700 et 1000 px. */
+@media (max-width: 1199px) {
   .ham { display:flex; }
   .nav-links { display:none; }
 }
@@ -1010,14 +1404,23 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
   #nav { padding:1rem 2rem; }
   .section-pad { padding:5rem 2.5rem; }
   .hero-text { padding:7rem 2rem 4rem; }
-  .about-grid,.bespoke-grid,.coach-grid,.outdoor-grid { grid-template-columns:1fr; gap:2.5rem; }
-  .about-img-wrap img,.bespoke-img,.coach-img-wrap img,.outdoor-img { height:340px; }
+  .about-grid,.coach-grid { grid-template-columns:1fr; gap:2.5rem; }
+  /* Les photos gardent leurs proportions à toutes les largeurs (voir « IMAGES » plus haut) : plus de hauteur imposée ici. */
   .footer-inner { grid-template-columns:1fr; text-align:center; }
   .footer-right { align-items:center; }
+  /* Sur une colonne, TOUT se centre : le logo restait calé à gauche et les
+     liens alignés à droite, sous un slogan centré. */
+  .footer-brand, .footer-nav { justify-content:center; }
+  .footer-brand > div { text-align:left; }
   footer { padding:3rem 2rem; }
   .manifesto { padding:3rem 2rem; }
 }
-@media (max-width: 700px) {
+/* TÉLÉPHONE — portrait (jusqu'à 700 px de large) ET paysage : un iPhone
+   tourné fait 844 px de large mais 390 de haut. Sans la seconde condition,
+   il recevait la mise en page d'ordinateur, étiquettes à 10 px comprises.
+   « pointer: coarse » = écran tactile : un ordinateur à fenêtre basse n'est
+   pas concerné. */
+@media (max-width: 700px), (max-height: 500px) and (pointer: coarse) {
   /* Sentier : une seule colonne, mais on garde un léger zigzag
      (décalage horizontal alterné) pour ne pas perdre l'esprit sinueux. */
   .activites-sentier { max-width:320px; }
@@ -1029,88 +1432,274 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
   .etape--droite .etape-panneau { text-align:left; }
   .etape--droite .etape-tags { justify-content:flex-start; }
   .etape-media { width:90px; height:90px; }
-  /* Carrousel : cartes plus étroites que l'écran pour que la suivante
-     dépasse toujours du bord droit (l'affordance principale). */
-  /* TÉLÉPHONE — et seulement là — la carte active se CENTRE.
-     Une seule carte tient à l'écran : sans centrage, on ne verrait jamais
-     qu'il y en a d'autres. Sur grand écran le problème ne se pose pas,
-     trois cartes sont visibles d'un coup, et la première doit rester
-     alignée à gauche comme le reste de la page.
+  /* ── TÉLÉPHONE ──────────────────────────────────────────────────
+     Tout ce qui suit a été MESURÉ sur le site en ligne à 390 × 664 px
+     (un iPhone 13 dans Safari), puis à 320, 360 et 375 px de large.
+     Chaque bloc dit ce qui n'allait pas, chiffres d'avant compris, pour
+     qu'on ne réintroduise pas le défaut en « simplifiant ». */
 
-     La marge latérale vaut la moitié de l'espace libre autour d'une carte
-     centrée. Sans elle, la PREMIÈRE et la DERNIÈRE ne peuvent pas se
-     centrer : il n'y a rien à faire défiler au-delà du bord.
-     `max()` protège les écrans plus étroits qu'une carte, où le calcul
-     deviendrait négatif — une marge négative est ignorée, et on
-     retomberait silencieusement sur zéro.
-     Elle s'annule dans le calcul du JS : centrer la carte N revient à
-     `scrollLeft = N x pas`, ce que allerA() fait déjà.
+  /* Les blocs .apparition-droite partent décalés de 32 px vers la droite
+     avant d'entrer en fondu : sur un écran de 390 px, ils dépassaient du
+     bord et la page entière pouvait glisser de côté. `clip` coupe ce
+     débordement sans créer de zone de défilement (contrairement à
+     `hidden`). La nav, hors de <main>, n'est pas concernée. */
+  main { overflow-x:clip; }
 
-     Carte rétrécie à 250 px : à 300 dans une piste de 342, les voisines
-     ne dépassaient que de 5 px — invisible. */
-  .carrousel-piste {
-    --carte-l: min(64vw, 250px);
-    gap:1rem;
-    padding:1rem max(.25rem, calc(50% - var(--carte-l) / 2)) 2rem;
+  /* Marges : la page faisait 21 écrans de haut. Sections, en-têtes et
+     grilles se resserrent — sans jamais toucher à la taille du texte. */
+  #nav { padding:.9rem 1.25rem; }
+  .section-pad { padding:3rem 1.25rem; }
+  .acts-header, .tarifs-entete, .planning-entete, .contact-header { margin-bottom:2rem; }
+  .tarifs { gap:2rem; }
+  .about-grid,.coach-grid { gap:1.75rem; }
+  footer { padding:2.5rem 1.25rem; }
+  .manifesto { padding:2.5rem 1.25rem; }
+
+  /* LISIBILITÉ — sur téléphone, le plancher de .85rem (13,6 px) vaut pour
+     TOUT le texte, étiquettes comprises. 90 textes étaient entre 10,4 et
+     12,8 px, dont les étiquettes des activités à 10,4 px. */
+  .section-label, .tarif-groupe, .about-badge-label, .etape-num, .etape-tag,
+  .etape-lien, .etape-toggle, .carte-act-num, .carrousel-indice,
+  .carrousel-compteur, .coach-stat-label, .tarif-tableau thead th,
+  .planning-jour, .footer-nav a, .footer-brand-sub, .footer-tagline small,
+  .footer-bottom { font-size:.85rem; }
+  /* LISIBILITÉ — les paragraphes passent à 16 px. À 13,6 px dans une
+     carte de 250 px, une description tenait 25 caractères par ligne. */
+  .carte-act-accroche, .carte-act-desc, .etape-accroche, .etape-panneau p,
+  .tarif-vignette-detail, .tarif-tableau-detail, .tarif-note,
+  .inscription-etapes li, .inscription-precision, .cta-btns-aide,
+  .cert-text { font-size:1rem; }
+  /* Montserrat 300 est trop fin pour un petit écran en plein jour. */
+  .lead { font-weight:400; }
+  /* À .35em, une étiquette de deux mots occupait toute la largeur. */
+  .section-label { letter-spacing:.2em; }
+
+  /* BOUTONS — pleine largeur, lettres moins espacées. À .18em,
+     « Remplir le formulaire d'inscription » s'étalait sur trois lignes et
+     les trois boutons du contact avaient trois largeurs différentes.
+     Pleine largeur, ce sont aussi de grandes cibles pour le doigt. */
+  .btn-primary, .btn-secondary, .btn-outline, .cta-btn-rose, .cta-btn-outline {
+    display:block; width:100%; text-align:center; text-wrap:balance;
+    letter-spacing:.08em; padding:1rem 1.25rem;
   }
-  .carte-act { scroll-snap-align:center; }
-  .carte-act-media { height:170px; }
-  .carrousel-piste { gap:1rem; }
-  .carrousel-commandes { gap:1rem; }
-  .carrousel-scene::before, .carrousel-scene::after { width:2.5rem; }
-  .carrousel-indice { font-size:.68rem; letter-spacing:.08em; }
-  /* Planning : le tableau ne tient plus dans la largeur, il faut le dire.
-     LISIBILITÉ : .85rem = 13.6px, le plancher du projet. */
-  .planning-indice {
-    display:block; text-align:center; margin-bottom:1rem;
-    font-family:var(--font-sans),sans-serif; font-size:.85rem;
-    color:var(--prune); opacity:.6; font-style:italic;
+  .cta-btns { flex-direction:column; }
+
+  /* ACCUEIL — la bande d'activités, collée en bas de l'image, passait
+     PAR-DESSUS les boutons dès que l'écran était petit : 57 px sur un
+     iPhone SE, où « Nous rejoindre » disparaissait entièrement. Elle
+     rentre dans le flux, SOUS les boutons : elle ne peut plus rien
+     recouvrir, quel que soit le nombre d'activités saisi dans le CMS.
+     Et elle se lit comme une phrase — minuscules, peu d'espacement — au
+     lieu de quatre lignes de capitales : 170 px de haut ramenés à ~80. */
+  .hero-h1 { font-size:clamp(3.8rem,15vw,6rem); }
+  #hero { flex-direction:column; align-items:stretch; }
+  .hero-text { flex:1; justify-content:center; max-width:none; padding:5.5rem 1.5rem 2rem; }
+  .hero-activities { position:relative; padding:.85rem 1rem 1rem; gap:.4rem; }
+  /* Chaque activité devient une petite pastille en verre dépoli : même
+     organisation qu'avant (une bande sous les boutons), mais la place d'une
+     étiquette au lieu d'une ligne entière. En capitales espacées, six
+     activités prenaient 35 % de l'écran d'un iPhone. */
+  .hero-act-pill {
+    font-size:.85rem; font-weight:600; letter-spacing:.01em; text-transform:none;
+    color:var(--creme); background:rgba(var(--creme-rgb),.14);
+    border:1px solid rgba(var(--creme-rgb),.3); border-radius:2rem; padding:.3rem .8rem;
   }
-  /* Tarifs sur petit écran : le prix de l'adhésion passe sous son libellé,
-     les vignettes se mettent sur deux colonnes. Quand il y en a trois, la
-     dernière prend toute la largeur plutôt que de rester seule dans sa
-     colonne — la règle ne vise que ce cas (:nth-child(3) ET dernière). */
-  .tarif-adhesion { flex-direction:column; align-items:flex-start; gap:.5rem; padding:1.25rem 1.35rem; }
-  .tarif-adhesion-prix { font-size:2.2rem; }
-  .tarif-vignettes { grid-template-columns:repeat(2,1fr); gap:.75rem; }
-  .tarif-vignette { padding:1.4rem .75rem; }
-  .tarif-vignette-prix { font-size:2.2rem; }
-  .tarif-vignettes > :last-child:nth-child(3) { grid-column:1 / -1; }
-  /* Le tableau tient dans la largeur en resserrant : plutôt que de le faire
-     défiler, on réduit ce qui peut l'être sans passer sous le plancher de
-     lisibilité du projet. */
-  .tarif-tableau { min-width:0; }
-  .tarif-tableau thead th { padding:.75rem .5rem; letter-spacing:.06em; }
-  .tarif-tableau tbody th { padding:1rem .75rem; }
-  .tarif-tableau td { font-size:1.5rem; padding:1rem .4rem; }
-  .tarif-tableau-nom { font-size:1.05rem; }
-  .blog-page { padding-top: 7rem; }
-  .blog-grille { grid-template-columns: 1fr; gap: 1.5rem; }
-  .blog-article-image { height: 220px; }
-  .contact-cards { grid-template-columns:1fr; }
-  /* Les compteurs du coach étaient la cause du débordement horizontal de
-     toute la page : rangée flex de 2,5rem d'écart et 2rem de marge
-     intérieure, que rien ne faisait se replier. Mesuré à 490 px dans un
-     écran de 390. Le document entier passait à 546 px, et le bouton
-     hamburger se retrouvait à x=486 — hors de l'écran, donc impossible à
-     toucher. C'est ce qui empêchait le menu de s'ouvrir sur téléphone. */
-  .coach-stats { flex-wrap:wrap; justify-content:center; gap:1.25rem; padding:1.25rem 1rem; }
-  .coach-stat-sep { display:none; }
-  .cert-grid { grid-template-columns:1fr; }
-  .bespoke-types { grid-template-columns:1fr; }
+  .hero-act-pill::before { display:none; }
   /* Version allégée du fond d'accueil sur téléphone. L'image de bureau
      fait 2560 px de large : sur un écran de 375 px elle est sept fois
      trop grande, et son téléchargement retarde tout le reste de la page.
      Ne s'applique QU'AU repli local — une image venue du CMS est déjà
      redimensionnée par le CDN de Sanity. */
   .hero-bg[data-repli="1"] { background-image: url('/fond1-mobile.avif') !important; }
-  .hero-h1 { font-size:clamp(3.8rem,15vw,6rem); }
-  #nav { padding:.9rem 1.25rem; }
-  .section-pad { padding:4rem 1.5rem; }
-  .hero-text { padding:6rem 1.5rem 4rem; }
-  footer { padding:2.5rem 1.5rem; }
-  .manifesto { padding:2.5rem 1.5rem; }
-  .contact-cta { padding:2rem 1.5rem; }
+
+  /* MENU — chaque lien faisait 19 px de haut, une cible difficile à
+     viser. Le remplissage les porte à 44 px sans grossir le texte. */
+  #mob-menu { padding:.75rem 1.5rem; }
+  #mob-menu ul { gap:0; }
+  #mob-menu a { display:block; padding:.8rem 0; }
+
+  /* CARROUSEL — la carte active se CENTRE, et seulement ici.
+     Une seule carte tient à l'écran : sans centrage, on ne verrait jamais
+     qu'il y en a d'autres. Sur grand écran, trois cartes sont visibles
+     d'un coup et la première reste alignée à gauche comme le reste.
+
+     La piste déborde des marges de la section (margin-inline négatif) et
+     occupe toute la largeur de l'écran : c'est ce qui permet une carte
+     LARGE — 84 % de l'écran — dont les voisines dépassent encore de part
+     et d'autre. Les cartes faisaient 250 px : avec le texte à 16 px, la
+     plus longue aurait mesuré plus de 900 px de haut.
+
+     La marge latérale de la piste vaut la moitié de l'espace libre autour
+     d'une carte centrée. Sans elle, la PREMIÈRE et la DERNIÈRE ne peuvent
+     pas se centrer : il n'y a rien à faire défiler au-delà du bord.
+     `max()` protège les écrans plus étroits qu'une carte, où le calcul
+     deviendrait négatif. Elle s'annule dans le calcul du JS : centrer la
+     carte N revient à `scrollLeft = N x pas`, ce que allerA() fait déjà.
+
+     Les dégradés de bord sont réduits à 1rem : à 2,5rem, ils couvraient
+     justement les voisines qui dépassent, seule preuve qu'il y a une suite. */
+  .carrousel-scene { margin-inline:-1.25rem; }
+  .carrousel-piste {
+    --carte-l: min(84vw, 340px);
+    gap:.75rem;
+    padding:1rem max(.25rem, calc(50% - var(--carte-l) / 2)) 1.5rem;
+    /* Une carte dépliée grandit seule : étirées, les autres se seraient
+       allongées d'autant, pleines de vide. */
+    align-items:flex-start;
+  }
+  /* Collés au bord de la scène : décalés de .25rem comme sur grand écran,
+     ils dépasseraient de l'écran et feraient glisser la page de côté. */
+  .carrousel-scene::before { width:1rem; left:0; }
+  .carrousel-scene::after  { width:1rem; right:0; }
+  .carte-act { scroll-snap-align:center; }
+  .carte-act-media { height:150px; }
+  .carte-act-corps { padding:1.75rem 1.25rem 1.25rem; }
+  /* Quatre lignes, puis « Lire la suite ». Entière, la plus longue
+     description faisait 317 px et la carte 733 px — plus que l'écran :
+     on ne voyait jamais une activité en entier. */
+  .carte-act-desc {
+    line-height:1.65;
+    display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:4; overflow:hidden;
+  }
+  .carte-act.est-ouverte .carte-act-desc { display:block; -webkit-line-clamp:unset; }
+  /* 44 px de haut, comme toute cible au doigt. */
+  .carte-act-suite { display:inline-flex; align-items:center; min-height:44px; padding:0; }
+  .carte-act-bas { padding-top:.5rem; }
+  .etape-lien { display:inline-flex; align-items:center; min-height:44px; padding:0; }
+  .carte-act-bas .etape-lien { margin-top:0; }
+  .carrousel-commandes { gap:1rem; }
+  .carrousel-indice { letter-spacing:.06em; }
+
+
+  /* PLUS D'ACTIVITÉS — trois onglets côte à côte, pictogramme AU-DESSUS
+     du libellé : c'est ce qui les fait tenir à trois sur 342 px, en
+     cibles de 64 px de haut. Le panneau passe sur une colonne, dans
+     l'ordre titre → photo → texte : le titre dit tout de suite quel
+     onglet on vient d'ouvrir. */
+  .onglets { gap:.3rem; padding:.3rem; }
+  .onglet { flex-direction:column; gap:.25rem; min-height:64px; padding:.5rem .25rem; font-size:.85rem; letter-spacing:.01em; }
+  .panneau {
+    grid-template-columns:1fr; grid-template-areas:"titre" "media" "texte";
+    grid-template-rows:auto; gap:1rem; padding:1.5rem 1.25rem; border-radius:1.4rem;
+  }
+  .themes, .publics { gap:.5rem; }
+  .theme { padding:.7rem .75rem; font-size:.95rem; }
+  .public-carte { flex-direction:column; text-align:center; gap:.45rem; padding:.9rem .5rem; font-size:1.05rem; }
+
+  /* COACH — les trois chiffres se rangeaient en 2 + 1, bancals. En
+     liste, chiffre à gauche et libellé à droite, ils tiennent à toutes
+     les largeurs.
+     Historique : cette rangée faisait autrefois déborder la PAGE ENTIÈRE
+     (490 px dans un écran de 390), ce qui rendait le bouton menu
+     intouchable. Une liste verticale ne peut plus déborder. */
+  .coach-stats { flex-direction:column; gap:.5rem; padding:1rem 1.25rem; margin:1.25rem 0; }
+  .coach-stat { display:flex; align-items:center; gap:1rem; text-align:left; }
+  .coach-stat-num { font-size:2.2rem; min-width:4.5rem; text-align:center; }
+  .coach-stat-label { margin-top:0; letter-spacing:.08em; }
+  .coach-stat-sep { display:none; }
+  .cert-grid { grid-template-columns:1fr; }
+
+  /* TARIFS — le prix de l'adhésion passe sous son libellé, les vignettes
+     se mettent sur deux colonnes ; une vignette seule sur sa ligne se
+     centre d'elle-même (voir « ALIGNEMENT AUTOMATIQUE » plus haut). */
+  .tarif-adhesion { flex-direction:column; align-items:flex-start; gap:.5rem; padding:1.25rem 1.35rem; }
+  .tarif-adhesion-prix { font-size:2.2rem; }
+  .tarif-vignettes { gap:.75rem; }
+  .tarif-vignette, .tarif-vignettes--duo .tarif-vignette { flex-basis:calc((100% - .75rem) / 2); padding:1.4rem .75rem; }
+  .tarif-vignette-prix { font-size:2.2rem; }
+  /* Le tableau tient dans la largeur en resserrant : plutôt que de le faire
+     défiler, on réduit ce qui peut l'être sans passer sous le plancher de
+     lisibilité du projet. */
+  .tarif-tableau { min-width:0; }
+  .tarif-tableau thead th { padding:.75rem .35rem; letter-spacing:.04em; }
+  .tarif-tableau tbody th { padding:1rem .6rem; }
+  .tarif-tableau td { font-size:1.5rem; padding:1rem .3rem; }
+  .tarif-tableau-nom { font-size:1.05rem; }
+  /* « Famille * » ne se coupe plus (espace insécable) : à 16 px, le détail
+     « Renouvellement d'adhésion » faisait déborder le tableau de 11 px.
+     La césure permet au mot long de passer à la ligne. */
+  .tarif-tableau-detail { font-size:.9rem; hyphens:auto; }
+
+  /* INSCRIPTION — le bloc faisait 1 079 px, 1,6 écran. Les étapes
+     deviennent une liste alignée à gauche, au lieu de pastilles centrées
+     de largeurs toutes différentes, et l'encadré se resserre. */
+  .inscription { margin-top:2.5rem; padding:2rem 1.25rem; }
+  .inscription-titre { font-size:1.7rem; }
+  .inscription-etapes { flex-direction:column; align-items:flex-start; gap:.4rem; margin:.75rem 0 1.5rem; text-align:left; }
+  .inscription-etapes li { background:none; padding:0; border-radius:0; align-items:baseline; }
+  .inscription-alerte { margin:1.5rem 0; padding:1rem 1.1rem 1.1rem; }
+
+  /* PLANNING — le tableau de 620 px, dans 342 px, ne montrait qu'un jour
+     et un tiers sur quatre : il fallait le faire glisser de côté pour
+     découvrir chaque jour. Le téléphone reçoit la liste jour par jour
+     (voir Planning.js) ; le tableau reprend la main au-delà de 700 px. */
+  .planning-wrap { display:none; }
+  .planning-jours { display:grid; }
+
+  /* ÉVÉNEMENTS — le rail se rapproche du bord, la pastille de date
+     rétrécit, la flèche disparaît (toute la carte est le lien, elle ne
+     sert qu'à l'indiquer sur grand écran). */
+  .evenements-entete { margin-bottom:2rem; }
+  .frise-mois-titre { margin-left:1.6rem; }
+  .frise-liste { padding-left:1.6rem; gap:.75rem; }
+  .frise-liste::before { left:.45rem; }
+  .frise-item::before { left:-1.45rem; top:1.6rem; width:.85rem; height:.85rem; }
+  .frise-carte { grid-template-columns:auto 1fr; gap:.85rem; padding:.9rem .9rem .9rem .8rem; }
+  .frise-date { width:3.9rem; min-height:4.25rem; }
+  .frise-date strong { font-size:1.75rem; }
+  .frise-titre { font-size:1.2rem; }
+  .frise-fleche { display:none; }
+  .evenement-page { padding-top:6.5rem; }
+  .evenement-infos { padding:1.1rem 1.1rem; }
+  .evenement-infos > div { grid-template-columns:1fr; gap:.2rem; }
+
+  /* CONTACT & RÉSEAUX — les cartes avaient exactement la couleur de leur
+     section (rose clair sur rose clair) : invisibles, il ne restait que
+     3 × 193 px de vide autour de trois lignes d'information. Elles
+     deviennent des rangées blanches, pictogramme à gauche, et TOUTE la
+     rangée est la zone à toucher (le ::after du lien la recouvre). */
+  .contact-cards, #reseaux .contact-cards { grid-template-columns:1fr; gap:.6rem; max-width:none; margin-bottom:2.5rem; }
+  /* Rien ne suit la carte des réseaux : sa marge basse ajoutait 40 px de vide. */
+  #reseaux .contact-cards { margin-bottom:0; }
+  .contact-card {
+    position:relative; display:grid; grid-template-columns:auto 1fr;
+    align-items:center; column-gap:1rem; text-align:left;
+    background:var(--blanc); padding:.9rem 1.1rem; border-radius:1.1rem;
+  }
+  .contact-icon { grid-row:span 2; margin:0; }
+  .contact-label { margin-bottom:0; }
+  .contact-value::after { content:''; position:absolute; inset:0; border-radius:inherit; }
+  .contact-cta { padding:2rem 1.25rem; }
+  .contact-carte { height:250px; border-radius:1.25rem; }
+  .contact-carte-bandeau { padding:.75rem .85rem; gap:.6rem; }
+  .contact-carte-adresse { font-size:.9rem; }
+  .contact-carte-bouton { padding:.55rem .9rem; letter-spacing:.04em; }
+
+  /* PIED DE PAGE — liens de 15 px de haut, pictogrammes de 18 × 22 px :
+     trop petits pour le doigt. Tous passent à 44 px. */
+  .footer-nav { gap:0 .25rem; }
+  .footer-nav a { display:inline-flex; align-items:center; min-height:44px; padding:0 .5rem; letter-spacing:.1em; }
+  .footer-socials { gap:.25rem; }
+  .footer-socials a { display:grid; place-items:center; width:44px; height:44px; }
+
+  .blog-page { padding-top: 7rem; }
+  .blog-grille { grid-template-columns: 1fr; gap: 1.5rem; }
+  .blog-article-image { height: 220px; }
+}
+
+/* TÉLÉPHONE EN PAYSAGE — la règle « téléphone » ci-dessus s'applique
+   (textes, cibles), mais 844 px de large laissent la place à DEUX colonnes.
+   Sur une seule, chaque photo occupait toute la largeur : plus haute que
+   l'écran, qui ne fait que 390 px. */
+@media (max-height: 500px) and (pointer: coarse) and (min-width: 701px) {
+  /* align-items:start : centrée face à une colonne de texte très haute, la
+     photo tombait loin sous le titre, hors de l'écran. */
+  .about-grid, .coach-grid { grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+  .panneau {
+    grid-template-columns: 5fr 7fr; grid-template-areas: "media titre" "media texte";
+    grid-template-rows: auto 1fr; gap: .75rem 2rem;
+  }
+  .coach-img-wrap img { max-height: 85vh; width: auto; max-width: 100%; margin: 0 auto; }
 }
 
 /* Toujours en dernier dans la cascade : doit l'emporter sur les
@@ -1128,5 +1717,4 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
   .carte-act { transition:none; }
   .carte-act:hover { transform:none; }
   .carrousel-jauge { transition:none; }
-  .carrousel-indice-molette::after { animation:none; }
 }

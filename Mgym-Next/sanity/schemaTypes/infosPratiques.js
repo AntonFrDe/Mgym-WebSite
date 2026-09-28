@@ -51,6 +51,23 @@ export const infosPratiques = defineType({
       validation: (Rule) =>
         Rule.uri({ scheme: ['https'] }).error('L\'adresse doit commencer par https://'),
     }),
+    defineField({
+      name: 'positionCarte', title: 'Position sur la carte', type: 'geopoint',
+      description: 'Le repère de la mini-carte et la destination du bouton « Itinéraire ». ' +
+        'Pour la trouver : sur Google Maps, clic droit sur la salle, puis cliquez sur les deux nombres pour les copier. ' +
+        'Le premier est la latitude, le second la longitude.',
+    }),
+    defineField({
+      name: 'plaquetteGroupes', title: 'Plaquette « Groupes, événements & entreprises »', type: 'file',
+      options: { accept: 'application/pdf' },
+      description: 'Le PDF ouvert par « Découvrir en détail » des prestations sur mesure. ' +
+        'Enregistrez-le en « qualité web » : un PDF de plusieurs dizaines de Mo ne s\'ouvre pas sur un téléphone.',
+    }),
+    defineField({
+      name: 'plaquetteMassages', title: 'Plaquette « Massages bien-être »', type: 'file',
+      options: { accept: 'application/pdf' },
+      description: 'Le PDF des massages, avec leurs tarifs.',
+    }),
   ],
 
   preview: {
