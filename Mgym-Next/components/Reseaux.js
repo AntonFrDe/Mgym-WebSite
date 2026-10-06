@@ -23,7 +23,6 @@ export default function Reseaux({ site, infos }) {
       <div className="section-max">
 
         <div className="contact-header apparition">
-          <p className="section-label">{site.reseauxEtiquette}</p>
           <h2 className="section-title">
             {site.reseauxTitre} <em>{site.reseauxTitreItalique}</em>
           </h2>

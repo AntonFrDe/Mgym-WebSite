@@ -7,7 +7,8 @@
 //
 // LA FORME : une FRISE verticale, groupée par mois. La date vient en premier,
 // en pastille : c'est la première question qu'on se pose (« c'est quand ? »),
-// puis le titre, le lieu, le prix, et l'état des inscriptions. Verticale sur
+// puis le titre, le lieu, le prix, l'état des inscriptions, et la photo
+// du stage si la cliente en a mis une. Verticale sur
 // toutes les largeurs : une frise horizontale obligerait à la faire défiler
 // de côté, ce qu'un public senior fait mal.
 //
@@ -43,7 +44,6 @@ export default function Evenements({ site, evenements = [], urlSite }) {
       <div className="section-max">
 
         <div className="evenements-entete apparition">
-          <p className="section-label">{site.evenementsEtiquette}</p>
           <h2 className="section-title">
             {site.evenementsTitre} <em>{site.evenementsTitreItalique}</em>
           </h2>
@@ -88,6 +88,12 @@ export default function Evenements({ site, evenements = [], urlSite }) {
                             )}
                             <span className={`frise-statut est-${statut.classe}`}>{statut.texte}</span>
                           </span>
+                          {/* La photo du stage, saisie avec l'événement. alt
+                              vide : le titre est écrit juste à côté, dans le
+                              même lien — la décrire le ferait lire deux fois. */}
+                          {ev.vignette?.src && (
+                            <img className="frise-photo" src={ev.vignette.src} alt="" loading="lazy" />
+                          )}
                           <span className="frise-fleche"><Picto nom="fleche" taille={20} /></span>
                         </a>
                       </li>

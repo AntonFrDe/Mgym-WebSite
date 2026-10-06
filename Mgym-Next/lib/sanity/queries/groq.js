@@ -74,15 +74,16 @@ export const SITE_CONTENT = `*[_type == "siteContent"][0]{
   activitesEtiquette, activitesTitre, activitesTitreItalique, activitesChapo,
 
   plusEtiquette, plusTitre, plusTitreItalique, plusChapo,
+  plusOngletAteliers, plusOngletSurMesure, plusOngletPleinAir,
 
   outdoorEtiquette, outdoorTitre, outdoorTitreSuite, outdoorTitreItalique,
   "outdoorTexte": outdoorTexte${TEXTE_RICHE},
   "outdoorImage": outdoorImage${IMAGE},
-  outdoorMotsCles,
+  outdoorMotsCles, outdoorBouton,
 
   bespokeEtiquette, bespokeTitre, bespokeTitreItalique,
   "bespokeTexte": bespokeTexte${TEXTE_RICHE},
-  bespokePublics, bespokeBouton,
+  bespokePublics, bespokeBouton, bespokePlaquetteGroupes, bespokePlaquetteMassages,
   "bespokeImage": bespokeImage${IMAGE},
 
   coachEtiquette, coachPrenom, coachNom,
@@ -129,7 +130,9 @@ export const INFOS_PRATIQUES = `*[_type == "infosPratiques"][0]{
   lienInscription, lienStages,
   positionCarte{ lat, lng },
   "plaquetteGroupes": plaquetteGroupes.asset->url,
-  "plaquetteMassages": plaquetteMassages.asset->url
+  "plaquetteMassages": plaquetteMassages.asset->url,
+  "reglementInterieur": reglementInterieur.asset->url,
+  "conditionsGenerales": conditionsGenerales.asset->url
 }`
 
 export const SEO_GLOBAL = `*[_type == "seoGlobal"][0]{

@@ -54,7 +54,6 @@ export default async function Planning({ site, enPreview = false }) {
       <div className="section-max">
 
         <div className="planning-entete apparition">
-          <p className="section-label">{site.planningEtiquette}</p>
           <h2 className="section-title">
             {site.planningTitre} <em>{site.planningTitreItalique}</em>
           </h2>

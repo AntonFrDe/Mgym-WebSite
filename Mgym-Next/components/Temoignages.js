@@ -5,7 +5,8 @@
 // Le bandeau de chiffres de la coach y renvoie (voir Coach.js).
 //
 // TROIS SITUATIONS, AUCUNE SECTION VIDE :
-//   · des témoignages   → trois au plus, en cartes ;
+//   · des témoignages   → des cartes, autant que l'écran en aligne
+//     (voir MAX_AVIS) ;
 //   · aucun, mais un lien vers la fiche Google → une invitation à lire ou
 //     laisser un avis, à la place des cartes ;
 //   · ni l'un ni l'autre → la section disparaît.
@@ -14,7 +15,12 @@
 // l'impose (voir sanity/schemaTypes/objets/temoignage.js), et la mention
 // sous la section dit d'où ils viennent — c'est une obligation légale.
 
-const MAX_AVIS = 3
+// Le nombre d'avis dépend de l'écran : deux rangées de trois sur
+// ordinateur, deux de deux sur tablette, trois l'un sous l'autre sur
+// téléphone — au-delà, on fait défiler un mur de citations. Les six sont
+// dans le HTML ; globals.css (« TÉMOIGNAGES ») masque ceux qui ne tiennent
+// pas. Ce sont les PREMIERS de la liste du back-office qui restent.
+const MAX_AVIS = 6
 
 // Les libellés des provenances. Recopiés ici plutôt qu'importés du schéma :
 // ce dernier charge tout le paquet « sanity », qui n'a rien à faire dans
@@ -53,7 +59,6 @@ export default function Temoignages({ site }) {
       <div className="section-max">
 
         <div className="temoignages-entete apparition">
-          <p className="section-label">{site.avisEtiquette}</p>
           <h2 className="section-title">
             {site.avisTitre} <em>{site.avisTitreItalique}</em>
           </h2>

@@ -90,7 +90,8 @@ export default function Footer({ site, infos }) {
       </div>
 
       <div className="footer-bottom">
-        © 2025 M&apos;GYM Association · {adresseSurUneLigne}
+        {/* L'année se met à jour seule (la page est régénérée en continu). */}
+        © {new Date().getFullYear()} M&apos;GYM Association · {adresseSurUneLigne}
         {infos.telephone && ` · ${infos.telephone}`}
         {infos.email && ` · ${infos.email}`}
       </div>

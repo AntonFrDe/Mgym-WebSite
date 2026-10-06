@@ -51,6 +51,11 @@ export default function DonneesStructurees({ infos, seo, activites = [] }) {
       ...(ville ? { addressLocality: ville } : {}),
       addressCountry: 'FR',
     },
+    // Le point exact de la salle : « Route de Layrac » seule désigne une
+    // route d'un kilomètre, Google ne saurait pas où placer le repère.
+    ...(infos.positionCarte?.lat && infos.positionCarte?.lng
+      ? { geo: { '@type': 'GeoCoordinates', latitude: infos.positionCarte.lat, longitude: infos.positionCarte.lng } }
+      : {}),
     ...(infos.reseauxSociaux?.length
       ? { sameAs: infos.reseauxSociaux.map((r) => r.url).filter(Boolean) }
       : {}),

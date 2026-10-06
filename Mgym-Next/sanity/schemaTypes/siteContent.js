@@ -34,6 +34,13 @@ export const siteContent = defineType({
     { name: 'pied', title: 'Pied de page' },
   ],
   fields: [
+    // ÉTIQUETTES MASQUÉES (hidden: true) : Plus d'activités, Témoignages,
+    // Stages, Planning, Contact, Réseaux. Leur petite étiquette en
+    // capitales répétait le titre juste en dessous (« SUIVEZ-NOUS » / « Nos
+    // Réseaux ») ; le site ne les affiche plus. Elles restent dans les
+    // données : retirer `hidden` et la ligne `section-label` du composant
+    // suffit à les rétablir. Les étiquettes qui APPORTENT une information
+    // (À propos, Activités, Coach, Tarifs) sont gardées.
     // ── ACCUEIL ────────────────────────────────────────────────
     defineField({
       name: 'heroTitre', title: 'Grand titre', type: 'string', group: 'accueil',
@@ -96,10 +103,21 @@ export const siteContent = defineType({
     // L'en-tête de la section à trois onglets. Le contenu des onglets vient
     // de l'activité « Ateliers thématiques », des champs « Sur mesure » et
     // des champs « Marche nordique » ci-dessous.
-    defineField({ name: 'plusEtiquette', title: 'Petite étiquette', type: 'string', group: 'plus', description: 'Actuellement « Plus d\'activités ».' }),
+    defineField({ name: 'plusEtiquette', hidden: true, title: 'Petite étiquette', type: 'string', group: 'plus', description: 'Actuellement « Plus d\'activités ».' }),
     defineField({ name: 'plusTitre', title: 'Titre', type: 'string', group: 'plus', description: 'Actuellement « Ateliers, sur-mesure & ».' }),
     defineField({ name: 'plusTitreItalique', title: 'Mot en italique', type: 'string', group: 'plus', description: 'Actuellement « plein air ».' }),
     defineField({ name: 'plusChapo', title: 'Phrase d\'introduction', type: 'string', group: 'plus', description: 'Une phrase sous le titre.' }),
+    // Les noms des trois onglets. Courts : ils tiennent côte à côte sur un
+    // téléphone de 320 px.
+    defineField({ name: 'plusOngletAteliers', title: 'Nom du 1er onglet', type: 'string', group: 'plus',
+      description: 'Actuellement « Ateliers ». Le contenu de cet onglet se modifie dans « Les activités » → « Ateliers thématiques ».',
+      validation: (Rule) => Rule.max(14).warning('Au-delà de 14 caractères, les onglets débordent sur téléphone.') }),
+    defineField({ name: 'plusOngletSurMesure', title: 'Nom du 2e onglet', type: 'string', group: 'plus',
+      description: 'Actuellement « Sur mesure ». Son contenu se modifie dans l\'onglet « Sur mesure » ci-dessus.',
+      validation: (Rule) => Rule.max(14).warning('Au-delà de 14 caractères, les onglets débordent sur téléphone.') }),
+    defineField({ name: 'plusOngletPleinAir', title: 'Nom du 3e onglet', type: 'string', group: 'plus',
+      description: 'Actuellement « Plein air ». Son contenu se modifie dans l\'onglet « Marche nordique » ci-dessus.',
+      validation: (Rule) => Rule.max(14).warning('Au-delà de 14 caractères, les onglets débordent sur téléphone.') }),
 
     defineField({ name: 'outdoorEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'outdoor', description: 'Actuellement « Explorez aussi ».' }),
     defineField({ name: 'outdoorTitre', title: 'Titre', type: 'string',
@@ -113,6 +131,7 @@ export const siteContent = defineType({
     defineField({ name: 'outdoorImage', title: 'Photo', type: 'imageEditoriale',
       description: 'Format paysage, 1200 px minimum.', group: 'outdoor' }),
     defineField({ name: 'outdoorMotsCles', title: 'Étiquettes', type: 'array', of: [{ type: 'string' }], group: 'outdoor', description: 'Les petites pastilles sous le texte.' }),
+    defineField({ name: 'outdoorBouton', title: 'Texte du bouton', type: 'string', group: 'outdoor', description: 'Il mène aux stages & événements. Actuellement « Voir les prochaines sorties ».' }),
 
     // ── SUR MESURE ─────────────────────────────────────────────
     defineField({ name: 'bespokeEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'bespoke', description: 'Actuellement « Sur mesure ».' }),
@@ -130,6 +149,12 @@ export const siteContent = defineType({
     defineField({ name: 'bespokeImage', title: 'Photo', type: 'imageEditoriale',
       description: 'Format paysage, 1200 px minimum.', group: 'bespoke' }),
     defineField({ name: 'bespokeBouton', title: 'Texte du bouton', type: 'string', group: 'bespoke', description: 'Actuellement « Prendre rendez-vous ».' }),
+    // Les deux plaquettes, côte à côte. Les PDF eux-mêmes se déposent dans
+    // « Infos pratiques ».
+    defineField({ name: 'bespokePlaquetteGroupes', title: 'Nom de la plaquette « groupes »', type: 'string', group: 'bespoke',
+      description: 'Actuellement « Groupes, associations & entreprises ». Le PDF se change dans « Infos pratiques ».' }),
+    defineField({ name: 'bespokePlaquetteMassages', title: 'Nom de la plaquette « massages »', type: 'string', group: 'bespoke',
+      description: 'Actuellement « Massages bien-être ». Le PDF se change dans « Infos pratiques ».' }),
 
     // ── COACH ──────────────────────────────────────────────────
     defineField({ name: 'coachEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'coach', description: 'Actuellement « Votre coach ».' }),
@@ -148,7 +173,7 @@ export const siteContent = defineType({
     defineField({ name: 'coachCertifications', title: 'Diplômes et certifications', type: 'array', of: [{ type: 'string' }], group: 'coach', description: 'Un par ligne.' }),
 
     // ── TÉMOIGNAGES ────────────────────────────────────────────
-    defineField({ name: 'avisEtiquette', title: 'Petite étiquette', type: 'string', group: 'avis', description: 'Actuellement « Ils en parlent ».' }),
+    defineField({ name: 'avisEtiquette', hidden: true, title: 'Petite étiquette', type: 'string', group: 'avis', description: 'Actuellement « Ils en parlent ».' }),
     defineField({ name: 'avisTitre', title: 'Titre', type: 'string', group: 'avis', description: 'Actuellement « Vos ».' }),
     defineField({ name: 'avisTitreItalique', title: 'Mot en italique', type: 'string', group: 'avis', description: 'Actuellement « témoignages ».' }),
     defineField({ name: 'avisNote', title: 'Note Google', type: 'string', group: 'avis', description: 'La note moyenne affichée par Google, par exemple « 5 » ou « 4,8 ». Laissez vide pour ne pas afficher de note.' }),
@@ -160,13 +185,13 @@ export const siteContent = defineType({
     }),
     defineField({
       name: 'temoignages', title: 'Témoignages', type: 'array', of: [{ type: 'temoignage' }], group: 'avis',
-      description: 'Trois au maximum sont affichés. Uniquement de vrais avis, avec l\'accord des personnes.',
+      description: 'Jusqu\'à six sont affichés sur ordinateur, quatre sur tablette, trois sur téléphone : mettez les meilleurs en haut de la liste. Uniquement de vrais avis, avec l\'accord des personnes.',
     }),
 
     // ── STAGES & ÉVÉNEMENTS ────────────────────────────────────
     // L'en-tête de la frise. Les événements eux-mêmes se créent dans le
     // menu « Événements & stages ».
-    defineField({ name: 'evenementsEtiquette', title: 'Petite étiquette', type: 'string', group: 'evenements', description: 'Actuellement « Au programme ».' }),
+    defineField({ name: 'evenementsEtiquette', hidden: true, title: 'Petite étiquette', type: 'string', group: 'evenements', description: 'Actuellement « Au programme ».' }),
     defineField({ name: 'evenementsTitre', title: 'Titre', type: 'string', group: 'evenements', description: 'Actuellement « Stages & ».' }),
     defineField({ name: 'evenementsTitreItalique', title: 'Mot en italique', type: 'string', group: 'evenements', description: 'Actuellement « événements ».' }),
     defineField({ name: 'evenementsChapo', title: 'Phrase d\'introduction', type: 'string', group: 'evenements' }),
@@ -203,7 +228,7 @@ export const siteContent = defineType({
       description: 'Actuellement « Remplir le formulaire d\'inscription ».', group: 'tarifs' }),
 
     // ── PLANNING ───────────────────────────────────────────────
-    defineField({ name: 'planningEtiquette', title: 'Petite étiquette rose', type: 'string',
+    defineField({ name: 'planningEtiquette', hidden: true, title: 'Petite étiquette rose', type: 'string',
       description: 'Actuellement « Horaires des cours ».', group: 'planning' }),
     defineField({ name: 'planningTitre', title: 'Titre', type: 'string',
       description: 'Actuellement « Notre ».', group: 'planning' }),
@@ -216,7 +241,7 @@ export const siteContent = defineType({
       description: 'Le bouton sous le tableau. Actuellement « Une question sur les horaires ? ».', group: 'planning' }),
 
     // ── CONTACT ────────────────────────────────────────────────
-    defineField({ name: 'contactEtiquette', title: 'Petite étiquette rose', type: 'string',
+    defineField({ name: 'contactEtiquette', hidden: true, title: 'Petite étiquette rose', type: 'string',
       description: 'Actuellement « Nous trouver ».', group: 'contact' }),
     defineField({ name: 'contactTitre', title: 'Titre', type: 'string',
       description: 'Actuellement « Contacts & ».', group: 'contact' }),
@@ -229,7 +254,7 @@ export const siteContent = defineType({
     defineField({ name: 'contactCtaSousTitre', title: 'Sous-titre de l\'encadré', type: 'texteSimple',
       description: 'Deux lignes sous le titre de l\'encadré sombre.', group: 'contact' }),
     defineField({ name: 'contactCtaAide', title: 'Phrase sous les boutons', type: 'string', group: 'contact', description: 'Explique où mène le bouton d\'inscription.' }),
-    defineField({ name: 'reseauxEtiquette', title: 'Étiquette de la section Réseaux', type: 'string',
+    defineField({ name: 'reseauxEtiquette', hidden: true, title: 'Étiquette de la section Réseaux', type: 'string',
       description: 'Actuellement « Suivez-nous ».', group: 'contact' }),
     defineField({ name: 'reseauxTitre', title: 'Titre de la section Réseaux', type: 'string',
       description: 'Actuellement « Nos ».', group: 'contact' }),

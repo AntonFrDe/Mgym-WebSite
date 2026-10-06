@@ -112,9 +112,19 @@ export async function getContenu(preview = false) {
   }
 }
 
-/** L'image d'un événement, dans la même forme que les autres images. */
+/**
+ * L'image d'un événement, dans la même forme que les autres images.
+ * `vignette` : la même, en petit (16:9, 480 px), pour la frise de
+ * l'accueil — inutile d'y télécharger la photo de 1200 px de la fiche.
+ */
 export function normaliserEvenement(ev) {
-  return { ...ev, image: normaliserImage(ev.image, ev.titre ?? '', 1200) }
+  return {
+    ...ev,
+    image: normaliserImage(ev.image, ev.titre ?? '', 1200),
+    vignette: ev.image?.asset?._ref
+      ? { src: urlImage(ev.image, { largeur: 480, hauteur: 270 }) }
+      : null,
+  }
 }
 
 /**

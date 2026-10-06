@@ -126,8 +126,9 @@ export const activite = defineType({
       type: 'string',
       description:
         'Un cours régulier va dans le carrousel des activités. Les ateliers ' +
-        'thématiques et les prestations sur mesure ont chacun leur onglet ' +
-        'dans la section « Plus d\'activités ».',
+        'thématiques ont leur onglet dans « Plus d\'activités », rempli par ' +
+        'cette fiche. Les prestations sur mesure ont aussi le leur, mais son ' +
+        'texte se modifie dans « Textes du site » → « Sur mesure ».',
       options: {
         list: [
           { title: 'Cours régulier (carrousel des activités)', value: 'cours' },
