@@ -22,8 +22,11 @@ import { cheminInterne, depuisCadreTiers, DUREE_STUDIO_MS } from '@/lib/preview-
 export const dynamic = 'force-dynamic'
 
 export async function GET(requete) {
-  if (!clientBrouillon || !process.env.SANITY_API_READ_TOKEN) {
-    console.error('[aperçu] SANITY_API_READ_TOKEN absent : impossible de vérifier le secret du Studio')
+  // Les DEUX variables sont exigées : le jeton lit les brouillons, le
+  // secret signe le cookie d'expiration (lib/preview.js). Sans le secret,
+  // ouvrirPreview() levait une exception : erreur 500 dans le Studio.
+  if (!clientBrouillon || !process.env.SANITY_API_READ_TOKEN || (process.env.SANITY_PREVIEW_SECRET ?? '').length < 16) {
+    console.error('[aperçu] SANITY_API_READ_TOKEN ou SANITY_PREVIEW_SECRET (16 caractères min.) absent de l\'environnement')
     return new NextResponse('Aperçu indisponible', { status: 503 })
   }
 

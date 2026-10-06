@@ -35,3 +35,7 @@ Site-MGYM*.html
 # publiées sur le site.
 /Mgym-Next/plaquette-*.pdf
 .impeccable/
+
+# Photos d'adhérentes en pleine résolution : jamais dans un dépôt public
+# (droit à l'image). Retirées du suivi le 2026-10-06 ; restent dans
+# l'HISTORIQUE tant quil

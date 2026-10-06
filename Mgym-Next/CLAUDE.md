@@ -313,9 +313,12 @@ Pièges à connaître :
 ## Le CMS — ce qu'il faut savoir avant d'y toucher
 
 Le contenu vient de Sanity, avec un **repli** sur `lib/contenu/defaut.js`.
-Sans projet configuré, le site affiche exactement ce qu'il affichait avant.
-Ce n'est pas une panne : c'est l'état initial, et le filet de sécurité en cas
-de panne du CMS.
+Sans projet configuré, le site affiche exactement ce qu'il affichait avant :
+c'est l'état initial. **En production, une panne de Sanity n'utilise PAS ce
+repli** (`lib/sanity/fetch.js` lève l'erreur) : le build échoue et Netlify
+garde la version précédente, ou la régénération échoue et Next garde la
+dernière page bonne. Le repli mis en cache affichait sinon d'anciens tarifs
+sans la moindre erreur.
 
 **Trois fichiers décrivent les mêmes champs** et rien ne les relie
 automatiquement :

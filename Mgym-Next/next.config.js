@@ -127,6 +127,10 @@ const enTetes = [
 ]
 
 const nextConfig = {
+  // Le site n'utilise pas <Image> de Next (des <img>, voir CLAUDE.md) :
+  // inutile de laisser ouverte la route /_next/image, cible des failles
+  // de l'« Image Optimization » de Next.
+  images: { unoptimized: true },
   ...(enExport ? { output: 'export' } : {}),
 
   // headers() n'existe pas en mode export : il n'y a pas de serveur pour
