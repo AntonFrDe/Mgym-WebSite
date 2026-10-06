@@ -1,5 +1,7 @@
 // Hero épuré : H1 + CTAs uniquement.
-// Les activités sont communiquées via la bande frosted-glass en bas de l'image.
+// Les activités sont nommées dans la bande en bas de l'image : une simple
+// liste, pas des boutons (rien n'y est cliquable, rien ne doit le laisser
+// croire).
 //
 // Le contenu vient du CMS (ou du contenu par défaut si le CMS n'est pas
 // branché) : voir lib/contenu/index.js. Le composant ne fait qu'afficher.
@@ -28,6 +30,10 @@ export default function Hero({ site }) {
             élément est réglé en CSS (voir la section HERO de globals.css). */}
         <h1 className="hero-h1">
           <span className="hero-h1-ligne hero-anim">{site.heroTitre}</span>
+          {/* L'espace compte : sans elle, le titre lu par un lecteur
+              d'écran (et par Google) était « Bougeonsensemble ». Le
+              retour à la ligne, lui, vient du CSS. */}
+          {' '}
           <em className="hero-anim">{site.heroTitreItalique}</em>
         </h1>
 
@@ -39,12 +45,12 @@ export default function Hero({ site }) {
         </div>
       </div>
 
-      {/* Bande activités en bas : propre, lisible, sans surcharger l'image */}
-      <div className="hero-activities hero-anim">
+      {/* Bande activités en bas : une liste de mots, pas des boutons. */}
+      <ul className="hero-activities hero-anim" aria-label="Nos activités">
         {(site.heroActivites ?? []).map((act) => (
-          <span key={act} className="hero-act-pill">{act}</span>
+          <li key={act} className="hero-act-pill">{act}</li>
         ))}
-      </div>
+      </ul>
     </section>
   )
 }

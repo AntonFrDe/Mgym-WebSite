@@ -19,7 +19,7 @@ import { visionTool } from '@sanity/vision'
 import { frFRLocale } from '@sanity/locale-fr-fr'
 import { schemaTypes } from './sanity/schemaTypes/index.js'
 import { structure, actionsDocument, modelesDocument } from './sanity/lib/structure.js'
-import { actionDupliquer, actionAnnulerUneDate, avecAdresseAutomatique } from './sanity/lib/actions.jsx'
+import { actionDupliquer, actionAnnulerUneDate, avecAdresseAutomatique, TYPES_DUPLICABLES } from './sanity/lib/actions.jsx'
 import { optionsApercu } from './sanity/lib/presentation.js'
 
 // Les documents dont « Publier » fabrique lui-même l'adresse web.
@@ -72,9 +72,13 @@ export default defineConfig({
 
   document: {
     // Retire « Supprimer » et « Dupliquer » des documents uniques, et
-    // ajoute les deux raccourcis du quotidien.
+    // ajoute les deux raccourcis du quotidien. Sur les événements et
+    // articles, le « Dupliquer » natif est remplacé par le nôtre (voir
+    // actionDupliquer : le natif recopiait l'adresse web).
     actions: (actions, contexte) => [
-      ...actionsDocument(actions, contexte).map((action) =>
+      ...actionsDocument(actions, contexte)
+        .filter((action) => !(action.action === 'duplicate' && TYPES_DUPLICABLES.includes(contexte.schemaType)))
+        .map((action) =>
         action.action === 'publish' && AVEC_ADRESSE_AUTO.includes(contexte.schemaType)
           ? avecAdresseAutomatique(action)
           : action

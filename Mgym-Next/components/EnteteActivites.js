@@ -22,7 +22,7 @@ export default function EnteteActivites({ site, instruction }) {
       </h2>
       <div className="divider" />
       <p className="lead">
-        {site.activitesChapo} {instruction}
+        {site.activitesChapo}{instruction ? ` ${instruction}` : ''}
       </p>
     </div>
   )

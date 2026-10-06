@@ -10,13 +10,14 @@ import TexteRiche from './TexteRiche'
 import { Picto } from './pictogrammes'
 
 /**
- * L'adresse du plan OpenStreetMap intégré, centré un peu AU SUD du repère :
- * le bandeau d'adresse couvre le bas de la carte, et le repère doit rester
- * visible au-dessus de lui.
+ * L'adresse du plan OpenStreetMap intégré, à l'échelle du quartier (environ
+ * 500 m de large) : on doit reconnaître les rues autour de la salle, pas
+ * toute la commune. Le repère tombe au milieu de la partie visible : le
+ * plan déborde en haut de la carte (voir .contact-carte-fond), ce qui
+ * compense le bandeau d'adresse qui en couvre le bas.
  */
 function urlCarte({ lat, lng }) {
-  const centre = lat - 0.0012
-  const bbox = [lng - 0.008, centre - 0.0045, lng + 0.008, centre + 0.0045].map((n) => n.toFixed(5)).join(',')
+  const bbox = [lng - 0.003, lat - 0.0015, lng + 0.003, lat + 0.0015].map((n) => n.toFixed(5)).join(',')
   return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`
 }
 
@@ -76,7 +77,6 @@ export default function Contact({ site, infos }) {
       <div className="section-max">
 
         <div className="contact-header apparition">
-          <p className="section-label">{site.contactEtiquette}</p>
           <h2 className="section-title">
             {site.contactTitre} <em>{site.contactTitreItalique}</em>
           </h2>
@@ -139,7 +139,10 @@ export default function Contact({ site, infos }) {
             <LienFormulaire lien={infos.lienInscription} className="cta-btn-rose">
               Formulaire d&apos;inscription
             </LienFormulaire>
-            {infos.telephone && <a href={`tel:${telBrut}`} className="cta-btn-rose">Appeler</a>}
+            {/* « Appeler pour un essai » : la phrase au-dessus promet une
+                séance d'essai, qui se réserve par téléphone. « Appeler »
+                seul ne disait pas que c'était le chemin. */}
+            {infos.telephone && <a href={`tel:${telBrut}`} className="cta-btn-rose">Appeler pour un essai</a>}
             {infos.email && <a href={`mailto:${infos.email}`} className="cta-btn-outline">Nous écrire</a>}
           </div>
           {site.contactCtaAide && (

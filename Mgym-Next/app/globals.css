@@ -84,6 +84,10 @@ body {
   color: var(--prune);
   font-family: var(--font-sans), sans-serif;
   -webkit-font-smoothing: antialiased;
+  /* Chiffres « alignés » partout. Cormorant dessine par défaut des
+     chiffres elzéviriens, qui montent et descendent comme des lettres :
+     « 10€ » se lisait « IO€ », et « +20 » flottait au-dessus de « 5 ». */
+  font-variant-numeric: lining-nums;
 }
 
 ::-webkit-scrollbar { width: 4px; }
@@ -182,7 +186,9 @@ body.en-preview { padding-top: 2.6rem; }
   padding: .65rem 1.5rem; border-radius: 2rem;
   transition: background .25s, transform .25s;
 }
-.nav-links .btn-contact:hover { background: var(--prune); transform: translateY(-1px); }
+.nav-links .btn-contact:hover { background: var(--prune); color: var(--blanc); transform: translateY(-1px); }
+/* `color` répété ci-dessus : sans lui, `.nav-links a:hover` (plus précis)
+   repeignait le texte en rose foncé sur le fond prune — 1,85:1 au survol. */
 /* 44 × 44 px : la taille minimale d'une cible au doigt. Le bouton en
    faisait 40 × 31. La marge négative garde les trois traits alignés sur
    le bord du contenu, comme avant. */
@@ -242,9 +248,9 @@ body:has(#hero) #nav:not(.scrolled) .ham span { background:var(--creme); }
   position: absolute; inset: 0; z-index: 1;
   background: linear-gradient(
     160deg,
-    rgba(var(--prune-rgb),.65) 0%,
-    rgba(var(--prune-rgb),.48) 50%,
-    rgba(var(--prune-rgb),.30) 100%
+    rgba(var(--prune-rgb),.68) 0%,
+    rgba(var(--prune-rgb),.58) 50%,
+    rgba(var(--prune-rgb),.45) 100%
   );
 }
 .hero-text {
@@ -327,25 +333,28 @@ body:has(#hero) #nav:not(.scrolled) .ham span { background:var(--creme); }
 .hero-ctas       { animation-delay: 1s;   }
 .hero-activities { animation-delay: 1.3s; }
 
-/* Bande activités en bas du hero : frosted glass, remplace le texte de sous-titre */
+/* Bande activités en bas du hero : un aplat prune, plus de verre dépoli
+   (un flou décoratif, sans rien derrière à laisser deviner). Les mots sont
+   séparés par un point dessiné en CSS — pas un caractère ✦ en guise
+   d'icône. */
 .hero-activities {
   position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
-  background: rgba(var(--prune-rgb),.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  padding: 1.2rem 3rem;
+  list-style: none;
+  background: rgba(var(--prune-rgb),.88);
+  padding: 1.1rem 3rem;
   display: flex; align-items: center; justify-content: center;
-  gap: 1.5rem 2.5rem; flex-wrap: wrap;
+  gap: .6rem 1.4rem; flex-wrap: wrap;
 }
 .hero-act-pill {
   font-family: var(--font-sans), sans-serif;
-  font-size: .75rem; font-weight: 600;
-  letter-spacing: .2em; text-transform: uppercase;
-  color: rgba(var(--creme-rgb),.85);
-  display: flex; align-items: center; gap: .55rem;
+  font-size: .85rem; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--creme);
+  display: flex; align-items: center; gap: 1.4rem;
 }
-.hero-act-pill::before {
-  content: '✦'; color: var(--rose); font-size: .45rem; flex-shrink: 0;
+.hero-act-pill + .hero-act-pill::before {
+  content: ''; width: 4px; height: 4px; border-radius: 50%;
+  background: var(--rose); flex-shrink: 0;
 }
 
 /* ── BANDEAU MANIFESTE ──────────────────────────────────────── */
@@ -378,8 +387,10 @@ body:has(#hero) #nav:not(.scrolled) .ham span { background:var(--creme); }
 .section-title em { font-style:italic; color:var(--accent-texte); }
 .divider { width:48px; height:1.5px; background:var(--accent-decor); margin:1.5rem 0; }
 /* LISIBILITÉ : 1rem = 16px — taille standard confortable */
+/* Graisse 400 : en 300, Montserrat est trop fin pour des yeux presbytes,
+   sur téléphone comme sur tablette. */
 .lead {
-  font-family:var(--font-sans),sans-serif; font-size:1rem; font-weight:300;
+  font-family:var(--font-sans),sans-serif; font-size:1rem; font-weight:400;
   line-height:1.95; color:var(--texte-doux);
 }
 
@@ -493,7 +504,7 @@ body:has(#hero) #nav:not(.scrolled) .ham span { background:var(--creme); }
 .etape-panneau p { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--texte-doux); line-height:1.8; }
 .etape-tags { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.85rem; }
 .etape--droite .etape-tags { justify-content:flex-end; }
-.etape-tag { font-family:var(--font-sans),sans-serif; font-size:.65rem; font-weight:600; letter-spacing:.08em; background:var(--rose-clair); color:var(--accent-texte); padding:.28rem .7rem; border-radius:2rem; }
+.etape-tag { font-family:var(--font-sans),sans-serif; font-size:.65rem; font-weight:600; letter-spacing:.03em; background:var(--rose-clair); color:var(--accent-texte); padding:.28rem .7rem; border-radius:2rem; }
 .etape-lien { display:inline-block; margin-top:.9rem; font-family:var(--font-sans),sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--rose-fonce); text-decoration:none; }
 .etape-lien:hover { color:var(--prune); }
 
@@ -755,13 +766,26 @@ body:has(#hero) #nav:not(.scrolled) .ham span { background:var(--creme); }
 .prochain strong { font-family:var(--font-serif),serif; font-size:1.15rem; font-weight:500; }
 .prochain span span { font-family:var(--font-sans),sans-serif; font-size:.9rem; font-weight:600; color:var(--lavande-fonce); }
 .panneau-actions { display:flex; flex-wrap:wrap; gap:.75rem; margin-top:1.75rem; }
-/* Le renvoi vers la seconde plaquette : un lien de texte, pas un troisième
-   bouton — trois boutons côte à côte, on ne sait plus lequel choisir. */
-.panneau-renvoi {
-  display:flex; align-items:center; flex-wrap:wrap; gap:.4rem;
-  margin-top:1.25rem; font-family:var(--font-sans),sans-serif; font-size:.95rem; color:var(--texte-doux);
+/* Les deux plaquettes (Sur mesure) : deux cartes jumelles, côte à côte
+   s'il y a la place, l'une sous l'autre sinon. Même forme que les
+   prochains ateliers : une ligne-lien, pas un bouton de plus. */
+.plaquettes { list-style:none; display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:.6rem; }
+.plaquette {
+  display:flex; align-items:center; gap:.85rem; height:100%; min-height:44px;
+  background:var(--sauge-clair); border-radius:1rem; padding:.85rem 1rem;
+  color:var(--prune); text-decoration:none; transition:box-shadow .25s;
 }
-.panneau-renvoi svg { color:var(--accent-texte); }
+.plaquette:hover { box-shadow:inset 0 0 0 2px var(--sauge-fonce); }
+/* Les documents de l'inscription, dans l'encadré « Bon à savoir ». */
+.inscription-documents { margin-top:1rem; }
+.inscription-documents .plaquette { background:var(--lin); }
+.inscription-documents .plaquette > svg { color:var(--rose-fonce); }
+.inscription-documents .plaquette:hover { box-shadow:inset 0 0 0 2px var(--rose); }
+.plaquette:focus-visible { outline:2px solid var(--prune); outline-offset:3px; }
+.plaquette > svg { color:var(--sauge-fonce); flex-shrink:0; }
+.plaquette > span { display:flex; flex-direction:column; flex:1; }
+.plaquette strong { font-family:var(--font-serif),serif; font-size:1.15rem; font-weight:500; line-height:1.2; }
+.plaquette span span { font-family:var(--font-sans),sans-serif; font-size:.85rem; font-weight:600; color:var(--texte-doux); }
 
 /* ── TARIFS ─────────────────────────────────────────────────────
    Trois formes différentes plutôt qu'une liste de dix lignes jumelles :
@@ -1027,7 +1051,7 @@ a[href^="tel:"] { white-space:nowrap; }
 }
 /* La carte ENTIÈRE est le lien : une grande cible, facile à toucher. */
 .frise-carte {
-  display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:1.1rem;
+  display:grid; grid-template-columns:auto 1fr auto auto; align-items:center; gap:1.1rem;
   background:var(--blanc); border-radius:1.25rem; padding:1rem 1.25rem 1rem 1rem;
   color:var(--prune); text-decoration:none;
   box-shadow:0 8px 24px rgba(var(--prune-rgb), .07);
@@ -1053,6 +1077,9 @@ a[href^="tel:"] { white-space:nowrap; }
 .frise-infos > span { display:inline-flex; align-items:center; gap:.35rem; }
 .frise-infos svg { color:var(--lavande-fonce); flex-shrink:0; }
 .frise-fleche { color:var(--lavande-fonce); }
+/* La photo du stage : petite, à droite, à ses proportions (16:9, fixées
+   par Sanity). Sans photo, la colonne se replie d'elle-même. */
+.frise-photo { width:8rem; height:auto; aspect-ratio:16 / 9; object-fit:cover; border-radius:.75rem; display:block; }
 /* L'état des inscriptions : une étiquette, jamais la couleur seule — le
    mot est écrit. */
 .frise-statut {
@@ -1127,7 +1154,9 @@ a[href^="tel:"] { white-space:nowrap; }
 .coach-titre { line-height:1; }
 .coach-texte { margin-bottom:1.5rem; }
 .coach-deco { position:absolute; bottom:-1.5rem; right:-1.5rem; width:6rem; height:6rem; border-radius:1.25rem; background:rgba(var(--rose-rgb),.2); z-index:-1; }
-.coach-stats { display:flex; gap:2.5rem; margin:1.75rem 0; padding:1.5rem 2rem; background:var(--blanc); border-radius:1.25rem; }
+/* Le cadre épouse ses chiffres (fit-content) : en pleine largeur, deux
+   chiffres laissaient les deux tiers du cadre blancs sur grand écran. */
+.coach-stats { display:flex; width:fit-content; max-width:100%; gap:2.5rem; margin:1.75rem 0; padding:1.5rem 2.25rem; background:var(--blanc); border-radius:1.25rem; }
 .coach-stat { text-align:center; }
 .coach-stat-num { font-family:var(--font-serif),serif; font-size:2.8rem; font-weight:300; color:var(--rose-fonce); line-height:1; }
 .coach-stat-label { font-family:var(--font-sans),sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--texte-doux); margin-top:.35rem; }
@@ -1159,6 +1188,10 @@ a[href^="tel:"] { white-space:nowrap; }
   list-style:none; display:grid; justify-content:center; gap:1.25rem;
   grid-template-columns:repeat(auto-fit, minmax(260px, 340px));
 }
+/* Six avis au plus (Temoignages.js) : deux rangées pleines sur ordinateur.
+   Sur tablette, deux colonnes → quatre ; sur téléphone, une → trois. */
+@media (max-width: 1099px) { .temoignage:nth-child(n+5) { display:none; } }
+@media (max-width: 700px)  { .temoignage:nth-child(n+4) { display:none; } }
 .temoignage {
   position:relative; display:flex; flex-direction:column;
   background:var(--blanc); border-radius:1.5rem; padding:2.6rem 1.6rem 1.5rem;
@@ -1207,7 +1240,13 @@ a[href^="tel:"] { white-space:nowrap; }
   border-radius:1.5rem; overflow:hidden; background:var(--sauge-clair);
   box-shadow:0 10px 30px rgba(var(--prune-rgb),.10);
 }
-.contact-carte-fond { position:absolute; inset:0; width:100%; height:100%; border:0; pointer-events:none; }
+/* Le plan déborde de 60 px en haut et à droite : ce débord, rogné par
+   overflow:hidden, emporte les boutons +/− du plan, inutilisables ici
+   (pointer-events:none) et que le crédit recouvrait à moitié. */
+.contact-carte-fond {
+  position:absolute; top:-60px; right:-60px; width:calc(100% + 60px); height:calc(100% + 60px);
+  border:0; pointer-events:none;
+}
 /* L'attribution d'OpenStreetMap est obligatoire : le bandeau recouvre
    celle du plan, on la réécrit en haut. */
 .contact-carte-credit {
@@ -1237,6 +1276,7 @@ a[href^="tel:"] { white-space:nowrap; }
 .contact-carte-bouton:focus-visible { outline:2px solid var(--prune); outline-offset:3px; }
 .contact-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.25rem; max-width:860px; margin:0 auto 3.5rem; }
 .contact-card {
+  position:relative;
   background:var(--rose-clair); border-radius:1.5rem; padding:2.5rem 2rem; text-align:center;
   transition:transform .3s, box-shadow .3s;
 }
@@ -1247,6 +1287,10 @@ a[href^="tel:"] { white-space:nowrap; }
 /* LISIBILITÉ : 1rem = 16px pour les coordonnées */
 .contact-value { font-family:var(--font-sans),sans-serif; font-size:1rem; color:var(--rose-fonce); font-weight:600; text-decoration:none; word-break:break-all; }
 .contact-value:hover { color:var(--prune); }
+/* La carte se soulève au survol comme un bouton : elle doit donc EN ÊTRE
+   un. Le ::after du lien recouvre toute la carte (il ne valait que sur
+   téléphone ; sur ordinateur, seuls les 19 px du numéro réagissaient). */
+.contact-value::after { content:''; position:absolute; inset:0; border-radius:inherit; }
 .contact-addr { font-family:var(--font-sans),sans-serif; font-size:.95rem; color:var(--texte-doux); line-height:1.7; }
 .contact-cta {
   max-width:480px; margin:0 auto; background:var(--prune); border-radius:2rem;
@@ -1276,7 +1320,7 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
 .footer-brand-name { font-family:var(--font-serif),serif; font-size:1.4rem; font-weight:300; color:var(--blanc); }
 .footer-brand-sub { font-family:var(--font-sans),sans-serif; font-size:.7rem; font-style:italic; color:rgba(var(--blanc-rgb),.6); margin-top:.1rem; }
 .footer-tagline { font-family:var(--font-serif),serif; font-size:1.2rem; font-style:italic; color:var(--rose-pale); text-align:center; }
-.footer-tagline small { display:block; font-family:var(--font-sans),sans-serif; font-size:.65rem; font-style:normal; color:rgba(var(--blanc-rgb),.68); margin-top:.25rem; letter-spacing:.1em; }
+.footer-tagline small { display:block; font-family:var(--font-sans),sans-serif; font-size:.65rem; font-style:normal; color:rgba(var(--blanc-rgb),.68); margin-top:.25rem; letter-spacing:.04em; }
 .footer-right { display:flex; flex-direction:column; align-items:flex-end; gap:1rem; }
 /* Huit liens ne tiennent plus toujours sur une ligne. `nowrap` empêche
    qu'un libellé se coupe en deux (« À / PROPOS ») ; `wrap` sur le
@@ -1395,6 +1439,18 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
    Si l'on ajoute un lien, refaire la mesure : ce seuil en dépend.
    Historique : la barre n'avait que sept liens et basculait à 1024 px ;
    avant encore, à 700 px, ce qui la cassait entre 700 et 1000 px. */
+/* LISIBILITÉ — le plancher de .85rem (13,6 px) vaut pour TOUT le texte,
+   étiquettes comprises, À TOUTES LES LARGEURS. Il ne s'appliquait que sous
+   700 px : une tablette, l'écran préféré de beaucoup d'adhérentes,
+   recevait les mots-clés des activités à 10,4 px et les étiquettes à
+   11–12 px. Placé avant les media queries : il remplace les tailles
+   ci-dessus, et le bloc TÉLÉPHONE peut encore l'affiner. */
+.section-label, .tarif-groupe, .about-badge-label, .etape-num, .etape-tag,
+.etape-lien, .etape-toggle, .carte-act-num, .carrousel-indice,
+.carrousel-compteur, .coach-stat-label, .tarif-tableau thead th,
+.planning-jour, .footer-nav a, .footer-brand-sub, .footer-tagline small,
+.footer-bottom, .hero-act-pill { font-size:.85rem; }
+
 @media (max-width: 1199px) {
   .ham { display:flex; }
   .nav-links { display:none; }
@@ -1455,22 +1511,12 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
   footer { padding:2.5rem 1.25rem; }
   .manifesto { padding:2.5rem 1.25rem; }
 
-  /* LISIBILITÉ — sur téléphone, le plancher de .85rem (13,6 px) vaut pour
-     TOUT le texte, étiquettes comprises. 90 textes étaient entre 10,4 et
-     12,8 px, dont les étiquettes des activités à 10,4 px. */
-  .section-label, .tarif-groupe, .about-badge-label, .etape-num, .etape-tag,
-  .etape-lien, .etape-toggle, .carte-act-num, .carrousel-indice,
-  .carrousel-compteur, .coach-stat-label, .tarif-tableau thead th,
-  .planning-jour, .footer-nav a, .footer-brand-sub, .footer-tagline small,
-  .footer-bottom { font-size:.85rem; }
   /* LISIBILITÉ — les paragraphes passent à 16 px. À 13,6 px dans une
      carte de 250 px, une description tenait 25 caractères par ligne. */
   .carte-act-accroche, .carte-act-desc, .etape-accroche, .etape-panneau p,
   .tarif-vignette-detail, .tarif-tableau-detail, .tarif-note,
   .inscription-etapes li, .inscription-precision, .cta-btns-aide,
   .cert-text { font-size:1rem; }
-  /* Montserrat 300 est trop fin pour un petit écran en plein jour. */
-  .lead { font-weight:400; }
   /* À .35em, une étiquette de deux mots occupait toute la largeur. */
   .section-label { letter-spacing:.2em; }
 
@@ -1494,17 +1540,12 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
   .hero-h1 { font-size:clamp(3.8rem,15vw,6rem); }
   #hero { flex-direction:column; align-items:stretch; }
   .hero-text { flex:1; justify-content:center; max-width:none; padding:5.5rem 1.5rem 2rem; }
-  .hero-activities { position:relative; padding:.85rem 1rem 1rem; gap:.4rem; }
-  /* Chaque activité devient une petite pastille en verre dépoli : même
-     organisation qu'avant (une bande sous les boutons), mais la place d'une
-     étiquette au lieu d'une ligne entière. En capitales espacées, six
-     activités prenaient 35 % de l'écran d'un iPhone. */
-  .hero-act-pill {
-    font-size:.85rem; font-weight:600; letter-spacing:.01em; text-transform:none;
-    color:var(--creme); background:rgba(var(--creme-rgb),.14);
-    border:1px solid rgba(var(--creme-rgb),.3); border-radius:2rem; padding:.3rem .8rem;
-  }
-  .hero-act-pill::before { display:none; }
+  .hero-activities { position:relative; padding:.85rem 1rem 1rem; gap:.4rem .6rem; }
+  /* Les activités se lisent comme une phrase, en minuscules, séparées par
+     le même point. En capitales espacées, six activités prenaient 35 % de
+     l'écran d'un iPhone ; en pastilles bordées, elles ressemblaient à des
+     boutons qui ne faisaient rien. */
+  .hero-act-pill { letter-spacing:.01em; text-transform:none; gap:.6rem; }
   /* Version allégée du fond d'accueil sur téléphone. L'image de bureau
      fait 2560 px de large : sur un écran de 375 px elle est sept fois
      trop grande, et son téléchargement retarde tout le reste de la page.
@@ -1592,11 +1633,13 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
      Historique : cette rangée faisait autrefois déborder la PAGE ENTIÈRE
      (490 px dans un écran de 390), ce qui rendait le bouton menu
      intouchable. Une liste verticale ne peut plus déborder. */
-  .coach-stats { flex-direction:column; gap:.5rem; padding:1rem 1.25rem; margin:1.25rem 0; }
-  .coach-stat { display:flex; align-items:center; gap:1rem; text-align:left; }
-  .coach-stat-num { font-size:2.2rem; min-width:4.5rem; text-align:center; }
-  .coach-stat-label { margin-top:0; letter-spacing:.08em; }
-  .coach-stat-sep { display:none; }
+  /* Téléphone : les chiffres côte à côte, à parts égales, sur toute la
+     largeur. Empilés, chacun suivi de son libellé, ils laissaient un
+     vide irrégulier entre « +20 » et « ANS D'EXPÉRIENCE ». */
+  .coach-stats { width:auto; gap:.75rem; padding:1rem .75rem; margin:1.25rem 0; }
+  .coach-stat { flex:1 1 0; min-width:0; }
+  .coach-stat-num { font-size:2.2rem; }
+  .coach-stat-label { letter-spacing:.06em; }
   .cert-grid { grid-template-columns:1fr; }
 
   /* TARIFS — le prix de l'adhésion passe sous son libellé, les vignettes
@@ -1649,6 +1692,9 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
   .frise-date strong { font-size:1.75rem; }
   .frise-titre { font-size:1.2rem; }
   .frise-fleche { display:none; }
+  /* Téléphone : la photo passe en bandeau au-dessus de la carte, sur toute
+     sa largeur — à droite, elle écrasait le titre à 320 px. */
+  .frise-photo { grid-column:1 / -1; order:-1; width:100%; aspect-ratio:5 / 2; }
   .evenement-page { padding-top:6.5rem; }
   .evenement-infos { padding:1.1rem 1.1rem; }
   .evenement-infos > div { grid-template-columns:1fr; gap:.2rem; }
@@ -1668,7 +1714,6 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
   }
   .contact-icon { grid-row:span 2; margin:0; }
   .contact-label { margin-bottom:0; }
-  .contact-value::after { content:''; position:absolute; inset:0; border-radius:inherit; }
   .contact-cta { padding:2rem 1.25rem; }
   .contact-carte { height:250px; border-radius:1.25rem; }
   .contact-carte-bandeau { padding:.75rem .85rem; gap:.6rem; }

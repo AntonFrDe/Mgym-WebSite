@@ -34,15 +34,22 @@ export const siteContent = defineType({
     { name: 'pied', title: 'Pied de page' },
   ],
   fields: [
+    // ÉTIQUETTES MASQUÉES (hidden: true) : Plus d'activités, Témoignages,
+    // Stages, Planning, Contact, Réseaux. Leur petite étiquette en
+    // capitales répétait le titre juste en dessous (« SUIVEZ-NOUS » / « Nos
+    // Réseaux ») ; le site ne les affiche plus. Elles restent dans les
+    // données : retirer `hidden` et la ligne `section-label` du composant
+    // suffit à les rétablir. Les étiquettes qui APPORTENT une information
+    // (À propos, Activités, Coach, Tarifs) sont gardées.
     // ── ACCUEIL ────────────────────────────────────────────────
     defineField({
       name: 'heroTitre', title: 'Grand titre', type: 'string', group: 'accueil',
-      description: 'Le premier mot, en haut de la page. Actuellement « Bougeons ».',
+      description: 'Le premier mot, en haut de la page.',
       validation: (Rule) => Rule.required().max(20).error('Titre obligatoire, 20 caractères maximum : au-delà il déborde sur mobile.'),
     }),
     defineField({
       name: 'heroTitreItalique', title: 'Second mot, en italique rose', type: 'string', group: 'accueil',
-      description: 'Le mot juste en dessous. Actuellement « ensemble ».',
+      description: 'Le mot juste en dessous.',
       validation: (Rule) => Rule.required().max(20).error('Obligatoire, 20 caractères maximum.'),
     }),
     defineField({
@@ -56,11 +63,9 @@ export const siteContent = defineType({
     }),
     defineField({
       name: 'heroBoutonActivites', title: 'Texte du bouton principal', type: 'string', group: 'accueil',
-      description: 'Actuellement « Découvrir les activités ».',
     }),
     defineField({
       name: 'heroBoutonContact', title: 'Texte du second bouton', type: 'string', group: 'accueil',
-      description: 'Actuellement « Nous rejoindre ».',
     }),
     defineField({
       name: 'citationBandeau', title: 'Citation du bandeau sombre', type: 'texteSimple', group: 'accueil',
@@ -68,27 +73,27 @@ export const siteContent = defineType({
     }),
 
     // ── À PROPOS ───────────────────────────────────────────────
-    defineField({ name: 'aProposEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'apropos', description: 'Actuellement « Notre histoire ».' }),
-    defineField({ name: 'aProposTitre', title: 'Titre', type: 'string', group: 'apropos', description: 'Actuellement « Une association ancrée dans le village ».' }),
-    defineField({ name: 'aProposTitreItalique', title: 'Mot en italique du titre', type: 'string', group: 'apropos', description: 'Le mot mis en valeur. Actuellement « ancrée ».' }),
+    defineField({ name: 'aProposEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'apropos' }),
+    defineField({ name: 'aProposTitre', title: 'Titre', type: 'string', group: 'apropos' }),
+    defineField({ name: 'aProposTitreItalique', title: 'Mot en italique du titre', type: 'string', group: 'apropos', description: 'Le mot mis en valeur.' }),
     defineField({ name: 'aProposTitreFin', title: 'Fin du titre', type: 'string', group: 'apropos',
-      description: 'Le texte qui suit le mot en italique. Actuellement « dans le village ».' }),
+      description: 'Le texte qui suit le mot en italique.' }),
     defineField({ name: 'aProposTexte', title: 'Texte d\'introduction', type: 'texteSimple',
       description: 'Le premier paragraphe de la section. Racontez l\'histoire de l\'association.', group: 'apropos' }),
-    defineField({ name: 'aProposAvantagesTitre', title: 'Titre de la liste', type: 'string', group: 'apropos', description: 'Actuellement « Rejoindre M\'GYM, c\'est profiter : ».' }),
+    defineField({ name: 'aProposAvantagesTitre', title: 'Titre de la liste', type: 'string', group: 'apropos' }),
     defineField({
       name: 'aProposAvantages', title: 'Les avantages', type: 'array', of: [{ type: 'string' }], group: 'apropos',
       description: 'Un par ligne. Ils s\'affichent avec une petite étoile rose.',
     }),
     defineField({ name: 'aProposConclusion', title: 'Paragraphe de conclusion', type: 'texteSimple', group: 'apropos', description: 'Mettez en gras les mots à faire ressortir en rose.' }),
     defineField({ name: 'aProposPhoto', title: 'Photo', type: 'imageEditoriale', group: 'apropos', description: 'Format paysage, 1200 px minimum.' }),
-    defineField({ name: 'aProposBadgeNombre', title: 'Chiffre du badge', type: 'string', group: 'apropos', description: 'Le grand chiffre sur la photo. Actuellement « +40 ».' }),
-    defineField({ name: 'aProposBadgeLibelle', title: 'Texte du badge', type: 'string', group: 'apropos', description: 'Actuellement « Ans d\'histoire ».' }),
+    defineField({ name: 'aProposBadgeNombre', title: 'Chiffre du badge', type: 'string', group: 'apropos', description: 'Le grand chiffre sur la photo.' }),
+    defineField({ name: 'aProposBadgeLibelle', title: 'Texte du badge', type: 'string', group: 'apropos' }),
 
     // ── ACTIVITÉS ──────────────────────────────────────────────
-    defineField({ name: 'activitesEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'activites', description: 'Actuellement « Nos pratiques ».' }),
-    defineField({ name: 'activitesTitre', title: 'Titre', type: 'string', group: 'activites', description: 'Actuellement « Formes & ».' }),
-    defineField({ name: 'activitesTitreItalique', title: 'Mot en italique', type: 'string', group: 'activites', description: 'Actuellement « Bien-être ».' }),
+    defineField({ name: 'activitesEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'activites' }),
+    defineField({ name: 'activitesTitre', title: 'Titre', type: 'string', group: 'activites' }),
+    defineField({ name: 'activitesTitreItalique', title: 'Mot en italique', type: 'string', group: 'activites' }),
     defineField({ name: 'activitesChapo', title: 'Phrase d\'introduction', type: 'string', group: 'activites', description: 'La phrase sous le titre. L\'instruction de manipulation (« cliquez sur une étape… ») est ajoutée automatiquement par le site.' }),
 
     // ── MARCHE NORDIQUE ────────────────────────────────────────
@@ -96,43 +101,59 @@ export const siteContent = defineType({
     // L'en-tête de la section à trois onglets. Le contenu des onglets vient
     // de l'activité « Ateliers thématiques », des champs « Sur mesure » et
     // des champs « Marche nordique » ci-dessous.
-    defineField({ name: 'plusEtiquette', title: 'Petite étiquette', type: 'string', group: 'plus', description: 'Actuellement « Plus d\'activités ».' }),
-    defineField({ name: 'plusTitre', title: 'Titre', type: 'string', group: 'plus', description: 'Actuellement « Ateliers, sur-mesure & ».' }),
-    defineField({ name: 'plusTitreItalique', title: 'Mot en italique', type: 'string', group: 'plus', description: 'Actuellement « plein air ».' }),
+    defineField({ name: 'plusEtiquette', hidden: true, title: 'Petite étiquette', type: 'string', group: 'plus' }),
+    defineField({ name: 'plusTitre', title: 'Titre', type: 'string', group: 'plus' }),
+    defineField({ name: 'plusTitreItalique', title: 'Mot en italique', type: 'string', group: 'plus' }),
     defineField({ name: 'plusChapo', title: 'Phrase d\'introduction', type: 'string', group: 'plus', description: 'Une phrase sous le titre.' }),
+    // Les noms des trois onglets. Courts : ils tiennent côte à côte sur un
+    // téléphone de 320 px.
+    defineField({ name: 'plusOngletAteliers', title: 'Nom du 1er onglet', type: 'string', group: 'plus',
+      description: 'Le contenu de cet onglet se modifie dans « Les activités » → « Ateliers thématiques ».',
+      validation: (Rule) => Rule.max(14).warning('Au-delà de 14 caractères, les onglets débordent sur téléphone.') }),
+    defineField({ name: 'plusOngletSurMesure', title: 'Nom du 2e onglet', type: 'string', group: 'plus',
+      description: 'Son contenu se modifie dans l\'onglet « Sur mesure » ci-dessus.',
+      validation: (Rule) => Rule.max(14).warning('Au-delà de 14 caractères, les onglets débordent sur téléphone.') }),
+    defineField({ name: 'plusOngletPleinAir', title: 'Nom du 3e onglet', type: 'string', group: 'plus',
+      description: 'Son contenu se modifie dans l\'onglet « Marche nordique » ci-dessus.',
+      validation: (Rule) => Rule.max(14).warning('Au-delà de 14 caractères, les onglets débordent sur téléphone.') }),
 
-    defineField({ name: 'outdoorEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'outdoor', description: 'Actuellement « Explorez aussi ».' }),
-    defineField({ name: 'outdoorTitre', title: 'Titre', type: 'string',
-      description: 'Actuellement « Marche nordique & activités ».', group: 'outdoor' }),
+    defineField({ name: 'outdoorEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'outdoor' }),
+    defineField({ name: 'outdoorTitre', title: 'Titre', type: 'string', group: 'outdoor' }),
     defineField({ name: 'outdoorTitreSuite', title: 'Début de la 2e ligne du titre', type: 'string', group: 'outdoor',
-      description: 'Le titre est sur deux lignes. Ceci est le début de la seconde. Actuellement « activités ».' }),
+      description: 'Le titre est sur deux lignes. Ceci est le début de la seconde.' }),
     defineField({ name: 'outdoorTitreItalique', title: 'Mot en italique', type: 'string',
-      description: 'Le mot mis en valeur en rose. Actuellement « outdoor ».', group: 'outdoor' }),
+      description: 'Le mot mis en valeur en rose.', group: 'outdoor' }),
     defineField({ name: 'outdoorTexte', title: 'Texte', type: 'texteSimple',
       description: 'Le paragraphe de présentation des sorties en extérieur.', group: 'outdoor' }),
     defineField({ name: 'outdoorImage', title: 'Photo', type: 'imageEditoriale',
       description: 'Format paysage, 1200 px minimum.', group: 'outdoor' }),
     defineField({ name: 'outdoorMotsCles', title: 'Étiquettes', type: 'array', of: [{ type: 'string' }], group: 'outdoor', description: 'Les petites pastilles sous le texte.' }),
+    defineField({ name: 'outdoorBouton', title: 'Texte du bouton', type: 'string', group: 'outdoor', description: 'Il mène aux stages & événements.' }),
 
     // ── SUR MESURE ─────────────────────────────────────────────
-    defineField({ name: 'bespokeEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'bespoke', description: 'Actuellement « Sur mesure ».' }),
-    defineField({ name: 'bespokeTitre', title: 'Titre', type: 'string',
-      description: 'Actuellement « Interventions ».', group: 'bespoke' }),
+    defineField({ name: 'bespokeEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'bespoke' }),
+    defineField({ name: 'bespokeTitre', title: 'Titre', type: 'string', group: 'bespoke' }),
     defineField({ name: 'bespokeTitreItalique', title: 'Mot en italique', type: 'string',
-      description: 'Le mot mis en valeur en rose. Actuellement « personnalisées ».', group: 'bespoke' }),
+      description: 'Le mot mis en valeur en rose.', group: 'bespoke' }),
     defineField({ name: 'bespokeTexte', title: 'Texte', type: 'texteSimple',
       description: 'À qui s\'adressent ces prestations et ce qu\'elles contiennent.', group: 'bespoke' }),
     defineField({
       name: 'bespokePublics', title: 'Publics visés', type: 'array', of: [{ type: 'string' }], group: 'bespoke',
-      description: 'Les quatre pastilles. Actuellement : Particulier, Association, Entreprise, Massage.',
+      description: 'Les quatre pastilles.',
       validation: (Rule) => Rule.max(6).warning('Au-delà de 6, la grille se déséquilibre.'),
     }),
     defineField({ name: 'bespokeImage', title: 'Photo', type: 'imageEditoriale',
       description: 'Format paysage, 1200 px minimum.', group: 'bespoke' }),
-    defineField({ name: 'bespokeBouton', title: 'Texte du bouton', type: 'string', group: 'bespoke', description: 'Actuellement « Prendre rendez-vous ».' }),
+    defineField({ name: 'bespokeBouton', title: 'Texte du bouton', type: 'string', group: 'bespoke' }),
+    // Les deux plaquettes, côte à côte. Les PDF eux-mêmes se déposent dans
+    // « Infos pratiques ».
+    defineField({ name: 'bespokePlaquetteGroupes', title: 'Nom de la plaquette « groupes »', type: 'string', group: 'bespoke',
+      description: 'Le PDF se change dans « Infos pratiques ».' }),
+    defineField({ name: 'bespokePlaquetteMassages', title: 'Nom de la plaquette « massages »', type: 'string', group: 'bespoke',
+      description: 'Le PDF se change dans « Infos pratiques ».' }),
 
     // ── COACH ──────────────────────────────────────────────────
-    defineField({ name: 'coachEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'coach', description: 'Actuellement « Votre coach ».' }),
+    defineField({ name: 'coachEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'coach' }),
     defineField({ name: 'coachPrenom', title: 'Prénom', type: 'string',
       description: 'Affiché en grand, sur la première ligne.', group: 'coach' }),
     defineField({ name: 'coachNom', title: 'Nom (en italique rose)', type: 'string',
@@ -148,9 +169,9 @@ export const siteContent = defineType({
     defineField({ name: 'coachCertifications', title: 'Diplômes et certifications', type: 'array', of: [{ type: 'string' }], group: 'coach', description: 'Un par ligne.' }),
 
     // ── TÉMOIGNAGES ────────────────────────────────────────────
-    defineField({ name: 'avisEtiquette', title: 'Petite étiquette', type: 'string', group: 'avis', description: 'Actuellement « Ils en parlent ».' }),
-    defineField({ name: 'avisTitre', title: 'Titre', type: 'string', group: 'avis', description: 'Actuellement « Vos ».' }),
-    defineField({ name: 'avisTitreItalique', title: 'Mot en italique', type: 'string', group: 'avis', description: 'Actuellement « témoignages ».' }),
+    defineField({ name: 'avisEtiquette', hidden: true, title: 'Petite étiquette', type: 'string', group: 'avis' }),
+    defineField({ name: 'avisTitre', title: 'Titre', type: 'string', group: 'avis' }),
+    defineField({ name: 'avisTitreItalique', title: 'Mot en italique', type: 'string', group: 'avis' }),
     defineField({ name: 'avisNote', title: 'Note Google', type: 'string', group: 'avis', description: 'La note moyenne affichée par Google, par exemple « 5 » ou « 4,8 ». Laissez vide pour ne pas afficher de note.' }),
     defineField({ name: 'avisNombre', title: 'Nombre d\'avis Google', type: 'string', group: 'avis', description: 'Par exemple « 24 ». Pensez à le mettre à jour de temps en temps.' }),
     defineField({
@@ -160,86 +181,76 @@ export const siteContent = defineType({
     }),
     defineField({
       name: 'temoignages', title: 'Témoignages', type: 'array', of: [{ type: 'temoignage' }], group: 'avis',
-      description: 'Trois au maximum sont affichés. Uniquement de vrais avis, avec l\'accord des personnes.',
+      description: 'Jusqu\'à six sont affichés sur ordinateur, quatre sur tablette, trois sur téléphone : mettez les meilleurs en haut de la liste. Uniquement de vrais avis, avec l\'accord des personnes.',
     }),
 
     // ── STAGES & ÉVÉNEMENTS ────────────────────────────────────
     // L'en-tête de la frise. Les événements eux-mêmes se créent dans le
     // menu « Événements & stages ».
-    defineField({ name: 'evenementsEtiquette', title: 'Petite étiquette', type: 'string', group: 'evenements', description: 'Actuellement « Au programme ».' }),
-    defineField({ name: 'evenementsTitre', title: 'Titre', type: 'string', group: 'evenements', description: 'Actuellement « Stages & ».' }),
-    defineField({ name: 'evenementsTitreItalique', title: 'Mot en italique', type: 'string', group: 'evenements', description: 'Actuellement « événements ».' }),
+    defineField({ name: 'evenementsEtiquette', hidden: true, title: 'Petite étiquette', type: 'string', group: 'evenements' }),
+    defineField({ name: 'evenementsTitre', title: 'Titre', type: 'string', group: 'evenements' }),
+    defineField({ name: 'evenementsTitreItalique', title: 'Mot en italique', type: 'string', group: 'evenements' }),
     defineField({ name: 'evenementsChapo', title: 'Phrase d\'introduction', type: 'string', group: 'evenements' }),
     defineField({ name: 'evenementsVide', title: 'Message quand rien n\'est prévu', type: 'string', group: 'evenements', description: 'Affiché à la place de la frise quand aucun événement n\'est à venir.' }),
 
     // ── TARIFS ─────────────────────────────────────────────────
-    defineField({ name: 'tarifsEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'tarifs', description: 'Actuellement « Tarifs ».' }),
-    defineField({ name: 'tarifsTitre', title: 'Titre', type: 'string',
-      description: 'Actuellement « Des formules ».', group: 'tarifs' }),
+    defineField({ name: 'tarifsEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'tarifs' }),
+    defineField({ name: 'tarifsTitre', title: 'Titre', type: 'string', group: 'tarifs' }),
     defineField({ name: 'tarifsTitreItalique', title: 'Mot en italique', type: 'string',
-      description: 'Le mot mis en valeur en rose. Actuellement « accessibles ».', group: 'tarifs' }),
+      description: 'Le mot mis en valeur en rose.', group: 'tarifs' }),
     defineField({ name: 'adhesion', title: 'Adhésion obligatoire', type: 'tarifSimple', group: 'tarifs', description: 'Le bandeau rose en haut de la grille.' }),
     defineField({ name: 'tarifsCarte', title: 'Formules à la carte', type: 'array', of: [{ type: 'tarifSimple' }], group: 'tarifs', description: 'Les vignettes blanches. Trois de préférence.' }),
     defineField({ name: 'tarifsCarteNote', title: 'Note sous les formules', type: 'string',
       description: 'La ligne en italique sous les vignettes. Exemple : « Prêt de bâton compris ».', group: 'tarifs' }),
     defineField({ name: 'tarifsSaison', title: 'Tarifs à la saison', type: 'array', of: [{ type: 'tarifSaison' }], group: 'tarifs', description: 'Les lignes du tableau à deux colonnes.' }),
-    defineField({ name: 'tarifsSaisonNote', title: 'Note sous le tableau', type: 'string', group: 'tarifs', description: 'Actuellement « Valable une saison, de septembre à juin ».' }),
+    defineField({ name: 'tarifsSaisonNote', title: 'Note sous le tableau', type: 'string', group: 'tarifs' }),
     defineField({ name: 'tarifsFamilleNote', title: 'Précision sur le tarif famille', type: 'string', group: 'tarifs', description: 'La ligne commençant par une astérisque, sous le tableau.' }),
     defineField({ name: 'tarifsPartiels', title: 'Saisons partielles', type: 'array', of: [{ type: 'tarifSimple' }], group: 'tarifs', description: 'Mi-saison, trimestre. Deux vignettes.' }),
     defineField({ name: 'tarifsSurMesure', title: 'Phrase « sur mesure »', type: 'texteSimple', group: 'tarifs', description: 'Le paragraphe qui renvoie vers les prestations sur mesure.' }),
-    defineField({ name: 'inscriptionTitre', title: 'Titre du bloc inscription', type: 'string',
-      description: 'Actuellement « Envie de nous ».', group: 'tarifs' }),
+    defineField({ name: 'inscriptionTitre', title: 'Titre du bloc inscription', type: 'string', group: 'tarifs' }),
     defineField({ name: 'inscriptionTitreItalique', title: 'Mot en italique', type: 'string',
-      description: 'Le mot mis en valeur en rose. Actuellement « rejoindre ».', group: 'tarifs' }),
+      description: 'Le mot mis en valeur en rose.', group: 'tarifs' }),
     defineField({ name: 'inscriptionSousTitre', title: 'Sous-titre', type: 'string',
       description: 'Une phrase qui rassure : combien de temps prend le formulaire.', group: 'tarifs' }),
-    defineField({ name: 'inscriptionAnnonce', title: 'Titre de la liste', type: 'string', group: 'tarifs', description: 'Actuellement « Il vous sera demandé : ».' }),
+    defineField({ name: 'inscriptionAnnonce', title: 'Titre de la liste', type: 'string', group: 'tarifs' }),
     defineField({
       name: 'inscriptionEtapes', title: 'Ce que demande le formulaire', type: 'array', of: [{ type: 'string' }], group: 'tarifs',
       description: 'IMPORTANT : cette liste doit refléter les vraies questions du formulaire d\'inscription. Si vous ajoutez une question dans le formulaire Google, ajoutez-la ici aussi — une annonce fausse est pire que pas d\'annonce.',
     }),
     defineField({ name: 'inscriptionAlerte', title: 'Encadré d\'avertissement', type: 'texteSimple', group: 'tarifs', description: 'L\'encadré blanc à liseré rose, avant le bouton. Sert à prévenir de ce qu\'il faut préparer.' }),
-    defineField({ name: 'inscriptionBouton', title: 'Texte du bouton', type: 'string',
-      description: 'Actuellement « Remplir le formulaire d\'inscription ».', group: 'tarifs' }),
+    defineField({ name: 'inscriptionBouton', title: 'Texte du bouton', type: 'string', group: 'tarifs' }),
 
     // ── PLANNING ───────────────────────────────────────────────
-    defineField({ name: 'planningEtiquette', title: 'Petite étiquette rose', type: 'string',
-      description: 'Actuellement « Horaires des cours ».', group: 'planning' }),
-    defineField({ name: 'planningTitre', title: 'Titre', type: 'string',
-      description: 'Actuellement « Notre ».', group: 'planning' }),
+    defineField({ name: 'planningEtiquette', hidden: true, title: 'Petite étiquette rose', type: 'string', group: 'planning' }),
+    defineField({ name: 'planningTitre', title: 'Titre', type: 'string', group: 'planning' }),
     defineField({ name: 'planningTitreItalique', title: 'Mot en italique', type: 'string',
-      description: 'Le mot mis en valeur en rose. Actuellement « Planning ».', group: 'planning' }),
+      description: 'Le mot mis en valeur en rose.', group: 'planning' }),
     defineField({ name: 'planningChapo', title: 'Phrase d\'introduction', type: 'texteSimple',
       description: 'La phrase d\'introduction, sous le titre.', group: 'planning' }),
     defineField({ name: 'planningSaison', title: 'Libellé de la saison', type: 'string', group: 'planning', description: 'Affiché au-dessus du tableau. Exemple : « Saison 2026 — 2027 ».' }),
     defineField({ name: 'planningBouton', title: 'Texte du bouton en bas', type: 'string',
-      description: 'Le bouton sous le tableau. Actuellement « Une question sur les horaires ? ».', group: 'planning' }),
+      description: 'Le bouton sous le tableau.', group: 'planning' }),
 
     // ── CONTACT ────────────────────────────────────────────────
-    defineField({ name: 'contactEtiquette', title: 'Petite étiquette rose', type: 'string',
-      description: 'Actuellement « Nous trouver ».', group: 'contact' }),
-    defineField({ name: 'contactTitre', title: 'Titre', type: 'string',
-      description: 'Actuellement « Contacts & ».', group: 'contact' }),
+    defineField({ name: 'contactEtiquette', hidden: true, title: 'Petite étiquette rose', type: 'string', group: 'contact' }),
+    defineField({ name: 'contactTitre', title: 'Titre', type: 'string', group: 'contact' }),
     defineField({ name: 'contactTitreItalique', title: 'Mot en italique', type: 'string',
-      description: 'Le mot mis en valeur en rose. Actuellement « Accès ».', group: 'contact' }),
-    defineField({ name: 'contactCtaTitre', title: 'Titre de l\'encadré sombre', type: 'string',
-      description: 'Actuellement « Prêtes et prêts à ».', group: 'contact' }),
+      description: 'Le mot mis en valeur en rose.', group: 'contact' }),
+    defineField({ name: 'contactCtaTitre', title: 'Titre de l\'encadré sombre', type: 'string', group: 'contact' }),
     defineField({ name: 'contactCtaTitreItalique', title: 'Mot en italique', type: 'string',
-      description: 'Le mot mis en valeur en rose. Actuellement « commencer ».', group: 'contact' }),
+      description: 'Le mot mis en valeur en rose.', group: 'contact' }),
     defineField({ name: 'contactCtaSousTitre', title: 'Sous-titre de l\'encadré', type: 'texteSimple',
       description: 'Deux lignes sous le titre de l\'encadré sombre.', group: 'contact' }),
     defineField({ name: 'contactCtaAide', title: 'Phrase sous les boutons', type: 'string', group: 'contact', description: 'Explique où mène le bouton d\'inscription.' }),
-    defineField({ name: 'reseauxEtiquette', title: 'Étiquette de la section Réseaux', type: 'string',
-      description: 'Actuellement « Suivez-nous ».', group: 'contact' }),
-    defineField({ name: 'reseauxTitre', title: 'Titre de la section Réseaux', type: 'string',
-      description: 'Actuellement « Nos ».', group: 'contact' }),
+    defineField({ name: 'reseauxEtiquette', hidden: true, title: 'Étiquette de la section Réseaux', type: 'string', group: 'contact' }),
+    defineField({ name: 'reseauxTitre', title: 'Titre de la section Réseaux', type: 'string', group: 'contact' }),
     defineField({ name: 'reseauxTitreItalique', title: 'Mot en italique', type: 'string',
-      description: 'Le mot mis en valeur en rose. Actuellement « Réseaux ».', group: 'contact' }),
+      description: 'Le mot mis en valeur en rose.', group: 'contact' }),
 
     // ── PIED DE PAGE ───────────────────────────────────────────
-    defineField({ name: 'footerSlogan', title: 'Slogan', type: 'string', group: 'pied', description: 'Actuellement « Bougeons ensemble ».' }),
-    defineField({ name: 'footerMention', title: 'Mention sous le slogan', type: 'string', group: 'pied', description: 'Actuellement « Mirepoix-sur-Tarn · depuis les années 80 ».' }),
-    defineField({ name: 'footerBaseline', title: 'Sous-titre du logo', type: 'string', group: 'pied', description: 'Actuellement « Bien-être & Santé ».' }),
+    defineField({ name: 'footerSlogan', title: 'Slogan', type: 'string', group: 'pied' }),
+    defineField({ name: 'footerMention', title: 'Mention sous le slogan', type: 'string', group: 'pied' }),
+    defineField({ name: 'footerBaseline', title: 'Sous-titre du logo', type: 'string', group: 'pied' }),
   ],
 
   preview: {

@@ -11,9 +11,13 @@
 //    construite par concaténation serait exploitable exactement comme une
 //    injection SQL.
 //
-// 2. LE SITE NE TOMBE PAS SI SANITY TOMBE. Une panne de Sanity renvoie
-//    `null` et laisse le composant afficher son état vide, plutôt que de
-//    faire échouer le rendu de toute la page.
+// 2. LE SITE NE TOMBE PAS SI SANITY TOMBE — mais il ne MENT pas non plus.
+//    En production, une panne LÈVE une erreur : Next garde alors la
+//    dernière page bonne et réessaie plus tard. Avant, la panne renvoyait
+//    le contenu par défaut, que Next mettait en cache comme une page
+//    normale : dix secondes d'incident chez Sanity, et le site affichait
+//    les anciens tarifs ou l'ancienne adresse, sans erreur visible.
+//    En développement et en aperçu, on garde le repli.
 
 import 'server-only'
 import { clientPour } from './client.js'
@@ -77,6 +81,7 @@ export async function interroger({
       '[sanity] requête en échec :',
       erreur instanceof Error ? erreur.message : String(erreur)
     )
+    if (!preview && process.env.NODE_ENV === 'production') throw erreur
     return siEchec
   }
 }

@@ -43,6 +43,10 @@ export default function Pricing({ site, infos }) {
   // « Il vous sera demandé : » au-dessus d'une puce vide.
   const etapes = (site.inscriptionEtapes ?? []).filter((e) => e?.trim())
   const alerte = site.inscriptionAlerte ?? []
+  const documents = [
+    { lien: infos.reglementInterieur, libelle: 'Règlement intérieur' },
+    { lien: infos.conditionsGenerales, libelle: 'Conditions générales' },
+  ].filter((doc) => doc.lien)
 
   return (
     <section id="tarifs" className="section-pad">
@@ -163,6 +167,20 @@ export default function Pricing({ site, infos }) {
                 Bon à savoir
               </p>
               <TexteRiche valeur={alerte} />
+              {/* Les deux documents demandés par le formulaire, dès que la
+                  cliente les a déposés dans « Infos pratiques ». */}
+              {documents.length > 0 && (
+                <ul className="plaquettes inscription-documents">
+                  {documents.map((doc) => (
+                    <li key={doc.lien}>
+                      <LienFormulaire lien={doc.lien} className="plaquette" precision="document PDF">
+                        <Picto nom="document" taille={22} />
+                        <span><strong>{doc.libelle}</strong><span>PDF</span></span>
+                      </LienFormulaire>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 

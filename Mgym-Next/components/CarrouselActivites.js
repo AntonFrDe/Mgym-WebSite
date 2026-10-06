@@ -119,7 +119,10 @@ export default function CarrouselActivites({ site, activites = [] }) {
 
         {/* Formulation valable pour la souris comme pour le doigt : ce
             chapô ne sait pas sur quel appareil il est lu. */}
-        <EnteteActivites site={site} instruction="Faites défiler les cartes, ou utilisez les flèches, pour toutes les découvrir." />
+        {/* Pas d'instruction dans le chapô : l'indice juste sous les cartes
+            (« Utilisez les flèches » / « Faites glisser du doigt ») la
+            donne déjà, au bon endroit. */}
+        <EnteteActivites site={site} />
 
         <div className={`carrousel${auDebut ? ' est-au-debut' : ''}${aLaFin ? ' est-a-la-fin' : ''}`}>
 

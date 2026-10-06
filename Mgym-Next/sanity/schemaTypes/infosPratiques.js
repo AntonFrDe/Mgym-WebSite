@@ -60,13 +60,26 @@ export const infosPratiques = defineType({
     defineField({
       name: 'plaquetteGroupes', title: 'Plaquette « Groupes, événements & entreprises »', type: 'file',
       options: { accept: 'application/pdf' },
-      description: 'Le PDF ouvert par « Découvrir en détail » des prestations sur mesure. ' +
+      description: 'Le PDF des interventions pour les groupes, associations et entreprises (onglet « Sur mesure »). ' +
         'Enregistrez-le en « qualité web » : un PDF de plusieurs dizaines de Mo ne s\'ouvre pas sur un téléphone.',
     }),
     defineField({
       name: 'plaquetteMassages', title: 'Plaquette « Massages bien-être »', type: 'file',
       options: { accept: 'application/pdf' },
       description: 'Le PDF des massages, avec leurs tarifs.',
+    }),
+    // Le formulaire d'inscription commence par demander si on a lu ces
+    // deux documents : sans eux sur le site, la personne restait bloquée
+    // dès la première question.
+    defineField({
+      name: 'reglementInterieur', title: 'Règlement intérieur (PDF)', type: 'file',
+      options: { accept: 'application/pdf' },
+      description: 'Proposé au téléchargement juste avant le bouton d\'inscription (section Tarifs).',
+    }),
+    defineField({
+      name: 'conditionsGenerales', title: 'Conditions générales (PDF)', type: 'file',
+      options: { accept: 'application/pdf' },
+      description: 'Proposées au téléchargement juste avant le bouton d\'inscription (section Tarifs).',
     }),
   ],
 

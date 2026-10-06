@@ -25,11 +25,15 @@ import TexteRiche from './TexteRiche'
 import LienFormulaire from './LienFormulaire'
 import { Picto, pictoPublic } from './pictogrammes'
 
-/** Les onglets, dans l'ordre d'affichage. `ancre` = l'identifiant du bouton. */
+/**
+ * Les onglets, dans l'ordre d'affichage. `ancre` = l'identifiant du bouton.
+ * `champ` = le nom de l'onglet dans le back-office (« Textes du site » →
+ * « Plus d'activités ») : la cliente le renomme sans toucher au code.
+ */
 const ONGLETS = [
-  { cle: 'ateliers',  ancre: 'ateliers', libelle: 'Ateliers',   picto: 'ateliers' },
-  { cle: 'surMesure', ancre: 'bespoke',  libelle: 'Sur mesure', picto: 'surMesure' },
-  { cle: 'pleinAir',  ancre: 'outdoor',  libelle: 'Plein air',  picto: 'pleinAir' },
+  { cle: 'ateliers',  ancre: 'ateliers', champ: 'plusOngletAteliers',  picto: 'ateliers' },
+  { cle: 'surMesure', ancre: 'bespoke',  champ: 'plusOngletSurMesure', picto: 'surMesure' },
+  { cle: 'pleinAir',  ancre: 'outdoor',  champ: 'plusOngletPleinAir',  picto: 'pleinAir' },
 ]
 
 export default function PlusActivites({ site, infos, ateliers, prochainsAteliers = [] }) {
@@ -62,13 +66,16 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
   }
 
   const telBrut = (infos.telephone ?? '').replace(/[ .]/g, '')
+  const plaquettes = [
+    { lien: infos.plaquetteGroupes, libelle: site.bespokePlaquetteGroupes },
+    { lien: infos.plaquetteMassages, libelle: site.bespokePlaquetteMassages },
+  ].filter((pl) => pl.lien)
 
   return (
     <section id="plus-activites" className="section-pad">
       <div className="section-max">
 
         <div className="plus-entete apparition">
-          <p className="section-label">{site.plusEtiquette}</p>
           <h2 className="section-title">
             {site.plusTitre} <em>{site.plusTitreItalique}</em>
           </h2>
@@ -91,7 +98,7 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
               onKeyDown={(e) => surTouche(e, i)}
             >
               <Picto nom={o.picto} taille={22} />
-              <span>{o.libelle}</span>
+              <span>{site[o.champ]}</span>
             </button>
           ))}
         </div>
@@ -180,24 +187,30 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
                 ))}
               </ul>
             )}
-            <div className="panneau-actions">
-              {infos.plaquetteGroupes && (
-                <LienFormulaire lien={infos.plaquetteGroupes} precision="plaquette PDF">
-                  Découvrir en détail
-                </LienFormulaire>
-              )}
-              {telBrut && (
-                <a href={`tel:${telBrut}`} className="btn-outline">{site.bespokeBouton}</a>
-              )}
-            </div>
-            {infos.plaquetteMassages && (
-              <p className="panneau-renvoi">
-                <Picto nom="document" taille={18} />
-                Voir aussi :{' '}
-                <LienFormulaire lien={infos.plaquetteMassages} className="price-lien" precision="plaquette PDF">
-                  la plaquette des massages bien-être
-                </LienFormulaire>
-              </p>
+            {/* LES DEUX PLAQUETTES, À ÉGALITÉ. Il y avait un bouton
+                « Découvrir en détail » (groupes) et, en petit dessous, un
+                lien vers les massages : on ne voyait que la seconde, et le
+                bouton ne disait pas ce qu'il ouvrait. Chacune annonce
+                maintenant son sujet. */}
+            {plaquettes.length > 0 && (
+              <>
+                <p className="panneau-sous-titre">En détail</p>
+                <ul className="plaquettes">
+                  {plaquettes.map((pl) => (
+                    <li key={pl.lien}>
+                      <LienFormulaire lien={pl.lien} className="plaquette" precision="plaquette PDF">
+                        <Picto nom="document" taille={22} />
+                        <span><strong>{pl.libelle}</strong><span>Plaquette PDF</span></span>
+                      </LienFormulaire>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {telBrut && (
+              <div className="panneau-actions">
+                <a href={`tel:${telBrut}`} className="btn-primary">{site.bespokeBouton}</a>
+              </div>
             )}
           </div>
         </div>
@@ -228,7 +241,7 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
               </div>
             )}
             <div className="panneau-actions">
-              <a href="#evenements" className="btn-primary">Voir les prochaines sorties</a>
+              <a href="#evenements" className="btn-primary">{site.outdoorBouton}</a>
             </div>
           </div>
         </div>

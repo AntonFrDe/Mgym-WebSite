@@ -26,9 +26,11 @@ export const infosPratiques = {
     { nom: 'facebook', url: 'https://www.facebook.com/mgym31', libelle: "Suivre M'GYM" },
     { nom: 'instagram', url: 'https://www.instagram.com/asso.mgym/', libelle: '@asso.mgym' },
   ],
-  // Route de Layrac, relevée sur OpenStreetMap : la cliente l'affine dans
-  // « Infos pratiques » si le repère n'est pas exactement sur la salle.
-  positionCarte: { lat: 43.8145262, lng: 1.5699006 },
+  // La salle des fêtes, relevée sur OpenStreetMap (le bâtiment, à 60 m du
+  // repère de la fiche Google « M'Gym »). L'ancienne valeur était le MILIEU
+  // de la route de Layrac, longue d'un kilomètre : le repère tombait à
+  // 400 m de la salle. La cliente l'affine dans « Infos pratiques ».
+  positionCarte: { lat: 43.8177085, lng: 1.5670418 },
   // Les deux plaquettes, compressées pour le web (224 Mo → 0,6 Mo). Un
   // PDF déposé dans le back-office les remplace.
   plaquetteGroupes: '/documents/plaquette-groupes-entreprises.pdf',
@@ -127,6 +129,9 @@ export const siteContent = {
   plusTitre: 'Ateliers, sur-mesure &',
   plusTitreItalique: 'plein air',
   plusChapo: 'Au-delà des cours de la semaine : des ateliers pour approfondir, des interventions pour votre groupe, et des sorties au grand air.',
+  plusOngletAteliers: 'Ateliers',
+  plusOngletSurMesure: 'Sur mesure',
+  plusOngletPleinAir: 'Plein air',
 
   // ── Marche nordique ─────────────────────────────────────────
   outdoorEtiquette: 'Explorez aussi',
@@ -144,6 +149,7 @@ export const siteContent = {
     'Yoga en extérieur', 'Étirements', 'Marche afghane',
     'Découverte du patrimoine',
   ],
+  outdoorBouton: 'Voir les prochaines sorties',
 
   // ── Sur mesure ──────────────────────────────────────────────
   bespokeEtiquette: 'Sur mesure',
@@ -156,6 +162,8 @@ export const siteContent = {
     "nordique, massages bien-être." }],
   bespokePublics: ['Particulier', 'Association', 'Entreprise', 'Massage'],
   bespokeBouton: 'Prendre rendez-vous',
+  bespokePlaquetteGroupes: 'Groupes, associations & entreprises',
+  bespokePlaquetteMassages: 'Massages bien-être',
 
   // ── Coach ───────────────────────────────────────────────────
   coachEtiquette: 'Votre coach',

@@ -9,10 +9,12 @@
 // devant rester visible au recadrage. `.fit('crop')` le respecte : un
 // visage ne sera pas coupé parce que le cadre est carré.
 
-import imageUrlBuilder from '@sanity/image-url'
+// L'export nommé : l'export par défaut est déprécié, et le signalait à
+// chaque rendu dans la console du serveur.
+import { createImageUrlBuilder } from '@sanity/image-url'
 import { dataset, projectId } from './env.js'
 
-const fabrique = imageUrlBuilder({ projectId, dataset })
+const fabrique = createImageUrlBuilder({ projectId, dataset })
 
 /**
  * @param {object|null|undefined} source  le champ image d'un document

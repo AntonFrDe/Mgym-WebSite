@@ -4,7 +4,7 @@
 // « parce que c'est possible » : un menu d'actions encombré fait hésiter.
 
 import { useState } from 'react'
-import { useDocumentOperation } from 'sanity'
+import { useClient, useDocumentOperation } from 'sanity'
 import { adressePour } from '../../lib/adresse-web.js'
 
 /**
@@ -47,37 +47,43 @@ export function avecAdresseAutomatique(PublierOriginal) {
  * on repart de la fiche existante au lieu de tout ressaisir. La copie
  * arrive en BROUILLON, avec « (copie) » dans le titre — impossible de
  * publier par mégarde un doublon de l'original.
+ *
+ * Il REMPLACE le « Dupliquer » natif de Sanity (retiré dans
+ * sanity.config.js) : le natif recopie l'adresse web, et deux fiches à la
+ * même adresse rendent l'une des deux inatteignable.
  */
 export function actionDupliquer(props) {
   const { type, draft, published, onComplete } = props
+  const client = useClient({ apiVersion: '2024-10-01' })
   const document = draft || published
 
-  if (!['evenement', 'article'].includes(type)) return null
+  if (!TYPES_DUPLICABLES.includes(type)) return null
 
   return {
     label: 'Dupliquer',
-    icon: () => '⧉',
+    disabled: !document,
     onHandle: async () => {
-      const client = props.getClient?.({ apiVersion: '2024-10-01' })
-      if (!client || !document) return onComplete?.()
-
-      const { _id, _rev, _createdAt, _updatedAt, ...contenu } = document
-
-      await client.create({
-        ...contenu,
-        _type: type,
-        _id: `drafts.${crypto.randomUUID()}`,
-        titre: `${contenu.titre ?? 'Sans titre'} (copie)`,
-        // Le slug doit être unique : on le vide pour forcer une
-        // régénération. Deux documents au même slug rendraient l'un des
-        // deux inatteignable.
-        slug: undefined,
-      })
-
+      const { _id, _rev, _createdAt, _updatedAt, slug, ...contenu } = document
+      try {
+        await client.create({
+          ...contenu,
+          _type: type,
+          _id: `drafts.${crypto.randomUUID()}`,
+          titre: `${contenu.titre ?? 'Sans titre'} (copie)`,
+          // Pas de `slug` : « Publier » en fabriquera une nouvelle.
+        })
+      } catch (e) {
+        // Une action n'a pas d'endroit où afficher un message : la console
+        // du navigateur garde la trace, et la liste ne montre pas de copie.
+        console.error('[Dupliquer] échec :', e)
+      }
       onComplete?.()
     },
   }
 }
+
+/** Les types où « Dupliquer » (la version maison) remplace le natif. */
+export const TYPES_DUPLICABLES = ['evenement', 'article']
 
 /**
  * « Annuler une date » depuis un créneau régulier.
@@ -89,20 +95,54 @@ export function actionDupliquer(props) {
  */
 export function actionAnnulerUneDate(props) {
   const { type, id, onComplete } = props
+  // useClient : la SEULE façon d'écrire dans Sanity depuis une action. Les
+  // actions ne reçoivent pas de client dans leurs props — l'ancienne
+  // version lisait `props.getClient`, qui n'existe pas : le bouton ne
+  // faisait rien, sans le moindre message.
+  const client = useClient({ apiVersion: '2024-10-01' })
   const [ouvert, setOuvert] = useState(false)
   const [date, setDate] = useState('')
   const [motif, setMotif] = useState('')
+  const [etat, setEtat] = useState({ enCours: false, erreur: '' })
 
   if (type !== 'creneau') return null
 
+  const fermer = () => {
+    setOuvert(false)
+    setEtat({ enCours: false, erreur: '' })
+    onComplete?.()
+  }
+
+  const creer = async () => {
+    setEtat({ enCours: true, erreur: '' })
+    try {
+      await client.create({
+        _type: 'exception',
+        // L'annulation vise le créneau PUBLIÉ : une référence vers le
+        // brouillon (« drafts.… ») ne serait jamais vue par le site.
+        creneau: { _type: 'reference', _ref: id.replace(/^drafts\./, '') },
+        date,
+        type: 'annule',
+        motif: motif || undefined,
+      })
+      setDate('')
+      setMotif('')
+      fermer()
+    } catch (e) {
+      setEtat({
+        enCours: false,
+        erreur: `L'annulation n'a pas été enregistrée (${e instanceof Error ? e.message : 'erreur inconnue'}). Réessayez, ou créez-la dans « Annulations & changements ».`,
+      })
+    }
+  }
+
   return {
     label: 'Annuler une date',
-    icon: () => '🚫',
     onHandle: () => setOuvert(true),
     dialog: ouvert && {
       type: 'dialog',
       header: 'Annuler ce cours pour une date',
-      onClose: () => { setOuvert(false); onComplete?.() },
+      onClose: fermer,
       content: (
         <div style={{ display: 'grid', gap: '0.75rem' }}>
           <label>
@@ -124,25 +164,14 @@ export function actionAnnulerUneDate(props) {
               style={{ width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
             />
           </label>
+          {etat.erreur && <p role="alert" style={{ color: '#b3261e', margin: 0 }}>{etat.erreur}</p>}
           <button
             type="button"
-            disabled={!date}
-            onClick={async () => {
-              const client = props.getClient?.({ apiVersion: '2024-10-01' })
-              if (!client) return
-              await client.create({
-                _type: 'exception',
-                creneau: { _type: 'reference', _ref: id },
-                date,
-                type: 'annule',
-                motif: motif || undefined,
-              })
-              setOuvert(false)
-              onComplete?.()
-            }}
-            style={{ padding: '0.6rem', cursor: date ? 'pointer' : 'not-allowed' }}
+            disabled={!date || etat.enCours}
+            onClick={creer}
+            style={{ padding: '0.6rem', cursor: date && !etat.enCours ? 'pointer' : 'not-allowed' }}
           >
-            Créer l&apos;annulation
+            {etat.enCours ? 'Enregistrement…' : "Créer l'annulation"}
           </button>
         </div>
       ),
