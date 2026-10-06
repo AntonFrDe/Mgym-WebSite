@@ -34,3 +34,4 @@ Site-MGYM*.html
 # de 100 Mo. Seules les versions compressées de public/documents/ sont
 # publiées sur le site.
 /Mgym-Next/plaquette-*.pdf
+.impeccable/
