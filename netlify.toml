@@ -9,7 +9,16 @@
 # tel quel : « 1 new file(s), 0 new function(s) ». Zéro fonction signifie
 # que /api/preview et /api/preview-exit n'existent pas en production —
 # donc pas de prévisualisation des brouillons pour la cliente.
+#
+# `ignore` : sur l'offre gratuite, chaque déploiement de production coûte
+# 15 crédits sur 300 par mois. Les 300 ont été épuisés en septembre, en
+# grande partie par des commits de DOCUMENTATION : Netlify a alors refusé
+# de publier (« Skipped due to account credit usage exceeded »). Ici, un
+# commit qui ne touche que des .md ou docs/ ne lance aucun build (code de
+# sortie 0 = « rien à construire »). Le webhook Sanity de reconstruction a
+# été supprimé pour la même raison : le site relit Sanity toutes les 60 s.
 [build]
+  ignore  = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)*.md' ':(exclude)docs/'"
   base    = "Mgym-Next"
   command = "npm run build"
   publish = ".next"
