@@ -1,15 +1,31 @@
 # Passation — site M'GYM
 
-> À coller au début d'une nouvelle conversation pour reprendre le travail.
-> Écrit le 26 septembre 2026. **Le dépôt est public : aucun secret ici.**
+> À coller (ou faire lire) au début d'une nouvelle conversation Claude.
+> Mis à jour le **7 octobre 2026**. **Le dépôt est public : aucun secret ici.**
+> Les conventions du code sont dans `Mgym-Next/CLAUDE.md` — à lire aussi.
 
 ---
 
 ## En une phrase
 
-Site vitrine Next.js d'une association de Mirepoix-sur-Tarn, alimenté par
-Sanity, en ligne sur Netlify. Il reste à le mettre sur `mgym.fr` et à
-remettre les clés à la cliente.
+Site vitrine Next.js 15 d'une association sport-santé de Mirepoix-sur-Tarn,
+alimenté par Sanity, hébergé chez Netlify sur `mgym.fr`. **La dernière
+version est sur `main` mais PAS en ligne** : l'équipe Netlify qui héberge
+le site n'a plus de crédits, et la migration vers un autre compte est à
+moitié faite (voir « Priorité 1 »).
+
+---
+
+## Démarrer une nouvelle conversation
+
+Message à envoyer à Claude :
+
+> Lis `Mgym-Next/PASSATION.md` puis `Mgym-Next/CLAUDE.md`. Vérifie l'état
+> réel (git, `netlify status`, `curl -I https://mgym.fr`) avant d'agir :
+> ce document peut avoir vieilli. Puis reprends à la « Priorité 1 ».
+
+Le projet est dans `Mgym-Next/`, **pas à la racine du dépôt**. `netlify.toml`
+est à la racine et déclare `base = "Mgym-Next"`.
 
 ---
 
@@ -17,244 +33,236 @@ remettre les clés à la cliente.
 
 | Quoi | Où |
 |---|---|
-| Site en production | <https://frolicking-babka-da04a6.netlify.app> |
+| Site en ligne | <https://mgym.fr> — sert encore la version du **27/09** |
+| Ancien projet Netlify | `frolicking-babka-da04a6` — équipe « Antoteam » |
+| Nouveau projet Netlify | `mgym-site` (id `e84ea511-d2c9-45bd-b75f-a990a32a6d8b`) — équipe « Anton » — **502, pas encore relié à GitHub** |
 | Back-office | <https://mgym.sanity.studio> |
 | Dépôt | `github.com/AntonFrDe/Mgym-WebSite` — **public** |
-| Projet Sanity | `zqxwi6qy`, dataset `production`, workspace `mgym` |
-| Domaine visé | `mgym.fr` — sert encore l'ancien site Hostinger |
-
-Le projet n'est **pas à la racine du dépôt** : il est dans `Mgym-Next/`.
-C'est la cause de plusieurs échecs de build ; `netlify.toml`, **à la racine
-du dépôt et non dans `Mgym-Next/`**, le déclare avec `base = "Mgym-Next"`.
+| Projet Sanity | `zqxwi6qy`, dataset `production` |
+| DNS | zone chez **OVH** (migration faite) : `@ A 75.2.60.5`, `www CNAME frolicking-babka-da04a6.netlify.app.`, MX OVH inchangés |
 
 ---
 
-## Où sont les secrets
+## Les comptes
 
-Aucun n'est dans le dépôt, et aucun ne doit y entrer.
+| Service | Compte | Remarque |
+|---|---|---|
+| Netlify — équipe **Antoteam** (ancien projet) | `anton.franc-delbourg@epitech.eu` | Propriétaire. **Crédits épuisés jusqu'au 13/10/2026** |
+| Netlify — équipe **Anton** (nouveau projet) | `antonfd8@gmail.com` | 300 crédits neufs |
+| GitHub | `AntonFrDe` | `gh` connecté sur la machine |
+| Sanity | CLI déjà connectée (`npx sanity …` marche) | |
 
-| Secret | Où le lire |
+Le CLI Netlify (`netlify`, v27) est installé et connaît **les deux** comptes.
+Le compte actif est `antonfd8@gmail.com`. Pour changer : `netlify switch`.
+Toute connexion (`netlify login`) est interactive : demander à l'utilisateur
+de taper `! netlify login` dans le prompt.
+
+---
+
+## Priorité 1 — remettre le site à jour en ligne
+
+### Pourquoi c'est bloqué
+
+Chaque déploiement de **production** coûte 15 crédits sur 300 par mois
+(offre gratuite). L'équipe Antoteam les a épuisés en septembre : chaque
+commit sur `main` (même de la doc) et chaque « Publier » de la cliente
+(webhook Sanity) relançait un build. Depuis le 28/09, Netlify répond
+« **Skipped due to account credit usage exceeded** » : les merges des PR
+#1, #2 et #3 n'ont jamais été publiés. Les aperçus de PR, eux, se
+construisent (ils ne coûtent rien) — d'où la confusion.
+
+Déjà corrigé pour l'avenir : le webhook Sanity est **supprimé** (le site
+relit Sanity toutes les 60 s, il était inutile) et `netlify.toml` contient
+une règle `ignore` : un commit qui ne touche que des `.md` ou `docs/` ne
+déclenche plus de build.
+
+### Choix de l'utilisateur : nouveau projet sur le compte « Anton »
+
+Fait :
+- projet `mgym-site` créé ; variables `SANITY_API_READ_TOKEN` (nouveau
+  jeton Sanity « Netlify – site (compte Anton, 2026-10-06) », rôle Viewer)
+  et `SANITY_PREVIEW_SECRET` (nouveau, 64 caractères) posées en secret pour
+  production, deploy-preview et branch-deploy ;
+- protection « Team login » retirée (`sso_login: false`), sinon le site
+  répond « This site is private ».
+
+**Reste, dans l'ordre :**
+1. **L'utilisateur** relie le projet à GitHub (interactif) :
+   <https://app.netlify.com/projects/mgym-site/configuration/deploys> →
+   *Link repository* → GitHub → `AntonFrDe/Mgym-WebSite` → branche `main`.
+   Netlify lit `netlify.toml` tout seul.
+2. Attendre le build serveur, vérifier `https://mgym-site.netlify.app` :
+   HTTP 200 sur `/`, `/blog`, `/evenements/tai-chi-chuan-and-qi-gong`,
+   « Appeler pour un essai » dans le HTML, ~40 occurrences de
+   `cdn.sanity.io`, `/api/draft-mode/enable` en **401** (pas 404),
+   `/_next/image?...` en **404**.
+3. Déplacer le domaine : avec le compte epitech, retirer `mgym.fr` de
+   `frolicking-babka-da04a6` (`custom_domain: null`) ; avec le compte
+   gmail, l'ajouter à `mgym-site` (`custom_domain: "mgym.fr"`, alias
+   `www.mgym.fr`). L'enregistrement A pointe déjà vers Netlify : rien à
+   changer pour `@`. Demander à l'utilisateur de remplacer chez OVH le
+   CNAME `www` par `mgym-site.netlify.app.`. Attendre le certificat.
+4. Vérifier `https://mgym.fr`, puis l'**Aperçu** du Studio (il dépend de
+   `/api/draft-mode/enable`, absent de la version en ligne actuelle).
+5. Ensuite seulement : révoquer l'ancien jeton Sanity `mgym-viewer`
+   (`npx sanity tokens list` / `delete`), et laisser l'ancien projet
+   s'éteindre.
+
+> Alternative si la migration coince : le 13/10, les crédits d'Antoteam
+> reviennent ; `netlify switch` (compte epitech) puis
+> `netlify api createSiteBuild --data '{"site_id":"94821dd5-2efc-4a66-8044-b6b4fa08e3af"}'`.
+
+### Ne pas refaire ce qui a échoué
+
+**Déployer depuis la machine** (`netlify deploy --build`) a échoué trois
+fois, ne pas réessayer :
+- le CLI en local résout `publish = ".next"` depuis la racine du dépôt et
+  non depuis `Mgym-Next/` (« publish directory was not found ») ;
+- en contournant (`publish = "Mgym-Next/.next"`), le déploiement réussit
+  mais la fonction serveur plante : `ENOENT … '/run-config.json'` (502) ;
+- un `node_modules` en lien symbolique donne une fonction sans Next
+  (`Cannot find module 'next/dist/server/lib/start-server.js'`).
+
+Les serveurs Netlify construisent ce dépôt correctement (les aperçus de PR
+le prouvent) : passer par GitHub.
+
+---
+
+## Priorité 2 — confidentialité
+
+- **Photos d'adhérentes** (`Mgym-Next/new pic/`, 14 PNG, 21 Mo) : retirées
+  du suivi git et ignorées le 7/10 (elles restent sur le disque). **Elles
+  sont encore dans l'historique d'un dépôt PUBLIC.** Décision de
+  l'utilisateur : passer le dépôt en privé (le plus simple), ou purger avec
+  `git filter-repo --path "Mgym-Next/new pic" --invert-paths` + push forcé
+  (réécrit l'historique de tout le monde).
+- Jeton Sanity **`mgym-editor`** (rôle Editor = écriture) : encore actif.
+  Il servait aux tests `verifier:workflow` ; à supprimer s'il ne sert plus.
+- Aucun jeton n'est dans `Mgym-Next/.env.local` (seulement les 5 variables
+  publiques). `SANITY_PREVIEW_SECRET` local : absent, l'aperçu local renvoie
+  503 — c'est voulu.
+
+---
+
+## Priorité 3 — Studio
+
+1. `npm run studio:deploy` (depuis `Mgym-Next/`) : le Studio en ligne n'a
+   peut-être pas les derniers changements (actions réparées, descriptions
+   nettoyées, champs PDF).
+2. Tester **dans le Studio** (personne ne l'a fait) :
+   - un créneau → ⋯ → **Annuler une date** → une « exception » doit
+     apparaître dans « Annulations & changements » ;
+   - un événement → ⋯ → **Dupliquer** → un brouillon « … (copie) » sans
+     adresse web.
+   Ces deux actions ne faisaient RIEN avant le 6/10 (`props.getClient`
+   n'existe pas) ; elles passent maintenant par `useClient`.
+
+---
+
+## Contenu à demander à la cliente (rien à coder)
+
+- **Photos réelles** de la salle des fêtes et d'adhérentes de tous âges :
+  le haut de page est une photo de banque d'images, l'image des Ateliers
+  une illustration IA (gratte-ciel). Premier facteur « générique » du site.
+- Bande du haut de page (`heroActivites`) : retirer « **Blog** » et
+  « Renforcement Musculaire » (n'existent nulle part ailleurs).
+- PDF **Règlement intérieur** et **Conditions générales** à déposer dans
+  *Infos pratiques* : le formulaire d'inscription les exige, le site les
+  propose dès qu'ils existent.
+- **Témoignages** : aucun dans Sanity (le site affiche le seul avis du
+  code). Uniquement de vrais avis, avec accord.
+- **Fiche Google « M'Gym »** : marquée « **Définitivement fermé** », adresse
+  « Rue du Coutal ». À corriger par la cliente dans Google Business Profile.
+  La vraie salle : salle des fêtes, Route de Layrac (le repère de carte du
+  site y est depuis le 2/10).
+- Questions jamais tranchées : la **saison** (« 2025—2026 » sur le site,
+  « ADHESION 26/27 » sur le formulaire) ; le **tarif famille** (410 € contre
+  2 × 215 €).
+
+---
+
+## Ce qui a été fait (depuis le 26/09)
+
+| Commit | Contenu |
 |---|---|
-| `SANITY_API_READ_TOKEN` | `Mgym-Next/.env.local` et interface Netlify |
-| `SANITY_PREVIEW_SECRET` | idem |
-| `SANITY_API_WRITE_TOKEN` | `.env.local` uniquement — **jamais** chez l'hébergeur |
-| URL du Build hook Netlify | interface Netlify, *Build & deploy → Build hooks* |
+| a6b00b9 | Version téléphone, onglets « Plus d'activités », frise des événements, aperçu du Studio |
+| c0e868f | Retours cliente lot 2 (plaquettes, carte sur la salle des fêtes, coach, témoignages, photos d'événements, libellés modifiables) + audit « généré par IA » (étiquettes redondantes, contrastes, lisibilité, CGV/règlement, « Appeler pour un essai ») + Next 15.5.27 (faille critique) |
+| 818b3f0 | Actions du Studio réparées, pannes Sanity visibles en prod, `images.unoptimized`, 62 descriptions « Actuellement « … » » retirées |
+| e9a094e | `netlify.toml` : pas de build pour un commit de doc |
 
-> ⚠️ **À régénérer avant la mise en service.** Les deux jetons Sanity et
-> l'URL du Build hook ont circulé en clair dans la conversation qui a
-> produit ce document.
-
-Les trois identifiants **publics** de Sanity (`projectId`, `dataset`,
-`apiVersion`) sont volontairement dans `netlify.toml` — voir « Pièges ».
+État : 103 tests, schémas et requêtes valides, build vert. Décisions de
+design : `Vault/30-Decisions/adr-006-mgym-elements-generes-par-ia.md`.
 
 ---
 
-## État au 26 septembre 2026
+## Améliorations repérées, non faites
 
-```
-61 commits · main == REFONTE-3 · arbre propre
-71 tests · schémas valides · requêtes valides · build vert
-production : HTTP 200, 34 images venant du CMS, 0 brouillon dans le HTML
-```
-
-**Fait :** Studio déployé · 21 documents migrés · Netlify en ligne ·
-webhook de publication validé (deux livraisons HTTP 200) · première
-sauvegarde du dataset vérifiée.
-
-**Reste :** le domaine · le compte de la cliente · la remise.
-
----
-
-## La prochaine manipulation : `mgym.fr` — décidé : zone DNS chez OVH
-
-Le site reste chez Netlify. On rapatrie la **zone DNS** chez OVH, où le
-domaine est déjà acheté (registrar OVH, expiration 29/06/2027). Ainsi,
-Hostinger pourra être résilié sans rien casser : tant que la zone y vit,
-résilier Hostinger coupe à la fois le site ET la messagerie.
-
-### Inventaire de la zone Hostinger (mesuré le 26/09/2026)
-
-| Nom | Type | Valeur | Sort |
-|---|---|---|---|
-| `@` | A | `193.58.105.88`, `147.79.119.52` (tournent) | → `75.2.60.5` |
-| `@` | AAAA | 2 adresses `2a02:4780:…` | **supprimées** (Netlify n'en veut pas) |
-| `www` | CNAME | `www.mgym.fr.cdn.hstgr.net` | → `frolicking-babka-da04a6.netlify.app.` |
-| `@` | MX | `1 mx4.mail.ovh.net`, `10 mx3.mail.ovh.net` | **recopiés à l'identique** |
-| `@` | TXT | `"1\|www.mgym.fr"` | supprimé (marqueur du CDN Hostinger) |
-
-Rien d'autre : pas de joker, pas de SPF, DKIM, DMARC, CAA ni `mail.`/`ftp.`
-(sondés un par un — un transfert de zone n'est pas possible).
-
-### Les cinq étapes, dans cet ordre
-
-1. **Netlify** — *Domain management → Add a domain* → `mgym.fr` (principal),
-   `www.mgym.fr` s'ajoute avec. Refuser « Netlify DNS ». État : « awaiting DNS ».
-2. **OVH** — *Web Cloud → Noms de domaine → mgym.fr → Zone DNS*. Si aucune
-   zone n'existe, la créer (sans « enregistrements minimaux »). Puis faire
-   correspondre la zone EXACTEMENT au tableau ci-dessus, colonne « Sort » :
-   supprimer les A/AAAA/CNAME/TXT par défaut d'OVH, vérifier les deux MX
-   (priorités 1 et 10). Rien ne change encore pour personne.
-3. **Vérifier la zone OVH avant de basculer** : je l'interroge directement
-   sur les serveurs OVH. On ne passe à 4 que si tout correspond.
-4. **OVH** — onglet *Serveurs DNS* → *Modifier* → mettre les serveurs OVH
-   affichés dans l'onglet Zone DNS (`dnsXX.ovh.net` / `nsXX.ovh.net`).
-   Propagation jusqu'à 24–48 h ; pendant ce temps, les deux zones répondent
-   avec les MES MX : la messagerie ne s'interrompt pas, le site alterne
-   entre l'ancien et le nouveau.
-5. **Attendre** le certificat Let's Encrypt de Netlify, **puis seulement**
-   poser `MGYM_HSTS=1` dans Netlify et redéployer.
-
-> ⚠️ L'étape 4 remplace le site actuel de la cliente. Son accord d'abord.
-> Et **ne pas résilier Hostinger** avant que `mgym.fr NS` réponde OVH
-> partout.
-
-## Ce qu'il reste ensuite
-
-- **Compte Sanity de l'association.** Décision prise : un compte dédié
-  (adresse de l'association), pas le compte personnel partagé — pour que
-  l'historique dise qui a modifié quoi. Rôle : voir le piège Sanity.
-- **Les 21 contrôles en production** : `node scripts/tester-workflow.mjs <url>`.
-  Exige un jeton **Editor** temporaire, à supprimer juste après.
-- **Sortir `new pic/` du dépôt** — 21 Mo de photos d'adhérentes en pleine
-  résolution, dans un dépôt public.
-- **Remise à la cliente** : `docs/GUIDE-CLIENTE.md`, la vidéo
-  (`docs/SCRIPT-VIDEO.md`), et chronométrer avec elle sur son téléphone
-  quatre parcours — modifier un tarif, ajouter un créneau, changer une
-  photo, publier un article.
-
-### Deux questions de contenu jamais tranchées
-
-- **La saison.** Le site annonce « Saison 2025 — 2026 », le formulaire
-  d'inscription s'intitule « ADHESION 26/27 ». L'un des deux est périmé.
-- **Le tarif famille.** 410 € pour deux personnes, contre 2 × 215 € = 430 €
-  en individuel. L'écart de 20 € est-il voulu ?
+Par ordre d'intérêt (détail : critique dans `Mgym-Next/.impeccable/`, non
+versionnée) :
+- **Deux systèmes d'aperçu** (`/api/preview?secret=` et
+  `/api/draft-mode/*`) + un jeton HMAC maison (`lib/preview-jeton.js`)
+  par-dessus le cookie de Next. Garder draft-mode seul.
+- Code mort en production : variante « sentier » et copie hors-ligne
+  (`build-standalone.js`, `export-statique.mjs`, `localiser-images.mjs`,
+  ~740 lignes qui réécrivent chaque interaction en JS vanilla). À retirer
+  maintenant que le site est en ligne — sinon toute modif est à faire deux fois.
+- CSS : 16 rayons et 25 ombres différents → 3 rayons, 2 ombres en variables.
+- Sections maigres : Témoignages (1 avis) et Réseaux (2 liens) ; nav à 9 entrées.
+- Documentation pléthorique (~3 100 lignes) : supprimer les audits
+  (`docs/AUDIT-*`, `FINAL-BACKEND-AUDIT.md`) qui affirment « 21/21 » sans
+  avoir testé le Studio ; `docs/DEPLOIEMENT.md` est périmé.
+- Scripts obsolètes : `scripts/heberger-tour.sh`, `adresse-tour.sh`,
+  `arreter-tour.sh` (tunnel, remplacé par Netlify), `migrer.mjs` (fait).
+- Textes génériques de la cliente (« Formes & Bien-être », triades
+  d'impératifs) : à proposer, l'utilisateur a choisi « code seulement ».
 
 ---
 
-## Les pièges — la partie la plus utile de ce document
+## Les pièges — la partie la plus utile
 
-Chacun a coûté du temps. Tous sont corrigés, mais un changement maladroit
-peut les rouvrir.
+### Netlify
+- **Les crédits** : 15 par déploiement de production, 300/mois en gratuit.
+  Ne jamais rebrancher un webhook Sanity → build.
+- **Les aperçus de PR sont protégés** (HTTP 401) : impossible de les tester
+  par `curl`. Le statut GitHub « Deploy Preview ready » prouve seulement
+  que le build passe.
+- **`publish` et `[[plugins]]` doivent rester explicites** dans
+  `netlify.toml`, sinon « 0 new function(s) » : pas de route serveur.
+- **Variables publiques Sanity dans `netlify.toml`** : une variable saisie
+  dans l'interface peut avoir une portée qui exclut le build.
+- **Le domaine** ne peut être que sur un seul projet à la fois.
 
-### Outillage
-
-- **Node 20.19 minimum.** Le Node du système est en 18 ; un Node 22 est
-  installé dans `~/.local/node22/bin`. Sous Node 18, le CLI Sanity échoue
-  sur un `ERR_REQUIRE_ESM` qui ne mentionne jamais la version.
-- **`pkill -f "next start"` se tue lui-même** : le motif figure dans sa
-  propre ligne de commande. Utiliser `[n]ext-server`, ou chercher par port.
-- **`npm start`** sert le site hébergé ; **`npm run start:horsligne`** sert
-  la copie hors-ligne. Les confondre donne un dossier introuvable.
-
-### Build et hébergement
-
-- **Le cache de données de Next survit aux builds.** Pendant `next build`,
-  une entrée existante est réutilisée quel que soit son âge — ni le temps
-  ni un `revalidate` ne l'expirent. C'est ce qui aurait rendu « Publier »
-  sans effet. `scripts/vider-cache-donnees.mjs` (script `prebuild`) vide le
-  seul `fetch-cache` à chaque build. **Ne pas le retirer.**
-- **Netlify ne lance pas son adaptateur Next sans `publish` et
-  `[[plugins]]` explicites.** Sans eux : « 0 new function(s) », donc aucune
-  route serveur, donc pas de prévisualisation.
-- **Une variable saisie dans l'interface Netlify peut avoir une portée qui
-  exclut le build.** Le site se construit alors sans CMS et sert son
-  contenu de secours — sans la moindre erreur. C'est pourquoi les trois
-  identifiants publics sont dans `netlify.toml`.
-- **Le repli masque les pannes.** Sans Sanity configuré, le site affiche
-  `lib/contenu/defaut.js`, identique à l'original. Il a l'air parfait.
-  Le test qui tranche : `curl -s <url> | grep -c cdn.sanity.io` — si c'est
-  0, le CMS n'alimente rien.
-- **`MGYM_HSTS=1` est opt-in**, et doit le rester jusqu'au domaine
-  définitif. Servi sans certificat valide, l'en-tête rend le site
-  inaccessible **deux ans**, et c'est le navigateur qui mémorise.
+### Build et données
+- **Une panne Sanity fait maintenant échouer le build** en production
+  (`lib/sanity/fetch.js` relance l'erreur) : c'est voulu, Netlify garde la
+  version précédente. Ne pas « réparer » en revenant au repli silencieux.
+- **Une liste Sanity remplace la liste par défaut en entier** (`fusionner`,
+  `lib/contenu/index.js`) : Instagram, ajouté au code, est resté invisible
+  tant que Sanity ne contenait que Facebook. Vérifier ce qu'il y a dans
+  Sanity (requête publique sur `zqxwi6qy.apicdn.sanity.io`) avant de dire
+  « c'est fait ».
+- **Le cache de données de Next survit aux builds** : ne pas retirer le
+  `prebuild` (`scripts/vider-cache-donnees.mjs`).
+- **`MGYM_HSTS=1` reste opt-in** (Netlify envoie déjà son propre HSTS).
 
 ### Sanity
+- **Forfait gratuit : rôles Administrator et Viewer seulement.** La
+  protection du contenu, c'est `npm run sauvegarde` (dernière sauvegarde :
+  `../../Sauvegardes-MGYM/mgym-production-2026-10-02.tar.gz`).
+- **Actions du Studio : `useClient`, jamais `props.getClient`** (n'existe
+  pas — l'erreur est silencieuse).
+- **Stega** : tout champ COMPARÉ par le code va dans `CHAMPS_SANS_STEGA`.
+- **Après chaque changement de schéma : `npm run studio:deploy`.**
 
-- **Le forfait gratuit n'a que deux rôles : Administrator et Viewer.**
-  `editor` commence à Growth, 15 $/siège/mois. Pour que la cliente modifie
-  son site, elle doit être Administrator — donc capable de supprimer le
-  dataset. **La parade est `npm run sauvegarde`, pas le rôle.**
-- **Le webhook doit filtrer les brouillons** :
-  `!(_id in path("drafts.**"))`. Sanity enregistre les brouillons en
-  continu pendant la frappe ; sans filtre, chaque sauvegarde automatique
-  déclenche une reconstruction et épuise les 300 minutes mensuelles.
-  Le filtre vit dans `rule.filter`, pas dans le champ `filter` de premier
-  niveau — ce dernier reste `null`, c'est normal.
-- **Sanity refuse les AVIF 10 bits** (`422 Invalid image`). Cinq photos du
-  projet le sont. `scripts/migrer.mjs` les convertit en WebP sans perte
-  avant l'envoi ; `public/` n'est pas modifié.
-- **Les brouillons ne sont pas lisibles sans jeton**, même sur un dataset
-  public — vérifié. L'absence de dataset privé n'expose donc rien.
-
-### Code
-
-- **La CSP bloquait tout le JavaScript en développement.** `next dev`
-  évalue les modules avec `eval()` ; sans `'unsafe-eval'`, React ne
-  s'hydrate jamais : menu mort, sections invisibles, carrousel figé — et
-  seulement en local, ce qui rend le défaut très trompeur. L'autorisation
-  est accordée si `NODE_ENV != 'production'`. **Ne pas l'étendre à la
-  production.**
-- **Trois fichiers décrivent les mêmes champs** et rien ne les relie :
-  `sanity/schemaTypes/siteContent.js`, `lib/sanity/queries/groq.js`,
-  `lib/contenu/source-historique.mjs`. En oublier un donne un champ
-  inutilisable. `npm test` le détecte.
-- **La copie hors-ligne lit le CMS** depuis `scripts/export-statique.mjs`,
-  qui transmet les trois variables publiques et rapatrie les photos de
-  `cdn.sanity.io` en local. Sans ça elle livrait le contenu d'avant le CMS,
-  silencieusement.
-- **Le délai de revalidation est écrit en clair dans trois pages** — Next
-  refuse une constante importée. `lib/revalidation.test.mjs` échoue si
-  l'une diverge.
-
-### Réseau, si le test local revient sur la table
-
-- **Les box filtrent `*.trycloudflare.com`** (NXDOMAIN sur la box, résolu
-  par 1.1.1.1). Les tunnels Cloudflare gratuits sont inutilisables pour une
-  démonstration client. `scripts/heberger-tour.sh` utilise `localhost.run`
-  par défaut, qui passe.
-- **Vercel interdit l'usage commercial sur son offre gratuite**, « être payé
-  pour construire le site » inclus. D'où Netlify.
-
----
-
-## Les commandes
-
-```bash
-npm run verifier      # schémas + requêtes + 71 tests + build — la référence
-npm run dev           # développement
-npm run mobile        # ouvre le site en fenêtre iPhone 13 (390x844)
-npm run sauvegarde    # exporte le dataset HORS du dépôt, et vérifie l'archive
-npm run livraison     # copie hors-ligne, deux formats
-npm run studio:deploy # redéploie le back-office
-```
-
-Préfixer par `PATH="$HOME/.local/node22/bin:$PATH"` si `node -v` affiche 18.
-
-Il n'y a **pas de linter** : `npm run verifier` en tient lieu.
-
----
-
-## La documentation
-
-| Fichier | Pour qui |
-|---|---|
-| `CLAUDE.md` | conventions du code, pièges du projet |
-| `docs/DEPLOIEMENT.md` | le plan complet, 10 étapes, qui fait quoi |
-| `docs/SECURITY.md` | 12 points de sécurité, vérifiés |
-| `docs/ROLLBACK.md` | restaurer une version |
-| `docs/GUIDE-CLIENTE.md` | pour la cliente, pas pour un développeur |
-| `docs/SANITY-SCHEMAS.md` | les modèles de contenu |
-
----
-
-## Contexte humain
-
-Le prestataire est **étudiant en 3ᵉ année à Epitech** et réalise le site
-**gracieusement**. Cela a dicté plusieurs choix : pas de VPS à administrer
-pendant des années, pas d'abonnement mensuel, une plateforme qui ne demande
-aucune maintenance système.
-
-La cliente est une association de village ; son public est **adulte et
-souvent senior**. La lisibilité prime sur l'effet technique : ne jamais
-réduire la taille du texte ni le contraste pour un gain esthétique.
-Lighthouse mesuré : accessibilité 96, performance 91, SEO 100.
+### Outillage
+- **Node 20.19 minimum** (Node 22 actif via nvm).
+- **`pkill -f "next start"` se tue lui-même** : utiliser `[n]ext start`,
+  ou tuer par port (`ss -ltnp`).
+- **Ne pas lancer `next build` dans `Mgym-Next/` pendant que l'utilisateur
+  a un `next dev`** : ils partagent `.next/`. Construire dans une copie.
+- **`.gitignore` écrit avec `printf` et des apostrophes françaises** :
+  la ligne a été coupée et `git add -A` a recommité les photos qu'on venait
+  de retirer. Écrire ces fichiers avec un éditeur, puis vérifier avec
+  `git check-ignore -v <fichier>`.
+- La fusion vers `main` est bloquée par le garde-fou de Claude Code sauf
+  demande explicite de l'utilisateur (« merge avec le main »).
