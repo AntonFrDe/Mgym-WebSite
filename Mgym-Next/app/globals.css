@@ -1132,13 +1132,12 @@ a[href^="tel:"] { white-space:nowrap; }
 
 /* ── RÉSEAUX ────────────────────────────────────────────────── */
 #reseaux { background: var(--lin); }
-/* Une seule carte pour l'instant (Facebook) : elle reprend la mise en forme
-   des cartes de contact, mais sur une seule colonne et centrée. Ajouter un
-   second réseau ici suffira à repasser sur deux colonnes.
+/* Les cartes de contact, côte à côte et centrées quel que soit le nombre de
+   réseaux (Facebook et Instagram sur la même ligne).
    Sélecteur volontairement préfixé par #reseaux : .contact-cards est déclaré
    plus bas dans ce fichier et, à spécificité égale, c'est la dernière règle
    qui gagne — une simple classe .reseaux-cards serait donc ignorée. */
-#reseaux .contact-cards { max-width:320px; grid-template-columns:1fr; }
+#reseaux .contact-cards { grid-template-columns:repeat(auto-fit, minmax(240px, 280px)); justify-content:center; }
 
 /* ── COACH ──────────────────────────────────────────────────── */
 #coach { background: var(--lin); }

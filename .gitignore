@@ -37,5 +37,9 @@ Site-MGYM*.html
 .impeccable/
 
 # Photos d'adhérentes en pleine résolution : jamais dans un dépôt public
-# (droit à l'image). Retirées du suivi le 2026-10-06 ; restent dans
-# l'HISTORIQUE tant quil
+# (droit à l'image). Retirées du suivi le 2026-10-07. Elles restent dans
+# l'HISTORIQUE git tant qu'il n'est pas purgé (voir PASSATION.md).
+Mgym-Next/new pic/
+
+# Lien local vers le projet Netlify (créé par `netlify link`)
+.netlify/
