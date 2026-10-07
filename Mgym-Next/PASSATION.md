@@ -9,10 +9,9 @@
 ## En une phrase
 
 Site vitrine Next.js 15 d'une association sport-santé de Mirepoix-sur-Tarn,
-alimenté par Sanity, hébergé chez Netlify sur `mgym.fr`. **La dernière
-version est sur `main` mais PAS en ligne** : l'équipe Netlify qui héberge
-le site n'a plus de crédits, et la migration vers un autre compte est à
-moitié faite (voir « Priorité 1 »).
+alimenté par Sanity, hébergé chez Netlify sur `mgym.fr`. **En ligne et à
+jour depuis le 7/10** : `main` est publié par le projet `mgym-site` (compte
+« Anton »), qui porte le domaine. Reste les finitions de la « Priorité 1 ».
 
 ---
 
@@ -33,9 +32,9 @@ est à la racine et déclare `base = "Mgym-Next"`.
 
 | Quoi | Où |
 |---|---|
-| Site en ligne | <https://mgym.fr> — sert encore la version du **27/09** |
-| Ancien projet Netlify | `frolicking-babka-da04a6` — équipe « Antoteam » |
-| Nouveau projet Netlify | `mgym-site` (id `e84ea511-d2c9-45bd-b75f-a990a32a6d8b`) — équipe « Anton » — **502, pas encore relié à GitHub** |
+| Site en ligne | <https://mgym.fr> (`www` redirige en 301) — servi par `mgym-site` |
+| Ancien projet Netlify | `frolicking-babka-da04a6` — équipe « Antoteam » — **plus de domaine**, à laisser s'éteindre |
+| Projet Netlify | `mgym-site` (id `e84ea511-d2c9-45bd-b75f-a990a32a6d8b`) — équipe « Anton » — relié à GitHub, branche `main` |
 | Back-office | <https://mgym.sanity.studio> |
 | Dépôt | `github.com/AntonFrDe/Mgym-WebSite` — **public** |
 | Projet Sanity | `zqxwi6qy`, dataset `production` |
@@ -86,31 +85,32 @@ Fait :
 - protection « Team login » retirée (`sso_login: false`), sinon le site
   répond « This site is private ».
 
-**Reste, dans l'ordre :**
-1. **L'utilisateur** relie le projet à GitHub (interactif) :
-   <https://app.netlify.com/projects/mgym-site/configuration/deploys> →
-   *Link repository* → GitHub → `AntonFrDe/Mgym-WebSite` → branche `main`.
-   Netlify lit `netlify.toml` tout seul.
-2. Attendre le build serveur, vérifier `https://mgym-site.netlify.app` :
-   HTTP 200 sur `/`, `/blog`, `/evenements/tai-chi-chuan-and-qi-gong`,
-   « Appeler pour un essai » dans le HTML, ~40 occurrences de
-   `cdn.sanity.io`, `/api/draft-mode/enable` en **401** (pas 404),
-   `/_next/image?...` en **404**.
-3. Déplacer le domaine : avec le compte epitech, retirer `mgym.fr` de
-   `frolicking-babka-da04a6` (`custom_domain: null`) ; avec le compte
-   gmail, l'ajouter à `mgym-site` (`custom_domain: "mgym.fr"`, alias
-   `www.mgym.fr`). L'enregistrement A pointe déjà vers Netlify : rien à
-   changer pour `@`. Demander à l'utilisateur de remplacer chez OVH le
-   CNAME `www` par `mgym-site.netlify.app.`. Attendre le certificat.
-4. Vérifier `https://mgym.fr`, puis l'**Aperçu** du Studio (il dépend de
-   `/api/draft-mode/enable`, absent de la version en ligne actuelle).
-5. Ensuite seulement : révoquer l'ancien jeton Sanity `mgym-viewer`
+Fait le 7/10 :
+- `mgym-site` relié au dépôt **par l'API** (`updateSite` avec `repo` :
+  `installation_id` 161377703, celui de l'app GitHub de Netlify, lu sur
+  l'ancien projet ; dépôt public, pas de clé de déploiement) ;
+- build serveur vert, contrôles passés sur `mgym.fr` : 200 sur `/`,
+  `/blog`, `/evenements/tai-chi-chuan-and-qi-gong`, « Appeler pour un
+  essai », 38 × `cdn.sanity.io`, `/api/draft-mode/enable` en 401 ;
+- domaine retiré de l'ancien projet et posé sur `mgym-site` ; certificat
+  émis pour `mgym.fr` et `www.mgym.fr`.
+
+**Reste :**
+1. **Chez OVH**, CNAME `www` → `mgym-site.netlify.app.` (préparé, pas
+   confirmé). `www` marche déjà (Netlify aiguille sur le nom demandé, pas
+   sur la cible du CNAME), mais il cassera quand l'ancien projet sera
+   supprimé.
+2. Tester l'**Aperçu** du Studio (il dépend de `/api/draft-mode/enable`).
+3. Ensuite seulement : révoquer l'ancien jeton Sanity `mgym-viewer`
    (`npx sanity tokens list` / `delete`), et laisser l'ancien projet
    s'éteindre.
+4. L'aperçu de PR de `9cf2a55` a échoué au build (code 2) pendant une
+   panne GitHub ; la production du même code est passée. À surveiller sur
+   la prochaine PR.
 
-> Alternative si la migration coince : le 13/10, les crédits d'Antoteam
-> reviennent ; `netlify switch` (compte epitech) puis
-> `netlify api createSiteBuild --data '{"site_id":"94821dd5-2efc-4a66-8044-b6b4fa08e3af"}'`.
+> Les actions de production (fusion vers `main`, `updateSite`, validation
+> DNS chez OVH) sont refusées par le mode auto de Claude Code tant que
+> l'utilisateur ne les a pas autorisées via `/permissions`.
 
 ### Ne pas refaire ce qui a échoué
 
