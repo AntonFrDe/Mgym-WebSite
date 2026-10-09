@@ -19,15 +19,10 @@ const LIENS = [
   { href: '/#tarifs',         label: 'Tarifs' },
   { href: '/#planning',       label: 'Planning' },
   { href: '/#evenements',     label: 'Stages' },
-  { href: '/blog',            label: 'Blog', horsExport: true },
+  { href: '/blog',            label: 'Blog' },
 ]
 
-/**
- * @param {{enExport?: boolean}} props  vrai pour la copie hors-ligne, où le
- *   blog n'existe pas : son lien serait mort.
- */
-export default function Nav({ enExport = false }) {
-  const liens = LIENS.filter((l) => !(enExport && l.horsExport))
+export default function Nav() {
   const [scrolled, setScrolled] = useState(false)   // false = pas encore défilé
   const [menuOpen, setMenuOpen] = useState(false)   // false = menu mobile fermé
 
@@ -57,7 +52,7 @@ export default function Nav({ enExport = false }) {
         </a>
 
         <ul className="nav-links">
-          {liens.map((l) => <li key={l.href}><a href={l.href}>{l.label}</a></li>)}
+          {LIENS.map((l) => <li key={l.href}><a href={l.href}>{l.label}</a></li>)}
           <li><a href="/#contact" className="btn-contact">Contact</a></li>
         </ul>
 
@@ -76,7 +71,7 @@ export default function Nav({ enExport = false }) {
       {/* Menu mobile — affiché uniquement si menuOpen est true */}
       <div id="mob-menu" className={menuOpen ? 'open' : ''}>
         <ul>
-          {liens.map((l) => <li key={l.href}><a href={l.href} onClick={closeMenu}>{l.label}</a></li>)}
+          {LIENS.map((l) => <li key={l.href}><a href={l.href} onClick={closeMenu}>{l.label}</a></li>)}
           <li><a href="/#contact" onClick={closeMenu} className="mob-contact">Contact</a></li>
         </ul>
       </div>

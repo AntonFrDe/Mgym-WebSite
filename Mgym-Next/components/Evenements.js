@@ -22,21 +22,16 @@
 import { grouperParMois, pastilleDate, periodeLisible, statutAffiche } from '../lib/evenements/format.js'
 import { Picto } from './pictogrammes'
 
-// La copie hors-ligne ne contient pas les fiches d'événements (voir
-// scripts/export-statique.mjs) : ses cartes pointent vers le site en ligne.
-const enExport = process.env.MGYM_EXPORT === '1'
-
 /**
  * L'adresse de la fiche, ou le contact si l'événement n'a pas d'adresse web.
  * Exportée : l'onglet « Ateliers » renvoie vers les mêmes fiches.
  */
-export function lienEvenement(ev, urlSite) {
+export function lienEvenement(ev) {
   if (!ev.slug) return '#contact'
-  if (!enExport) return `/evenements/${ev.slug}`
-  return urlSite ? `${urlSite}/evenements/${ev.slug}` : '#contact'
+  return `/evenements/${ev.slug}`
 }
 
-export default function Evenements({ site, evenements = [], urlSite }) {
+export default function Evenements({ site, evenements = [] }) {
   const groupes = grouperParMois(evenements)
 
   return (
@@ -68,7 +63,7 @@ export default function Evenements({ site, evenements = [], urlSite }) {
                     const statut = statutAffiche(ev.statut)
                     return (
                       <li key={ev._id} className={`frise-item est-${statut.classe}`}>
-                        <a href={lienEvenement(ev, urlSite)} className="frise-carte">
+                        <a href={lienEvenement(ev)} className="frise-carte">
                           {/* La pastille répète la date écrite en toutes
                               lettres juste à côté : masquée au lecteur
                               d'écran, qui l'entendrait deux fois. */}

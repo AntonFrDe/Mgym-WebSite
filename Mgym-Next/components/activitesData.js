@@ -1,8 +1,6 @@
-// activitesData.js — la SOURCE UNIQUE des 8 activités du site.
-// Deux affichages différents consomment ces mêmes données :
-//   · SentierActivites.js  → le chemin sinueux vertical (version d'origine)
-//   · CarrouselActivites.js → les cartes qui défilent à l'horizontale (test)
-// Modifier une activité ici la met à jour dans les deux affichages.
+// activitesData.js — contenu PAR DÉFAUT des 8 activités du site.
+// Il est lu uniquement par lib/contenu/source-historique.mjs, qui l'affiche
+// quand Sanity ne fournit pas d'activités.
 //
 // L'ORDRE DU TABLEAU EST L'ORDRE AFFICHÉ, et il n'est pas arbitraire : les
 // six activités régulières sont classées de la plus douce à la plus intense

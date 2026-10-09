@@ -431,90 +431,22 @@ body:has(#hero) #nav:not(.scrolled) .ham span { background:var(--creme); }
 }
 .about-conclusion { margin-top:1.5rem; }
 
-/* ── ACTIVITÉS : sentier sinueux ───────────────────────────────
-   Un chemin en pointillés qui se trace au scroll et relie les
-   activités en alternance gauche/droite, comme des étapes de
-   promenade. Cliquer une étape déplie sa description complète.
-   estOuvert (clic) et estVisible (scroll) restent deux states React
-   séparés (voir SentierActivites.js) : aucun des deux n'écrase
-   jamais la classe posée par l'autre. */
+/* ── ACTIVITÉS : en-tête et étiquettes partagées ──────────────
+   L'en-tête du bloc « Activités », et deux briques réutilisées par le
+   carrousel, les onglets « Plus d'activités » et l'aperçu du blog :
+   les pastilles de mots-clés (.etape-tag) et le lien fléché (.etape-lien). */
 #activites { background: var(--rose-clair); }
 .acts-header { text-align:center; margin-bottom:4rem; }
 .acts-header .divider { margin:1.5rem auto; }
 /* Le chapô reste étroit : une ligne de texte trop large se relit mal. */
 .acts-header .lead { max-width:540px; margin:0 auto; }
 
-.activites-sentier { position:relative; max-width:860px; margin:0 auto; }
-
-.sentier-trait { position:absolute; inset:0; width:100%; height:100%; z-index:0; overflow:visible; }
-.sentier-trait path { stroke: var(--rose); transition: stroke-dashoffset .1s linear; }
-
-.etape {
-  position:relative; z-index:1;
-  display:flex; align-items:flex-start; gap:1.5rem;
-  max-width:560px; margin-bottom:4.5rem;
-  opacity:0; transform:translateY(28px);
-  transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1);
-}
-.etape:last-child { margin-bottom:0; }
-.etape.est-visible { opacity:1; transform:none; }
-
-.etape--gauche { margin-right:auto; }
-.etape--droite { margin-left:auto; flex-direction:row-reverse; text-align:right; }
-
-.etape-media {
-  position:relative; width:130px; height:130px; flex-shrink:0;
-  border-radius:50%; overflow:hidden;
-  box-shadow:0 10px 30px rgba(var(--prune-rgb),.18);
-  border:4px solid var(--creme);
-}
-.etape-media img { width:100%; height:100%; object-fit:cover; display:block; }
-
-.etape-num { display:block; font-family:var(--font-sans),sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.15em; color:var(--rose-fonce); margin-bottom:.35rem; }
-.etape-contenu h3 { font-family:var(--font-serif),serif; font-weight:500; font-size:1.3rem; color:var(--prune); margin-bottom:.3rem; }
-/* LISIBILITÉ : .85rem ≈ 13.6px */
-.etape-accroche { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--texte-doux); line-height:1.6; margin-bottom:.75rem; }
-
-.etape-toggle {
-  display:inline-flex; align-items:center; gap:.4rem;
-  font-family:var(--font-sans),sans-serif; font-size:.72rem; font-weight:700;
-  letter-spacing:.1em; text-transform:uppercase; color:var(--rose-fonce);
-  background:none; border:none; padding:0; cursor:pointer;
-  transition: color .25s;
-}
-.etape--droite .etape-toggle { flex-direction:row-reverse; }
-.etape-toggle:hover { color:var(--prune); }
-.etape-toggle:focus-visible { outline:2px solid var(--rose-fonce); outline-offset:4px; border-radius:2px; }
-.etape-toggle svg { flex-shrink:0; transition:transform .3s; }
-.etape-toggle[aria-expanded="true"] svg { transform:rotate(180deg); }
-
-/* Le panneau est toujours présent dans le HTML et masqué par l'attribut
-   `hidden` (voir SentierActivites.js). L'animation est portée par
-   :not([hidden]) et non par .etape-panneau : c'est le retrait de l'attribut
-   qui la déclenche, donc elle rejoue à chaque ouverture. */
-.etape-panneau[hidden] { display:none; }
-.etape-panneau {
-  margin-top:1rem; padding:1.25rem 1.4rem;
-  background:var(--blanc); border-radius:1rem;
-  box-shadow:0 12px 30px rgba(var(--prune-rgb),.1);
-}
-.etape-panneau:not([hidden]) { animation: sentier-deplier .35s ease; }
-.etape--droite .etape-panneau { text-align:right; }
-/* LISIBILITÉ : .85rem ≈ 13.6px */
-.etape-panneau p { font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--texte-doux); line-height:1.8; }
-.etape-tags { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.85rem; }
-.etape--droite .etape-tags { justify-content:flex-end; }
 .etape-tag { font-family:var(--font-sans),sans-serif; font-size:.65rem; font-weight:600; letter-spacing:.03em; background:var(--rose-clair); color:var(--accent-texte); padding:.28rem .7rem; border-radius:2rem; }
 .etape-lien { display:inline-block; margin-top:.9rem; font-family:var(--font-sans),sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--rose-fonce); text-decoration:none; }
 .etape-lien:hover { color:var(--prune); }
 
-@keyframes sentier-deplier {
-  from { opacity:0; transform:translateY(-8px); }
-  to { opacity:1; transform:none; }
-}
-
-/* ── ACTIVITÉS : carrousel horizontal (branche teste-template) ──
-   Variante testée du bloc « Activités » : les 8 activités deviennent
+/* ── ACTIVITÉS : carrousel horizontal ──
+   Le seul affichage du bloc « Activités » : les 8 activités deviennent
    des cartes qui défilent latéralement (doigt, pavé tactile, flèches).
    Trois affordances CSS complètent le JS de CarrouselActivites.js :
      · la piste est plus large que l'écran → une carte est toujours
@@ -1444,8 +1376,8 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
    recevait les mots-clés des activités à 10,4 px et les étiquettes à
    11–12 px. Placé avant les media queries : il remplace les tailles
    ci-dessus, et le bloc TÉLÉPHONE peut encore l'affiner. */
-.section-label, .tarif-groupe, .about-badge-label, .etape-num, .etape-tag,
-.etape-lien, .etape-toggle, .carte-act-num, .carrousel-indice,
+.section-label, .tarif-groupe, .about-badge-label, .etape-tag,
+.etape-lien, .carte-act-num, .carrousel-indice,
 .carrousel-compteur, .coach-stat-label, .tarif-tableau thead th,
 .planning-jour, .footer-nav a, .footer-brand-sub, .footer-tagline small,
 .footer-bottom, .hero-act-pill { font-size:.85rem; }
@@ -1476,17 +1408,6 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
    « pointer: coarse » = écran tactile : un ordinateur à fenêtre basse n'est
    pas concerné. */
 @media (max-width: 700px), (max-height: 500px) and (pointer: coarse) {
-  /* Sentier : une seule colonne, mais on garde un léger zigzag
-     (décalage horizontal alterné) pour ne pas perdre l'esprit sinueux. */
-  .activites-sentier { max-width:320px; }
-  .etape { max-width:none; gap:1rem; transform:translateY(28px) translateX(var(--sway, 0)); }
-  .etape.est-visible { transform:translateX(var(--sway, 0)); }
-  .etape--gauche { margin-right:0; --sway:-12px; }
-  .etape--droite { margin-left:0; --sway:12px; flex-direction:row; text-align:left; }
-  .etape--droite .etape-toggle { flex-direction:row; }
-  .etape--droite .etape-panneau { text-align:left; }
-  .etape--droite .etape-tags { justify-content:flex-start; }
-  .etape-media { width:90px; height:90px; }
   /* ── TÉLÉPHONE ──────────────────────────────────────────────────
      Tout ce qui suit a été MESURÉ sur le site en ligne à 390 × 664 px
      (un iPhone 13 dans Safari), puis à 320, 360 et 375 px de large.
@@ -1512,7 +1433,7 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
 
   /* LISIBILITÉ — les paragraphes passent à 16 px. À 13,6 px dans une
      carte de 250 px, une description tenait 25 caractères par ligne. */
-  .carte-act-accroche, .carte-act-desc, .etape-accroche, .etape-panneau p,
+  .carte-act-accroche, .carte-act-desc,
   .tarif-vignette-detail, .tarif-tableau-detail, .tarif-note,
   .inscription-etapes li, .inscription-precision, .cta-btns-aide,
   .cert-text { font-size:1rem; }
@@ -1748,13 +1669,8 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
 
 /* Toujours en dernier dans la cascade : doit l'emporter sur les
    media queries de largeur ci-dessus (mobile inclus), pas seulement
-   sur le style desktop du sentier. */
+   sur le style de bureau. */
 @media (prefers-reduced-motion: reduce) {
-  .etape { opacity:1; transform:none; transition:none; }
-  .sentier-trait path { transition:none; }
-  /* Même sélecteur que la règle qui pose l'animation, sinon celle-ci
-     l'emporterait par spécificité (:not([hidden]) compte pour un cran). */
-  .etape-panneau:not([hidden]) { animation:none; }
   /* Carrousel : on garde l'information (jauge, dégradés) mais on
      supprime tout mouvement décoratif. Le défilement lui-même passe en
      'auto' côté JS (voir prefereMoinsAnimation dans CarrouselActivites). */

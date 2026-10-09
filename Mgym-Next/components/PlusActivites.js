@@ -12,8 +12,7 @@
 // fois. La page raccourcit d'autant.
 //
 // LES TROIS PANNEAUX SONT TOUJOURS DANS LE HTML — seul l'attribut `hidden`
-// les cache. C'est ce qui permet à Google de les lire, et à la copie
-// hors-ligne de fonctionner : build-standalone.js bascule le même attribut.
+// les cache. C'est ce qui permet à Google de les lire.
 //
 // LES ANCIENNES ADRESSES CONTINUENT DE MARCHER. Les boutons d'onglets
 // portent les identifiants des anciennes sections (#bespoke, #outdoor) :

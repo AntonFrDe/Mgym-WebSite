@@ -11,14 +11,7 @@
 //          "/api/preview" with "output: export"
 //
 // CE QUE ÇA NE CHANGE PAS
-// Le site reste entièrement généré au build et servi depuis un CDN.
-// « export » ne veut pas dire « statique » : Next hébergé sur un runtime
-// Node produit le même HTML pré-calculé. Le référencement et les
-// performances sont identiques.
-//
-// MGYM_EXPORT=1 réactive l'export, uniquement pour fabriquer la copie
-// hors-ligne livrée à la cliente (voir scripts/export-statique.mjs).
-const enExport = process.env.MGYM_EXPORT === '1'
+// Le site reste entièrement généré au build et servi par Netlify.
 
 // ── HSTS : opt-in, et c'est délibéré ────────────────────────────
 //
@@ -131,13 +124,8 @@ const nextConfig = {
   // inutile de laisser ouverte la route /_next/image, cible des failles
   // de l'« Image Optimization » de Next.
   images: { unoptimized: true },
-  ...(enExport ? { output: 'export' } : {}),
 
-  // headers() n'existe pas en mode export : il n'y a pas de serveur pour
-  // les émettre. On ne les déclare donc que pour le site hébergé.
-  ...(enExport
-    ? {}
-    : { async headers() { return [{ source: '/:chemin*', headers: enTetes }] } }),
+  async headers() { return [{ source: '/:chemin*', headers: enTetes }] },
 }
 
 module.exports = nextConfig

@@ -102,7 +102,7 @@ export default async function RootLayout({ children }) {
         {/* L'aperçu du Studio : cadres cliquables et rafraîchissement en
             direct. Jamais rendu sur le site public. */}
         {enPreview && <EditionVisuelle />}
-        <Nav enExport={process.env.MGYM_EXPORT === '1'} />
+        <Nav />
         {/* ClientLayout gère les animations au défilement (IntersectionObserver) */}
         <ClientLayout>
           {children}

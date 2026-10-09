@@ -11,8 +11,6 @@
 //
 // Le HTML part avec le lien Google Maps, qui marche PARTOUT : même sans
 // JavaScript, ou le temps qu'il se charge, le bouton mène au bon endroit.
-// Les attributs data-* servent à la copie hors-ligne (build-standalone.js),
-// qui refait la même substitution sans React.
 
 import { useEffect, useState } from 'react'
 
@@ -52,10 +50,6 @@ export default function LienItineraire({ position, nom = "M'GYM", className, chi
     <a
       href={href}
       className={className}
-      data-itineraire=""
-      data-lat={position.lat}
-      data-lng={position.lng}
-      data-nom={nom}
       {...(web ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
     >
       {children}

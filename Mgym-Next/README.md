@@ -84,12 +84,6 @@ npm run build && npm start        # le site hébergé
 ./launch.sh                       # build + start + vérification qu'il répond
 ```
 
-Pour relire la copie hors-ligne telle que la cliente la recevra :
-
-```bash
-npm run export:carousel && npm run start:horsligne
-```
-
 ---
 
 ## Vérifier
@@ -157,26 +151,6 @@ suffit et évite d'exposer une route publique à sécuriser.
 
 ---
 
-## Livrer une copie hors-ligne
-
-Le site peut aussi être remis sous forme de fichiers qui s'ouvrent par
-double-clic, sans serveur ni Internet.
-
-```bash
-npm run livraison       # dossier Livraison-MGYM/ (~1,3 Mo)
-npm run build:html:all  # deux fichiers .html autonomes (~1,6 Mo)
-```
-
-`scripts/export-statique.mjs` recopie le projet dans un dossier temporaire
-**sans `app/api/`**, y lance un build en mode export, et rapatrie `out/`. Le
-projet réel n'est jamais modifié : rien à réparer si le build échoue.
-
-C'est nécessaire parce que `output: 'export'` interdit toute route serveur, et
-que la prévisualisation en exige une. Les deux ne peuvent pas coexister dans
-une même configuration — vérifié par un build, pas supposé.
-
----
-
 ## Déploiement
 
 Le site n'est **pas encore hébergé**. Il lui faut un runtime Node (Vercel,
@@ -210,7 +184,6 @@ npm run studio:deploy   # puis brancher admin.mgym.fr
 | `ERR_REQUIRE_ESM` sur une commande `sanity` | Node < 20.19 — voir `.nvmrc` |
 | Le site affiche l'ancien contenu | Sanity non configuré : c'est le repli, il fonctionne |
 | Une section a disparu | Champ vidé dans le CMS **et** absent du contenu par défaut |
-| `npm run build` échoue sur `/api/preview` | `MGYM_EXPORT=1` est actif : les routes serveur sont incompatibles avec l'export |
 | La prévisualisation montre le contenu publié | `SANITY_API_READ_TOKEN` absent — repli volontaire, avertissement dans les journaux |
 | Le planning est vide | Aucun créneau saisi **et** repli désactivé |
 
@@ -234,7 +207,7 @@ lib/
   preview.js           session de prévisualisation
   preview-jeton.js     sa cryptographie, isolée pour être testable
 sanity/                schémas et structure du back-office
-scripts/               migration, export hors-ligne, vérifications
+scripts/               migration, sauvegarde, vérifications
 ```
 
 **Aucun composant n'appelle Sanity.** Ils reçoivent des données déjà prêtes et

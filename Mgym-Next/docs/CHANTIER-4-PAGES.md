@@ -66,6 +66,16 @@ et relance les tests avant la tâche suivante.
 **Fini quand** l'archive de sauvegarde est rouverte et comptée, et que `npm run
 verifier` passe sur la branche sans le code retiré.
 
+> **Fait le 9/10.** Sauvegarde `mgym-production-2026-10-09.tar.gz` (29 documents,
+> 15 images). Branche `refonte-4-pages`. D1 découpé en 12 tâches Haiku, une
+> par fichier : `package.json`, `app/page.js`, `Evenements.js`, `Nav.js`,
+> `app/layout.js`, `Footer.js`, `next.config.js`, `lib/preview.js`,
+> `globals.css`, commentaires (5 composants), `CLAUDE.md`, `README.md`.
+> Suppression des 5 fichiers et retouches (`Footer.js`, `CLAUDE.md`,
+> `launch.sh`) par Opus. Contrôles : `npm run verifier` vert ; HTML de
+> l'accueil identique à la production, à part les `data-*` de la copie
+> hors-ligne ; styles calculés identiques à 1280 et 390 px.
+
 ---
 
 ## L1 — Passer d'une page unique à plusieurs pages
