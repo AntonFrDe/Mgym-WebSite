@@ -64,9 +64,9 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 > **Le site n'écrit jamais dans Sanity.** Aucun token d'écriture ne doit
 > exister sur l'hébergeur. Voir [docs/SECURITY.md](docs/SECURITY.md).
 
-**Le site fonctionne sans Sanity configuré** : il affiche alors le contenu par
-défaut (`lib/contenu/defaut.js`), c'est-à-dire le site tel qu'il était avant
-l'ajout du CMS. Ce n'est pas une panne, c'est l'état initial.
+**Sanity est la seule source du texte** : sans projet configuré, le build
+s'arrête avec un message clair. Il n'y a plus de contenu de secours dans le
+code (voir CLAUDE.md, « Le CMS »).
 
 ---
 
@@ -96,7 +96,7 @@ npm run verifier       # enchaîne les quatre commandes ci-dessous
 |---|---|
 | `npm run schemas:check` | les schémas compilent, chaque document a un aperçu lisible, chaque champ une description française |
 | `npm run groq:check` | les 13 requêtes compilent, aucune valeur variable n'est concaténée, aucune ne vise `drafts.` |
-| `npm test` | 67 tests : moteur de planning, sécurité de la prévisualisation, idempotence de la migration, cohérence schéma / requête / contenu |
+| `npm test` | 86 tests : moteur de planning, sécurité de la prévisualisation, chaque champ du back-office lu par le site (et inversement) |
 | `npm run build` | le site se construit |
 
 Il n'y a **pas de linter** dans ce projet : `npm run verifier` en tient lieu.
@@ -106,28 +106,21 @@ Dernière mesure Lighthouse sur le build de production, émulation mobile :
 
 ---
 
-## Migrer le contenu existant
-
-```bash
-npm run migrer          # simulation, n'écrit rien
-npm run migrer:ecrire   # applique
-```
-
-Le script est **idempotent** : chaque document a un identifiant déduit de son
-contenu, une seconde exécution remplace au lieu de dupliquer.
-
----
 
 ## Prévisualisation
 
-```
-/api/preview?secret=LE_SECRET&chemin=/     ouvre une session d'une heure
-/api/preview-exit                           la ferme
-```
+Elle s'ouvre depuis l'outil **Aperçu** du back-office, qui appelle
+`/api/draft-mode/enable` avec un secret à usage court, créé par le Studio et
+vérifié auprès de Sanity. Le bouton « Revenir au site publié » appelle
+`/api/draft-mode/disable`. Une session vérifie le secret **et** une date
+limite signée ; un cookie modifié à la main est refusé.
 
-Une session vérifie le secret **et** une date limite signée. Un cookie
-modifié à la main est refusé, un secret faux renvoie exactement le même
-message qu'un secret absent.
+## Publication
+
+« Publier » dans le back-office appelle `/api/revalidation` (webhook Sanity
+signé par `SANITY_REVALIDATE_SECRET`) : le site jette ses pages en cache, la
+visite suivante voit la modification. Aucune reconstruction. Par sécurité,
+le site relit aussi Sanity toutes les heures.
 
 ---
 
@@ -195,8 +188,8 @@ npm run studio:deploy   # puis brancher admin.mgym.fr
 app/
   layout.js            metadata dynamiques, bandeau de prévisualisation
   page.js              récupère le contenu UNE fois et le distribue
-  api/preview/         entrée du mode prévisualisation
-  api/preview-exit/    sortie
+  api/draft-mode/      entrée et sortie de l'aperçu des brouillons
+  api/revalidation/    appelée par Sanity à chaque « Publier »
   sitemap.js robots.js générés depuis le contenu
   globals.css          100 % du style, organisé par section
 components/            des afficheurs : ils reçoivent des props, rien d'autre

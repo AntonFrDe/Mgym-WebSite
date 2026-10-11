@@ -70,10 +70,11 @@ commit sur `main` (même de la doc) et chaque « Publier » de la cliente
 #1, #2 et #3 n'ont jamais été publiés. Les aperçus de PR, eux, se
 construisent (ils ne coûtent rien) — d'où la confusion.
 
-Déjà corrigé pour l'avenir : le webhook Sanity est **supprimé** (le site
-relit Sanity toutes les 60 s, il était inutile) et `netlify.toml` contient
-une règle `ignore` : un commit qui ne touche que des `.md` ou `docs/` ne
-déclenche plus de build.
+Corrigé pour l'avenir : « Publier » ne reconstruit plus le site. Le webhook
+Sanity appelle maintenant `app/api/revalidation`, qui jette les pages en
+cache SANS build (0 crédit) ; le site se relit aussi seul toutes les heures.
+Et `netlify.toml` contient une règle `ignore` : un commit qui ne touche que
+des `.md` ou `docs/` ne déclenche plus de build.
 
 ### Choix de l'utilisateur : nouveau projet sur le compte « Anton »
 
@@ -222,7 +223,8 @@ versionnée) :
 
 ### Netlify
 - **Les crédits** : 15 par déploiement de production, 300/mois en gratuit.
-  Ne jamais rebrancher un webhook Sanity → build.
+  Ne jamais brancher un webhook Sanity sur un **build hook** Netlify : le seul
+  webhook autorisé vise `https://mgym.fr/api/revalidation` (0 crédit).
 - **Les aperçus de PR sont protégés** (HTTP 401) : impossible de les tester
   par `curl`. Le statut GitHub « Deploy Preview ready » prouve seulement
   que le build passe.

@@ -8,7 +8,7 @@ La lisibilité et la simplicité priment sur l'effet technique.
 
 - **Next.js 15.5** (App Router) + **React 19** (19.2 minimum : exigé par le
   Studio Sanity 5, dont l'outil « Aperçu » s'adapte aux téléphones)
-- **JavaScript pur** — pas de TypeScript, pas de linter. 67 tests via
+- **JavaScript pur** — pas de TypeScript, pas de linter. 86 tests via
   `node --test` (aucune dépendance de test)
 - **CSS global unique** : `app/globals.css` (pas de Tailwind, pas de CSS Modules)
 - Polices via `next/font/google` : Cormorant Garamond (serif) + Montserrat (sans)
@@ -22,7 +22,8 @@ La lisibilité et la simplicité priment sur l'effet technique.
 ```bash
 npm run dev            # développement, http://localhost:3000
 npm run studio:dev     # le back-office,  http://localhost:3333
-npm run verifier       # schémas + requêtes + 67 tests + build
+npm run verifier       # schémas + requêtes + 86 tests + build
+npm run livrer         # verifier, puis redéploie le Studio (sanity deploy)
 npm run build          # build du site hébergé
 npm start              # le sert (next start)
 ./launch.sh            # build + start + vérification qu'il répond
@@ -32,9 +33,17 @@ PORT=4000 ./launch.sh  # autre port
 
 La vérification de référence est `npm run verifier`. Il n'y a pas de linter.
 
-Le site est **entièrement généré au build** et servi par Netlify. Seules les
-routes `/api/*` (aperçu des brouillons) sont dynamiques : la prévisualisation
-du Studio exige un serveur.
+Le site est **pré-calculé** et servi par Netlify. Il se met à jour SANS
+reconstruction (une reconstruction coûte 15 crédits Netlify sur 300/mois) :
+
+1. à chaque « Publier », Sanity appelle `app/api/revalidation` (webhook
+   signé, secret `SANITY_REVALIDATE_SECRET`), qui jette les pages en cache ;
+2. au plus tard toutes les heures (`revalidate = 3600`, déclaré UNE fois
+   dans `app/layout.js`), si un appel de Sanity se perd.
+
+Une fiche d'événement ou d'article publiée après le build est fabriquée à
+la première visite (pas de `dynamicParams = false` : c'est ce qui laissait
+les nouveaux stages en 404). Les routes `/api/*` sont dynamiques.
 
 ## Architecture
 
@@ -49,7 +58,6 @@ components/
   Hero.js        # image plein écran + bande d'activités en verre dépoli
   Manifesto.js   # citation sur bandeau sombre
   About.js       # histoire de l'association
-  activitesData.js       # SOURCE UNIQUE des 8 activités
   EnteteActivites.js     # titre + chapô du carrousel
   CarrouselActivites.js  # affichage des activités en cartes horizontales ('use client')
   PlusActivites.js       # 3 onglets : ateliers · sur mesure · plein air ('use client')
@@ -58,11 +66,10 @@ components/
   BlogApercu.js          # 3 derniers articles (masqué sans article)
   LienItineraire.js      # ouvre Plans / Google Maps / geo: selon l'appareil ('use client')
   pictogrammes.js        # TOUS les pictogrammes et logos de réseaux
-  liens.js               # adresses des formulaires en ligne (un seul endroit)
   Coach.js Pricing.js Planning.js Reseaux.js Contact.js Footer.js
   ClientLayout.js # IntersectionObserver global pour les classes .apparition
-public/Images/   # toutes les photos, en .avif (sauf CoachPhoto.webp)
-public/fond1.avif # fond du hero
+public/Images/Logo.avif   # le logo ; TOUTES les autres photos sont dans Sanity
+public/documents/         # anciennes plaquettes PDF, gardées pour les liens déjà partagés
 ```
 
 L'accueil se parcourt par ancres (`#about`, `#activites`, `#plus-activites`,
@@ -182,15 +189,10 @@ Toute animation doit être neutralisée dans le bloc
 
 ## Le bloc « Activités » — le carrousel
 
-Les 8 activités vivent dans **`components/activitesData.js`**, classées de la
-plus douce à la plus intense (Yin Yoga, Yoga, Yogilates, Pilates, Gym
-Bien-être, Forme & Force), les deux offres sur mesure fermant la marche
-(Ateliers thématiques, Prestations sur mesure). **L'ordre du tableau est
-l'ordre affiché** : déplacer une ligne change le classement partout.
-
-**Ne jamais dupliquer les données des activités** dans plusieurs composants.
-Le contenu vient de Sanity ; `activitesData.js` n'en est que le repli,
-lu par `lib/contenu/source-historique.mjs`.
+Les activités vivent dans Sanity (documents « activite »), classées par
+leur champ « ordre d'affichage » : de la plus douce à la plus intense, les
+deux offres sur mesure fermant la marche. Il n'y a plus de copie dans le
+code.
 
 ### Règles du carrousel horizontal
 
@@ -216,31 +218,38 @@ lu par `lib/contenu/source-historique.mjs`.
 
 ## Le CMS — ce qu'il faut savoir avant d'y toucher
 
-Le contenu vient de Sanity, avec un **repli** sur `lib/contenu/defaut.js`.
-Sans projet configuré, le site affiche exactement ce qu'il affichait avant :
-c'est l'état initial. **En production, une panne de Sanity n'utilise PAS ce
-repli** (`lib/sanity/fetch.js` lève l'erreur) : le build échoue et Netlify
-garde la version précédente, ou la régénération échoue et Next garde la
-dernière page bonne. Le repli mis en cache affichait sinon d'anciens tarifs
-sans la moindre erreur.
+**Sanity est la seule source du texte.** Le code ne contient plus aucun
+texte « par défaut » (repli supprimé en octobre 2026 : il faisait revenir
+l'ancien texte quand la cliente vidait un champ, et cachait vingt champs
+vides). Conséquences :
 
-**Trois fichiers décrivent les mêmes champs** et rien ne les relie
-automatiquement :
-
-```
-sanity/schemaTypes/siteContent.js   ce que la cliente peut remplir
-lib/sanity/queries/groq.js          ce que le site va chercher
-lib/contenu/source-historique.mjs   ce qu'il affiche à défaut
-```
-
-Ajouter un champ dans l'un sans les autres donne un champ rempli pour rien,
-ou un texte non modifiable. `npm test` le détecte — l'oubli s'est produit
-deux fois pendant le développement.
+- **Un champ vide n'affiche rien.** Chaque composant teste la valeur avant
+  de l'afficher (`{site.x && …}`). Un document unique absent donne `{}`
+  (`lib/contenu/index.js`), jamais `null`.
+- **Sans Sanity configuré, le build s'arrête** avec un message clair
+  (`clientPour`, `lib/sanity/client.js`). En production, une panne de Sanity
+  LÈVE une erreur (`lib/sanity/fetch.js`) : Next garde la dernière page
+  bonne lors de la relecture horaire. Seule exception : une panne dans les
+  secondes qui suivent un « Publier » donne une page d'erreur jusqu'au rendu
+  suivant réussi.
+- **Les trois documents uniques sont lus EN ENTIER** (`*[_id == "siteContent"][0]`,
+  sans liste de champs, `lib/sanity/queries/groq.js`). Le schéma
+  (`sanity/schemaTypes/`) est leur seule description. Ajouter un texte =
+  ajouter le champ au schéma + le lire dans le composant, rien d'autre.
+  `lib/contenu/champs.test.mjs` échoue si un composant lit un champ qui
+  n'existe pas, ou si un champ du schéma n'est lu nulle part.
+- **Ne jamais valider en `error()` un champ de « Textes du site »** : un
+  seul champ en erreur bloque la publication des 112. Utiliser `warning()`
+  (seule exception : refuser une adresse de lien dangereuse ou mal formée).
+- **Sauvegarde** : chaque lundi, GitHub copie le contenu publié
+  (`.github/workflows/sauvegarde-sanity.yml`, onglet « Actions »). L'historique
+  gratuit de Sanity ne remonte qu'à 3 jours. `npm run sauvegarde` fait une
+  copie complète (images, brouillons) avant toute intervention.
 
 Vérifications avant de livrer :
 
 ```bash
-npm run verifier   # schémas + requêtes + 67 tests + build
+npm run verifier   # schémas + requêtes + 86 tests + build
 ```
 
 Documentation complète dans `docs/` : SECURITY, ROLLBACK, SANITY-SCHEMAS,

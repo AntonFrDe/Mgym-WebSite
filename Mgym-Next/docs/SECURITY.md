@@ -18,7 +18,7 @@
 | 5 | Téléversement de fichiers | ✅ |
 | 6 | CORS | ✅ vérifié — le site n'a besoin d'aucune origine |
 | 7 | En-têtes HTTP | ✅ (une exception assumée) |
-| 8 | Webhooks | ✅ aucun n'existe |
+| 8 | Webhooks | ✅ un seul, signé (publication) |
 | 9 | Contrôle d'accès | ⚠️ à tester avec un vrai compte |
 | 10 | Déni de service et coûts | ✅ |
 | 11 | Dépendances | ✅ |
@@ -267,15 +267,29 @@ un espace privé.
 
 ## 8. Webhooks
 
-**Aucun webhook n'a été créé, et c'est le but.**
+**Un seul webhook : « Publier » → `https://mgym.fr/api/revalidation`.**
 
-La publication passera par le **Deploy Hook de l'hébergeur** : une URL
-secrète, fournie et protégée par lui. Il n'y a donc aucune route publique à
-écrire, donc aucune signature à vérifier, aucune limitation de débit à
-implémenter, aucun endpoint à surveiller.
+Le premier plan passait par le Deploy Hook de l'hébergeur (une
+reconstruction par publication). Il a épuisé les 300 crédits mensuels de
+Netlify en septembre 2026 (15 crédits par reconstruction) : le site n'était
+plus mis à jour. Il a été remplacé (octobre 2026) par une route qui jette
+les pages en cache sans rien reconstruire.
 
-Une API de revalidation maison aurait ajouté une surface d'attaque pour un
-gain nul.
+Ce qui la protège :
+
+- **Signature obligatoire.** Sanity signe chaque message (HMAC-SHA256) avec
+  `SANITY_REVALIDATE_SECRET`, présent chez Netlify et dans le réglage du
+  webhook, jamais dans le code. Sans signature valide : 401, rien n'est fait
+  (`next-sanity/webhook`, `parseBody`).
+- **Rien à voler, rien à écrire.** La route ne lit aucune donnée et n'en
+  renvoie aucune. Le pire qu'un appel signé puisse provoquer est un nouveau
+  calcul des pages.
+- **Secret absent** : 503 (Sanity réessaie), message dans les journaux.
+- **Brouillons exclus** du webhook (réglage par défaut de Sanity) : seul
+  « Publier » déclenche un appel.
+
+Si le webhook se perd (Sanity ne réessaie que deux fois), le site se
+rattrape seul en une heure au plus (`revalidate = 3600`, `app/layout.js`).
 
 ---
 
