@@ -58,87 +58,26 @@ const ARTICLE_COMPLET = `{
 
 // ── Contenu éditorial (documents uniques) ───────────────────────
 
-export const SITE_CONTENT = `*[_type == "siteContent"][0]{
-  heroTitre, heroTitreItalique, heroActivites,
-  heroBoutonActivites, heroBoutonContact,
-  "heroImage": heroImage${IMAGE},
-  "citationBandeau": citationBandeau${TEXTE_RICHE},
+// Le document ENTIER, sans liste de champs : le schéma
+// (sanity/schemaTypes/siteContent.js) est la seule description des
+// champs. Avant, chaque champ était recopié ici ET dans le contenu par
+// défaut ; un oubli (arrivé deux fois) donnait un champ rempli pour rien.
+// Les images et textes riches arrivent bruts : lib/contenu/index.js et
+// TexteRiche.js savent les lire.
+// Par IDENTIFIANT et non par type : un second document du même type (un
+// test, une copie) ne peut pas prendre la place du vrai.
+export const SITE_CONTENT = `*[_id == "siteContent"][0]`
 
-  aProposEtiquette, aProposTitre, aProposTitreItalique, aProposTitreFin,
-  "aProposTexte": aProposTexte${TEXTE_RICHE},
-  aProposAvantagesTitre, aProposAvantages,
-  "aProposConclusion": aProposConclusion${TEXTE_RICHE},
-  "aProposPhoto": aProposPhoto${IMAGE},
-  aProposBadgeNombre, aProposBadgeLibelle,
-
-  activitesEtiquette, activitesTitre, activitesTitreItalique, activitesChapo,
-
-  plusEtiquette, plusTitre, plusTitreItalique, plusChapo,
-  plusOngletAteliers, plusOngletSurMesure, plusOngletPleinAir,
-
-  outdoorEtiquette, outdoorTitre, outdoorTitreSuite, outdoorTitreItalique,
-  "outdoorTexte": outdoorTexte${TEXTE_RICHE},
-  "outdoorImage": outdoorImage${IMAGE},
-  outdoorMotsCles, outdoorBouton,
-
-  bespokeEtiquette, bespokeTitre, bespokeTitreItalique,
-  "bespokeTexte": bespokeTexte${TEXTE_RICHE},
-  bespokePublics, bespokeBouton, bespokePlaquetteGroupes, bespokePlaquetteMassages,
-  "bespokeImage": bespokeImage${IMAGE},
-
-  coachEtiquette, coachPrenom, coachNom,
-  "coachPhoto": coachPhoto${IMAGE},
-  coachStatistiques[]{ nombre, libelle },
-  "coachTexte": coachTexte${TEXTE_RICHE},
-  coachCertifications,
-
-  avisEtiquette, avisTitre, avisTitreItalique, avisNote, avisNombre, avisLienGoogle,
-  temoignages[]{ texte, auteur, source, note, accord },
-
-  evenementsEtiquette, evenementsTitre, evenementsTitreItalique,
-  evenementsChapo, evenementsVide,
-
-  tarifsEtiquette, tarifsTitre, tarifsTitreItalique,
-  adhesion{ nom, detail, prix },
-  tarifsCarte[]{ nom, detail, prix },
-  tarifsCarteNote,
-  tarifsSaison[]{ nom, detail, prixUnePersonne, prixFamille },
-  tarifsSaisonNote, tarifsFamilleNote,
-  tarifsPartiels[]{ nom, detail, prix },
-  "tarifsSurMesure": tarifsSurMesure${TEXTE_RICHE},
-  inscriptionTitre, inscriptionTitreItalique, inscriptionSousTitre,
-  inscriptionAnnonce, inscriptionEtapes,
-  "inscriptionAlerte": inscriptionAlerte${TEXTE_RICHE},
-  inscriptionBouton,
-
-  planningEtiquette, planningTitre, planningTitreItalique,
-  "planningChapo": planningChapo${TEXTE_RICHE},
-  planningSaison, planningBouton,
-
-  contactEtiquette, contactTitre, contactTitreItalique,
-  contactCtaTitre, contactCtaTitreItalique,
-  "contactCtaSousTitre": contactCtaSousTitre${TEXTE_RICHE},
-  contactCtaAide,
-  reseauxEtiquette, reseauxTitre, reseauxTitreItalique,
-
-  footerSlogan, footerMention, footerBaseline
-}`
-
-export const INFOS_PRATIQUES = `*[_type == "infosPratiques"][0]{
-  adresse, telephone, email, horairesAccueil,
-  reseauxSociaux[]{ nom, url, libelle },
-  lienInscription, lienStages,
-  positionCarte{ lat, lng },
+// Tout le document ; seuls les fichiers PDF sont transformés en adresse.
+export const INFOS_PRATIQUES = `*[_id == "infosPratiques"][0]{
+  ...,
   "plaquetteGroupes": plaquetteGroupes.asset->url,
   "plaquetteMassages": plaquetteMassages.asset->url,
   "reglementInterieur": reglementInterieur.asset->url,
   "conditionsGenerales": conditionsGenerales.asset->url
 }`
 
-export const SEO_GLOBAL = `*[_type == "seoGlobal"][0]{
-  titre, description, urlCanonique,
-  "imagePartage": imagePartage${IMAGE}
-}`
+export const SEO_GLOBAL = `*[_id == "seoGlobal"][0]`
 
 // ── Activités ───────────────────────────────────────────────────
 
@@ -155,7 +94,7 @@ export const ACTIVITE_PAR_SLUG = `
 
 export const CRENEAUX = `
   *[_type == "creneau" && actif == true] | order(jour asc, heureDebut asc) {
-    _id, jour, heureDebut, duree, niveau, lieu, placesMax, actif,
+    _id, jour, heureDebut, duree, niveau, placesMax, actif,
     "activite": activite->{ _id, titre, "slug": slug.current }
   }
 `

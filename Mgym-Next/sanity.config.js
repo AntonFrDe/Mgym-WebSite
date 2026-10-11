@@ -23,7 +23,7 @@ import { actionDupliquer, actionAnnulerUneDate, avecAdresseAutomatique, TYPES_DU
 import { optionsApercu } from './sanity/lib/presentation.js'
 
 // Les documents dont « Publier » fabrique lui-même l'adresse web.
-const AVEC_ADRESSE_AUTO = ['article', 'evenement']
+const AVEC_ADRESSE_AUTO = ['article', 'evenement', 'activite']
 
 // Le CLI Sanity n'injecte dans le bundle du Studio que les variables
 // préfixées SANITY_STUDIO_. Celles de Next (NEXT_PUBLIC_) lui sont

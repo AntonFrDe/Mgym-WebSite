@@ -87,7 +87,8 @@ export default function Footer({ site, infos }) {
 
       <div className="footer-bottom">
         {/* L'année se met à jour seule (la page est régénérée en continu). */}
-        © {new Date().getFullYear()} M&apos;GYM Association · {adresseSurUneLigne}
+        © {new Date().getFullYear()}{site.footerNom && ` ${site.footerNom}`}
+        {adresseSurUneLigne && ` · ${adresseSurUneLigne}`}
         {infos.telephone && ` · ${infos.telephone}`}
         {infos.email && ` · ${infos.email}`}
       </div>

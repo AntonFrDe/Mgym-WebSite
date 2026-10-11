@@ -16,12 +16,10 @@ import LienFormulaire from './LienFormulaire'
 import TexteRiche from './TexteRiche'
 import { Picto } from './pictogrammes'
 
-// Les en-têtes du tableau sont dans le code : ce sont des repères de
-// lecture, pas du contenu. « Famille * » renvoie à la note explicative
-// saisie, elle, dans le back-office.
-//   = espace insécable : sans elle, l'astérisque passait seul à la
-// ligne sur téléphone.
-const COLONNES_SAISON = ['Une personne', 'Famille *']
+// Les en-têtes du tableau viennent du back-office (onglet Tarifs).
+// L'astérisque final est collé au mot par une espace insécable (\u00a0) :
+// sans elle, il passait seul à la ligne sur téléphone.
+const sansCoupure = (texte) => texte?.replace(/ \*$/, '\u00a0*')
 
 /** Une vignette : le prix en grand, le nom dessous. */
 function Vignette({ tarif }) {
@@ -35,6 +33,7 @@ function Vignette({ tarif }) {
 }
 
 export default function Pricing({ site, infos }) {
+  const colonnesSaison = [site.tarifsColonneSeul, sansCoupure(site.tarifsColonneFamille)]
   const carte = site.tarifsCarte ?? []
   const saison = site.tarifsSaison ?? []
   const partiels = site.tarifsPartiels ?? []
@@ -74,7 +73,7 @@ export default function Pricing({ site, infos }) {
 
           {carte.length > 0 && (
             <div className="apparition">
-              <h3 className="tarif-groupe">À la carte</h3>
+              {site.tarifsCarteTitre && <h3 className="tarif-groupe">{site.tarifsCarteTitre}</h3>}
               <div className="tarif-vignettes">
                 {carte.map((tarif) => (
                   <Vignette key={tarif._key ?? tarif.nom} tarif={tarif} />
@@ -86,7 +85,7 @@ export default function Pricing({ site, infos }) {
 
           {saison.length > 0 && (
             <div className="apparition">
-              <h3 className="tarif-groupe">À la saison</h3>
+              {site.tarifsSaisonTitre && <h3 className="tarif-groupe">{site.tarifsSaisonTitre}</h3>}
 
               {/* Un vrai tableau : les en-têtes de colonnes sont annoncés
                   aux lecteurs d'écran, et la comparaison se fait à l'œil
@@ -98,8 +97,14 @@ export default function Pricing({ site, infos }) {
                       <th scope="col">
                         <span className="visuellement-masque">Formule</span>
                       </th>
-                      {COLONNES_SAISON.map((colonne) => (
-                        <th key={colonne} scope="col">{colonne}</th>
+                      {/* Clé = position : deux en-têtes vides ou égaux ne
+                          doivent pas se confondre. */}
+                      {colonnesSaison.map((colonne, i) => (
+                        <th key={i} scope="col">
+                          {/* En-tête effacé dans le back-office : la colonne
+                              reste nommée pour les lecteurs d'écran. */}
+                          {colonne || <span className="visuellement-masque">Prix</span>}
+                        </th>
                       ))}
                     </tr>
                   </thead>
@@ -162,10 +167,12 @@ export default function Pricing({ site, infos }) {
 
           {alerte.length > 0 && (
             <div className="inscription-alerte">
-              <p className="inscription-alerte-titre">
-                <Picto nom="document" taille={18} />
-                Bon à savoir
-              </p>
+              {site.inscriptionAlerteTitre && (
+                <p className="inscription-alerte-titre">
+                  <Picto nom="document" taille={18} />
+                  {site.inscriptionAlerteTitre}
+                </p>
+              )}
               <TexteRiche valeur={alerte} />
               {/* Les deux documents demandés par le formulaire, dès que la
                   cliente les a déposés dans « Infos pratiques ». */}
@@ -184,17 +191,18 @@ export default function Pricing({ site, infos }) {
             </div>
           )}
 
-          <LienFormulaire lien={infos.lienInscription}>
-            {site.inscriptionBouton}
-          </LienFormulaire>
+          {site.inscriptionBouton && (
+            <LienFormulaire lien={infos.lienInscription}>
+              {site.inscriptionBouton}
+            </LienFormulaire>
+          )}
 
           <p className="inscription-precision">
-            Le formulaire s&apos;ouvre dans un nouvel onglet — cette page
-            reste ouverte derrière.
-            {infos.telephone && (
+            {site.inscriptionPrecision}
+            {infos.telephone && site.inscriptionTelephone && (
               <>
-                <br />
-                Vous préférez le téléphone ?{' '}
+                {site.inscriptionPrecision && <br />}
+                {site.inscriptionTelephone}{' '}
                 <a href={`tel:${infos.telephone.replace(/[ .]/g, '')}`} className="price-lien">
                   {infos.telephone}
                 </a>

@@ -14,6 +14,15 @@
 
 import { defineType, defineField } from 'sanity'
 
+// Un libellé de bouton vidé fait disparaître le bouton du site (un bouton
+// sans texte serait annoncé « bouton » sans nom par un lecteur d'écran).
+// AVERTISSEMENT et non erreur : une erreur bloquerait la publication de
+// tous les autres textes. La cliente est prévenue, rien n'est bloqué.
+const videMasqueBouton = (Rule) =>
+  Rule.required().warning('Sans texte, ce bouton n\'apparaît pas sur le site.')
+const videMasqueColonne = (Rule) =>
+  Rule.required().warning('Sans texte, cette colonne du tableau n\'a plus de titre.')
+
 export const siteContent = defineType({
   name: 'siteContent',
   title: 'Textes du site',
@@ -34,23 +43,24 @@ export const siteContent = defineType({
     { name: 'pied', title: 'Pied de page' },
   ],
   fields: [
-    // ÉTIQUETTES MASQUÉES (hidden: true) : Plus d'activités, Témoignages,
-    // Stages, Planning, Contact, Réseaux. Leur petite étiquette en
-    // capitales répétait le titre juste en dessous (« SUIVEZ-NOUS » / « Nos
-    // Réseaux ») ; le site ne les affiche plus. Elles restent dans les
-    // données : retirer `hidden` et la ligne `section-label` du composant
-    // suffit à les rétablir. Les étiquettes qui APPORTENT une information
-    // (À propos, Activités, Coach, Tarifs) sont gardées.
+    // ÉTIQUETTES RETIRÉES : la petite étiquette en capitales de Témoignages,
+    // Stages, Planning, Contact et Réseaux répétait le titre juste en
+    // dessous (« SUIVEZ-NOUS » / « Nos Réseaux »). Le site ne les affichait
+    // plus : leurs champs ont été supprimés (octobre 2026) pour que la
+    // cliente ne remplisse rien pour rien. Celle de « Plus d'activités »
+    // reste, masquée : elle nomme les onglets pour les lecteurs d'écran.
+    // Les étiquettes qui APPORTENT une information (À propos, Activités,
+    // Coach, Tarifs) sont visibles.
     // ── ACCUEIL ────────────────────────────────────────────────
     defineField({
       name: 'heroTitre', title: 'Grand titre', type: 'string', group: 'accueil',
       description: 'Le premier mot, en haut de la page.',
-      validation: (Rule) => Rule.required().max(20).error('Titre obligatoire, 20 caractères maximum : au-delà il déborde sur mobile.'),
+      validation: (Rule) => Rule.required().max(20).warning('Titre conseillé, 20 caractères maximum : au-delà il déborde sur mobile.'),
     }),
     defineField({
       name: 'heroTitreItalique', title: 'Second mot, en italique rose', type: 'string', group: 'accueil',
       description: 'Le mot juste en dessous.',
-      validation: (Rule) => Rule.required().max(20).error('Obligatoire, 20 caractères maximum.'),
+      validation: (Rule) => Rule.required().max(20).warning('Conseillé, 20 caractères maximum.'),
     }),
     defineField({
       name: 'heroImage', title: 'Photo de fond', type: 'imageEditoriale', group: 'accueil',
@@ -62,10 +72,10 @@ export const siteContent = defineType({
       validation: (Rule) => Rule.max(6).warning('Au-delà de 6, le bandeau passe sur deux lignes.'),
     }),
     defineField({
-      name: 'heroBoutonActivites', title: 'Texte du bouton principal', type: 'string', group: 'accueil',
+      name: 'heroBoutonActivites', validation: videMasqueBouton, title: 'Texte du bouton principal', type: 'string', group: 'accueil',
     }),
     defineField({
-      name: 'heroBoutonContact', title: 'Texte du second bouton', type: 'string', group: 'accueil',
+      name: 'heroBoutonContact', validation: videMasqueBouton, title: 'Texte du second bouton', type: 'string', group: 'accueil',
     }),
     defineField({
       name: 'citationBandeau', title: 'Citation du bandeau sombre', type: 'texteSimple', group: 'accueil',
@@ -116,6 +126,8 @@ export const siteContent = defineType({
     defineField({ name: 'plusOngletPleinAir', title: 'Nom du 3e onglet', type: 'string', group: 'plus',
       description: 'Son contenu se modifie dans l\'onglet « Marche nordique » ci-dessus.',
       validation: (Rule) => Rule.max(14).warning('Au-delà de 14 caractères, les onglets débordent sur téléphone.') }),
+    defineField({ name: 'ateliersSousTitreThemes', title: 'Titre au-dessus des thèmes (onglet Ateliers)', type: 'string', group: 'plus',
+      description: 'Exemple : « Quelques thèmes ». Les thèmes eux-mêmes se modifient dans l\'activité « Ateliers thématiques ».' }),
 
     defineField({ name: 'outdoorEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'outdoor' }),
     defineField({ name: 'outdoorTitre', title: 'Titre', type: 'string', group: 'outdoor' }),
@@ -128,7 +140,7 @@ export const siteContent = defineType({
     defineField({ name: 'outdoorImage', title: 'Photo', type: 'imageEditoriale',
       description: 'Format paysage, 1200 px minimum.', group: 'outdoor' }),
     defineField({ name: 'outdoorMotsCles', title: 'Étiquettes', type: 'array', of: [{ type: 'string' }], group: 'outdoor', description: 'Les petites pastilles sous le texte.' }),
-    defineField({ name: 'outdoorBouton', title: 'Texte du bouton', type: 'string', group: 'outdoor', description: 'Il mène aux stages & événements.' }),
+    defineField({ name: 'outdoorBouton', validation: videMasqueBouton, title: 'Texte du bouton', type: 'string', group: 'outdoor', description: 'Il mène aux stages & événements.' }),
 
     // ── SUR MESURE ─────────────────────────────────────────────
     defineField({ name: 'bespokeEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'bespoke' }),
@@ -144,13 +156,15 @@ export const siteContent = defineType({
     }),
     defineField({ name: 'bespokeImage', title: 'Photo', type: 'imageEditoriale',
       description: 'Format paysage, 1200 px minimum.', group: 'bespoke' }),
-    defineField({ name: 'bespokeBouton', title: 'Texte du bouton', type: 'string', group: 'bespoke' }),
+    defineField({ name: 'bespokeBouton', validation: videMasqueBouton, title: 'Texte du bouton', type: 'string', group: 'bespoke' }),
     // Les deux plaquettes, côte à côte. Les PDF eux-mêmes se déposent dans
     // « Infos pratiques ».
     defineField({ name: 'bespokePlaquetteGroupes', title: 'Nom de la plaquette « groupes »', type: 'string', group: 'bespoke',
       description: 'Le PDF se change dans « Infos pratiques ».' }),
     defineField({ name: 'bespokePlaquetteMassages', title: 'Nom de la plaquette « massages »', type: 'string', group: 'bespoke',
       description: 'Le PDF se change dans « Infos pratiques ».' }),
+    defineField({ name: 'bespokeSousTitrePlaquettes', title: 'Titre au-dessus des plaquettes', type: 'string', group: 'bespoke',
+      description: 'Exemple : « En détail ».' }),
 
     // ── COACH ──────────────────────────────────────────────────
     defineField({ name: 'coachEtiquette', title: 'Petite étiquette rose', type: 'string', group: 'coach' }),
@@ -167,9 +181,10 @@ export const siteContent = defineType({
     defineField({ name: 'coachTexte', title: 'Présentation', type: 'texteSimple',
       description: 'Quelques phrases de présentation, à la troisième personne.', group: 'coach' }),
     defineField({ name: 'coachCertifications', title: 'Diplômes et certifications', type: 'array', of: [{ type: 'string' }], group: 'coach', description: 'Un par ligne.' }),
+    defineField({ name: 'coachLienAvis', title: 'Texte du lien vers les avis', type: 'string', group: 'coach',
+      description: 'Sous le texte de la coach. La note Google s\'ajoute après (« · 5/5 »).' }),
 
     // ── TÉMOIGNAGES ────────────────────────────────────────────
-    defineField({ name: 'avisEtiquette', hidden: true, title: 'Petite étiquette', type: 'string', group: 'avis' }),
     defineField({ name: 'avisTitre', title: 'Titre', type: 'string', group: 'avis' }),
     defineField({ name: 'avisTitreItalique', title: 'Mot en italique', type: 'string', group: 'avis' }),
     defineField({ name: 'avisNote', title: 'Note Google', type: 'string', group: 'avis', description: 'La note moyenne affichée par Google, par exemple « 5 » ou « 4,8 ». Laissez vide pour ne pas afficher de note.' }),
@@ -179,6 +194,8 @@ export const siteContent = defineType({
       description: 'Ouvrez votre fiche Google Maps, « Partager », « Copier le lien ». Laissez vide pour ne pas afficher de lien.',
       validation: (Rule) => Rule.uri({ scheme: ['https'] }).error('L\'adresse doit commencer par https://'),
     }),
+    defineField({ name: 'avisBoutonGoogle', title: 'Texte du bouton vers Google', type: 'string', group: 'avis',
+      description: 'Affiché seulement si le lien Google est rempli.' }),
     defineField({
       name: 'temoignages', title: 'Témoignages', type: 'array', of: [{ type: 'temoignage' }], group: 'avis',
       description: 'Jusqu\'à six sont affichés sur ordinateur, quatre sur tablette, trois sur téléphone : mettez les meilleurs en haut de la liste. Uniquement de vrais avis, avec l\'accord des personnes.',
@@ -187,7 +204,6 @@ export const siteContent = defineType({
     // ── STAGES & ÉVÉNEMENTS ────────────────────────────────────
     // L'en-tête de la frise. Les événements eux-mêmes se créent dans le
     // menu « Événements & stages ».
-    defineField({ name: 'evenementsEtiquette', hidden: true, title: 'Petite étiquette', type: 'string', group: 'evenements' }),
     defineField({ name: 'evenementsTitre', title: 'Titre', type: 'string', group: 'evenements' }),
     defineField({ name: 'evenementsTitreItalique', title: 'Mot en italique', type: 'string', group: 'evenements' }),
     defineField({ name: 'evenementsChapo', title: 'Phrase d\'introduction', type: 'string', group: 'evenements' }),
@@ -205,6 +221,11 @@ export const siteContent = defineType({
     defineField({ name: 'tarifsSaison', title: 'Tarifs à la saison', type: 'array', of: [{ type: 'tarifSaison' }], group: 'tarifs', description: 'Les lignes du tableau à deux colonnes.' }),
     defineField({ name: 'tarifsSaisonNote', title: 'Note sous le tableau', type: 'string', group: 'tarifs' }),
     defineField({ name: 'tarifsFamilleNote', title: 'Précision sur le tarif famille', type: 'string', group: 'tarifs', description: 'La ligne commençant par une astérisque, sous le tableau.' }),
+    defineField({ name: 'tarifsCarteTitre', title: 'Titre des formules à la carte', type: 'string', group: 'tarifs' }),
+    defineField({ name: 'tarifsSaisonTitre', title: 'Titre du tableau à la saison', type: 'string', group: 'tarifs' }),
+    defineField({ name: 'tarifsColonneSeul', validation: videMasqueColonne, title: 'En-tête de la 1re colonne du tableau', type: 'string', group: 'tarifs' }),
+    defineField({ name: 'tarifsColonneFamille', validation: videMasqueColonne, title: 'En-tête de la 2e colonne du tableau', type: 'string', group: 'tarifs',
+      description: 'Terminez par « * » pour renvoyer à la précision sur le tarif famille.' }),
     defineField({ name: 'tarifsPartiels', title: 'Saisons partielles', type: 'array', of: [{ type: 'tarifSimple' }], group: 'tarifs', description: 'Mi-saison, trimestre. Deux vignettes.' }),
     defineField({ name: 'tarifsSurMesure', title: 'Phrase « sur mesure »', type: 'texteSimple', group: 'tarifs', description: 'Le paragraphe qui renvoie vers les prestations sur mesure.' }),
     defineField({ name: 'inscriptionTitre', title: 'Titre du bloc inscription', type: 'string', group: 'tarifs' }),
@@ -218,21 +239,23 @@ export const siteContent = defineType({
       description: 'IMPORTANT : cette liste doit refléter les vraies questions du formulaire d\'inscription. Si vous ajoutez une question dans le formulaire Google, ajoutez-la ici aussi — une annonce fausse est pire que pas d\'annonce.',
     }),
     defineField({ name: 'inscriptionAlerte', title: 'Encadré d\'avertissement', type: 'texteSimple', group: 'tarifs', description: 'L\'encadré blanc à liseré rose, avant le bouton. Sert à prévenir de ce qu\'il faut préparer.' }),
-    defineField({ name: 'inscriptionBouton', title: 'Texte du bouton', type: 'string', group: 'tarifs' }),
+    defineField({ name: 'inscriptionBouton', validation: videMasqueBouton, title: 'Texte du bouton', type: 'string', group: 'tarifs' }),
+    defineField({ name: 'inscriptionAlerteTitre', title: 'Titre de l\'encadré d\'avertissement', type: 'string', group: 'tarifs' }),
+    defineField({ name: 'inscriptionPrecision', title: 'Phrase sous le bouton', type: 'string', group: 'tarifs' }),
+    defineField({ name: 'inscriptionTelephone', title: 'Question avant le numéro de téléphone', type: 'string', group: 'tarifs',
+      description: 'Le numéro (« Infos pratiques ») s\'affiche juste après.' }),
 
     // ── PLANNING ───────────────────────────────────────────────
-    defineField({ name: 'planningEtiquette', hidden: true, title: 'Petite étiquette rose', type: 'string', group: 'planning' }),
     defineField({ name: 'planningTitre', title: 'Titre', type: 'string', group: 'planning' }),
     defineField({ name: 'planningTitreItalique', title: 'Mot en italique', type: 'string',
       description: 'Le mot mis en valeur en rose.', group: 'planning' }),
     defineField({ name: 'planningChapo', title: 'Phrase d\'introduction', type: 'texteSimple',
       description: 'La phrase d\'introduction, sous le titre.', group: 'planning' }),
     defineField({ name: 'planningSaison', title: 'Libellé de la saison', type: 'string', group: 'planning', description: 'Affiché au-dessus du tableau. Exemple : « Saison 2026 — 2027 ».' }),
-    defineField({ name: 'planningBouton', title: 'Texte du bouton en bas', type: 'string',
+    defineField({ name: 'planningBouton', validation: videMasqueBouton, title: 'Texte du bouton en bas', type: 'string',
       description: 'Le bouton sous le tableau.', group: 'planning' }),
 
     // ── CONTACT ────────────────────────────────────────────────
-    defineField({ name: 'contactEtiquette', hidden: true, title: 'Petite étiquette rose', type: 'string', group: 'contact' }),
     defineField({ name: 'contactTitre', title: 'Titre', type: 'string', group: 'contact' }),
     defineField({ name: 'contactTitreItalique', title: 'Mot en italique', type: 'string',
       description: 'Le mot mis en valeur en rose.', group: 'contact' }),
@@ -242,7 +265,9 @@ export const siteContent = defineType({
     defineField({ name: 'contactCtaSousTitre', title: 'Sous-titre de l\'encadré', type: 'texteSimple',
       description: 'Deux lignes sous le titre de l\'encadré sombre.', group: 'contact' }),
     defineField({ name: 'contactCtaAide', title: 'Phrase sous les boutons', type: 'string', group: 'contact', description: 'Explique où mène le bouton d\'inscription.' }),
-    defineField({ name: 'reseauxEtiquette', hidden: true, title: 'Étiquette de la section Réseaux', type: 'string', group: 'contact' }),
+    defineField({ name: 'contactBoutonInscription', validation: videMasqueBouton, title: 'Bouton « inscription »', type: 'string', group: 'contact' }),
+    defineField({ name: 'contactBoutonAppeler', validation: videMasqueBouton, title: 'Bouton « téléphone »', type: 'string', group: 'contact' }),
+    defineField({ name: 'contactBoutonEcrire', validation: videMasqueBouton, title: 'Bouton « e-mail »', type: 'string', group: 'contact' }),
     defineField({ name: 'reseauxTitre', title: 'Titre de la section Réseaux', type: 'string', group: 'contact' }),
     defineField({ name: 'reseauxTitreItalique', title: 'Mot en italique', type: 'string',
       description: 'Le mot mis en valeur en rose.', group: 'contact' }),
@@ -251,6 +276,8 @@ export const siteContent = defineType({
     defineField({ name: 'footerSlogan', title: 'Slogan', type: 'string', group: 'pied' }),
     defineField({ name: 'footerMention', title: 'Mention sous le slogan', type: 'string', group: 'pied' }),
     defineField({ name: 'footerBaseline', title: 'Sous-titre du logo', type: 'string', group: 'pied' }),
+    defineField({ name: 'footerNom', title: 'Nom après le ©', type: 'string', group: 'pied',
+      description: 'La ligne tout en bas. L\'année et l\'adresse s\'ajoutent seules.' }),
   ],
 
   preview: {

@@ -24,12 +24,21 @@ export const lien = defineType({
       description:
         'Adresse complète, en commençant par https:// — ou mailto: pour ' +
         'un courriel, tel: pour un numéro.',
-      validation: (Rule) =>
-        Rule.required()
-          .uri({ scheme: ['http', 'https', 'mailto', 'tel'] })
-          .error(
-            "L'adresse doit commencer par https://, http://, mailto: ou tel:"
-          ),
+      // Deux règles, deux niveaux :
+      //   · une adresse DANGEREUSE (javascript:, data:…) bloque la
+      //     publication — c'est la protection de sécurité ;
+      //   · une adresse OUBLIÉE ne bloque rien : le mot s'affiche alors
+      //     comme du texte simple (voir lienSur dans TexteRiche.js). Avant,
+      //     un lien laissé vide empêchait de publier toute la fiche —
+      //     c'est arrivé sur « Prestations sur mesure ».
+      validation: (Rule) => [
+        Rule.uri({ scheme: ['http', 'https', 'mailto', 'tel'] }).error(
+          "L'adresse doit commencer par https://, http://, mailto: ou tel:"
+        ),
+        Rule.required().warning(
+          'Lien sans adresse : le mot sera affiché sans lien.'
+        ),
+      ],
     }),
     defineField({
       name: 'nouvelOnglet',

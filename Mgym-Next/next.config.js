@@ -8,7 +8,7 @@
 // jamais pouvoir vérifier. Vérifié par un build réel :
 //
 //   Error: export const dynamic = "force-static" not configured on route
-//          "/api/preview" with "output: export"
+//          "/api/…" with "output: export"
 //
 // CE QUE ÇA NE CHANGE PAS
 // Le site reste entièrement généré au build et servi par Netlify.

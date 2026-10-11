@@ -1,7 +1,6 @@
-// route.js — la sortie de l'aperçu du Studio.
-//
-// Même rôle que /api/preview-exit, mais sait effacer les cookies
-// PARTITIONNÉS posés dans le cadre du Studio (voir ../enable/route.js).
+// route.js — la sortie de l'aperçu : bouton « Revenir au site publié »
+// du bandeau, et fermeture de l'aperçu du Studio. Sait aussi effacer les
+// cookies PARTITIONNÉS posés dans le cadre du Studio (voir ../enable/route.js).
 
 import { NextResponse } from 'next/server'
 import { fermerPreview } from '@/lib/preview'

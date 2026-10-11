@@ -1466,12 +1466,6 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
      l'écran d'un iPhone ; en pastilles bordées, elles ressemblaient à des
      boutons qui ne faisaient rien. */
   .hero-act-pill { letter-spacing:.01em; text-transform:none; gap:.6rem; }
-  /* Version allégée du fond d'accueil sur téléphone. L'image de bureau
-     fait 2560 px de large : sur un écran de 375 px elle est sept fois
-     trop grande, et son téléchargement retarde tout le reste de la page.
-     Ne s'applique QU'AU repli local — une image venue du CMS est déjà
-     redimensionnée par le CDN de Sanity. */
-  .hero-bg[data-repli="1"] { background-image: url('/fond1-mobile.avif') !important; }
 
   /* MENU — chaque lien faisait 19 px de haut, une cible difficile à
      viser. Le remplissage les porte à 44 px sans grossir le texte. */

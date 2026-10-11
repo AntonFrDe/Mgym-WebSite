@@ -29,12 +29,15 @@ export const imageEditoriale = defineType({
       description:
         'Décrivez ce que montre la photo, en une phrase. Exemple : ' +
         '« Cours de Pilates au sol dans la salle de Mirepoix ».',
+      // Un AVERTISSEMENT, pas une erreur : une description manquante ne
+      // doit pas empêcher de publier toute la page (c'est arrivé sur
+      // « Yoga »). Le site met alors le nom de la section à la place.
       validation: (Rule) =>
         Rule.required()
           .min(5)
-          .error(
-            'Une description est obligatoire : elle est lue à voix haute ' +
-            "aux personnes malvoyantes et s'affiche si la photo ne charge pas."
+          .warning(
+            'Pensez à décrire la photo : la description est lue à voix ' +
+            "haute aux personnes malvoyantes et s'affiche si la photo ne charge pas."
           ),
     }),
   ],

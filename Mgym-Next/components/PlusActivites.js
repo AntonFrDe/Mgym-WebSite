@@ -121,7 +121,7 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
               <TexteRiche valeur={ateliers.descriptionRiche} className="lead" />
               {(ateliers.motsCles ?? []).length > 0 && (
                 <>
-                  <p className="panneau-sous-titre">Quelques thèmes</p>
+                  {site.ateliersSousTitreThemes && <p className="panneau-sous-titre">{site.ateliersSousTitreThemes}</p>}
                   <ul className="themes">
                     {ateliers.motsCles.map((theme) => (
                       <li key={theme} className="theme"><Picto nom="etoile" taille={18} />{theme}</li>
@@ -193,7 +193,7 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
                 maintenant son sujet. */}
             {plaquettes.length > 0 && (
               <>
-                <p className="panneau-sous-titre">En détail</p>
+                {site.bespokeSousTitrePlaquettes && <p className="panneau-sous-titre">{site.bespokeSousTitrePlaquettes}</p>}
                 <ul className="plaquettes">
                   {plaquettes.map((pl) => (
                     <li key={pl.lien}>
@@ -208,7 +208,7 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
             )}
             {telBrut && (
               <div className="panneau-actions">
-                <a href={`tel:${telBrut}`} className="btn-primary">{site.bespokeBouton}</a>
+                {site.bespokeBouton && <a href={`tel:${telBrut}`} className="btn-primary">{site.bespokeBouton}</a>}
               </div>
             )}
           </div>
@@ -240,7 +240,7 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
               </div>
             )}
             <div className="panneau-actions">
-              <a href="#evenements" className="btn-primary">{site.outdoorBouton}</a>
+              {site.outdoorBouton && <a href="#evenements" className="btn-primary">{site.outdoorBouton}</a>}
             </div>
           </div>
         </div>

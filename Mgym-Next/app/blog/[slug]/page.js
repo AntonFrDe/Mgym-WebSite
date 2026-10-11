@@ -11,26 +11,16 @@ import { getArticleParSlug, getSlugsArticles } from '../../../lib/sanity/queries
 import { dateLisible } from '../../../lib/planning/grille.js'
 import TexteRiche from '../../../components/TexteRiche'
 
-// Combien de temps cette page peut rester figée avant de redemander son
-// contenu au CMS. Voir lib/revalidation.js : c'est ce qui permet de
-// modifier le site depuis Sanity sans le reconstruire.
+// Quand cette page relit le CMS : voir app/layout.js (déclaré une seule fois).
 //
-// Le nombre est écrit en clair parce que Next exige une valeur analysable
-// statiquement — une constante importée est refusée au build. Il est donc
-// répété dans les trois pages, et `lib/revalidation.test.mjs` échoue si
-// l'une d'elles s'écarte de la constante partagée.
-export const revalidate = 60
+// Un article publié APRÈS le build n'a pas de page pré-calculée : elle est
+// fabriquée à la première visite, puis gardée en cache. Sans cela, un
+// nouvel article restait en 404 jusqu'à la reconstruction suivante — qui
+// n'arrivait jamais (mesuré le 11/10 sur les fiches d'événements). Une
+// adresse qui ne correspond à aucun article donne toujours un 404 :
+// voir notFound() plus bas.
 
-// Seules les adresses rendues par generateStaticParams existent : toute
-// autre renvoie un 404, sans passer par le serveur. C'est exactement le
-// modèle de publication du projet — un nouvel article apparaît après la
-// reconstruction déclenchée par « Publier », pas avant.
-//
-// C'est aussi ce qui permet à la copie hors-ligne de se construire : sans
-// cette ligne, Next refuse d'exporter une route dynamique.
-export const dynamicParams = false
-
-/** Une page par article, calculée au build. */
+/** Une page par article connu au build ; les suivants à la demande. */
 export async function generateStaticParams() {
   const slugs = (await getSlugsArticles()) ?? []
   return slugs.filter((s) => s.slug).map((s) => ({ slug: s.slug }))
@@ -48,7 +38,7 @@ export async function generateMetadata({ params }) {
 
   return {
     // seoTitre est facultatif : sans lui, le titre de l'article fait l'affaire.
-    title: `${article.seoTitre || article.titre} — ${seo.titre}`,
+    title: [article.seoTitre || article.titre, seo.titre].filter(Boolean).join(' — '),
     description: article.seoDescription || article.extrait,
     alternates: seo.urlCanonique ? { canonical: `/blog/${slug}` } : undefined,
     openGraph: {

@@ -47,10 +47,10 @@ export default function Coach({ site }) {
             {/* Le pont vers les témoignages, juste sous les chiffres : après
                 « qui est la coach », la question suivante est « qu'en
                 pensent ceux qui l'ont suivie ? ». */}
-            {avecAvis && (
+            {avecAvis && site.coachLienAvis && (
               <a href="#temoignages" className="coach-avis">
                 <span className="etoiles" aria-hidden="true">★★★★★</span>
-                Lire les avis{site.avisNote ? ` · ${site.avisNote}/5` : ''}
+                {site.coachLienAvis}{site.avisNote ? ` · ${site.avisNote}/5` : ''}
                 <span aria-hidden="true">↓</span>
               </a>
             )}

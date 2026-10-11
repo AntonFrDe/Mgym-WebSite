@@ -10,8 +10,6 @@
     "dev": "next dev",
     "formulaires": "node scripts/analyser-formulaires.mjs",
     "groq:check": "node scripts/valider-requetes.mjs",
-    "migrer": "node scripts/migrer.mjs",
-    "migrer:ecrire": "node scripts/migrer.mjs --ecrire",
     "mobile": "bash scripts/apercu-mobile.sh",
     "prebuild": "node scripts/vider-cache-donnees.mjs",
     "sauvegarde": "bash scripts/sauvegarder.sh",
@@ -23,7 +21,8 @@
     "test": "node --test \"lib/**/*.test.mjs\" \"scripts/**/*.test.mjs\"",
     "verifier": "npm run schemas:check && npm run groq:check && npm test && npm run build",
     "verifier:historique": "node scripts/verifier-historique.mjs",
-    "verifier:workflow": "node scripts/tester-workflow.mjs"
+    "verifier:workflow": "node scripts/tester-workflow.mjs",
+    "livrer": "npm run verifier && sanity deploy"
   },
   "dependencies": {
     "@sanity/client": "^7.26.2",

@@ -136,14 +136,20 @@ export default function Contact({ site, infos }) {
               c'est la ligne .cta-btns-aide juste en dessous qui le précise,
               plutôt que d'allonger le texte des boutons. */}
           <div className="cta-btns">
-            <LienFormulaire lien={infos.lienInscription} className="cta-btn-rose">
-              Formulaire d&apos;inscription
-            </LienFormulaire>
+            {site.contactBoutonInscription && (
+              <LienFormulaire lien={infos.lienInscription} className="cta-btn-rose">
+                {site.contactBoutonInscription}
+              </LienFormulaire>
+            )}
             {/* « Appeler pour un essai » : la phrase au-dessus promet une
                 séance d'essai, qui se réserve par téléphone. « Appeler »
                 seul ne disait pas que c'était le chemin. */}
-            {infos.telephone && <a href={`tel:${telBrut}`} className="cta-btn-rose">Appeler pour un essai</a>}
-            {infos.email && <a href={`mailto:${infos.email}`} className="cta-btn-outline">Nous écrire</a>}
+            {infos.telephone && site.contactBoutonAppeler && (
+              <a href={`tel:${telBrut}`} className="cta-btn-rose">{site.contactBoutonAppeler}</a>
+            )}
+            {infos.email && site.contactBoutonEcrire && (
+              <a href={`mailto:${infos.email}`} className="cta-btn-outline">{site.contactBoutonEcrire}</a>
+            )}
           </div>
           {site.contactCtaAide && (
             <p className="cta-btns-aide">{site.contactCtaAide}</p>

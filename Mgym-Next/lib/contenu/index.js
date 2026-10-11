@@ -3,16 +3,24 @@
 // Les composants n'appellent jamais Sanity. Ils reçoivent un objet
 // `contenu` déjà constitué, dont la forme ne dépend pas de sa provenance.
 //
-// RÈGLE DE FUSION : la valeur de Sanity l'emporte dès qu'elle existe et
-// n'est pas vide. Sinon, le contenu par défaut prend le relais, champ par
-// champ. Trois conséquences, toutes voulues :
+// SANITY EST LA SEULE SOURCE DU TEXTE. Il n'y a plus de « contenu par
+// défaut » écrit dans le code (supprimé en octobre 2026). Il cachait trois
+// défauts mesurés sur le site en ligne :
 //
-//   · tant qu'aucun projet Sanity n'est configuré, le site est identique
-//     à ce qu'il était avant l'ajout du CMS ;
-//   · une panne de Sanity dégrade le site vers son ancien contenu, jamais
-//     vers une page vide ;
-//   · un champ que la cliente n'a pas encore rempli n'efface pas la
-//     section : il garde le texte d'origine.
+//   · vider un champ pour retirer un texte ne retirait rien : l'ancien
+//     texte du code revenait ;
+//   · vingt champs paraissaient vides dans le back-office alors que le
+//     site affichait un texte — la cliente ne pouvait pas savoir lequel
+//     modifier ;
+//   · les témoignages du site n'existaient pas dans le back-office.
+//
+// Désormais, ce que la cliente voit dans le back-office est exactement ce
+// qu'affiche le site. Un champ vide n'affiche rien (chaque composant le
+// vérifie avant d'afficher).
+//
+// Et si Sanity tombe en panne ? En production, la lecture LÈVE une erreur
+// (lib/sanity/fetch.js) : le site continue de servir la dernière page
+// fabriquée, il ne se vide pas.
 
 import 'server-only'
 import {
@@ -20,52 +28,37 @@ import {
   getEvenementsAVenir,
 } from '../sanity/queries/index.js'
 import { urlImage } from '../sanity/image.js'
-import { contenuDefaut } from './defaut.js'
-
-/** Vrai si la valeur mérite de remplacer celle par défaut. */
-function renseignee(v) {
-  if (v === null || v === undefined) return false
-  if (typeof v === 'string') return v.trim() !== ''
-  if (Array.isArray(v)) return v.length > 0
-  if (typeof v === 'object') return Object.keys(v).length > 0
-  return true
-}
 
 /**
- * Fusionne un objet Sanity sur son équivalent par défaut, champ par champ.
- * On ne descend pas dans les sous-objets : un tarif à moitié rempli n'a
- * pas de sens, c'est tout ou rien.
+ * Transforme une image Sanity en { src, alt }. Les composants n'ont donc
+ * qu'une forme à traiter, et `null` quand il n'y a pas de photo.
+ *
+ * @param {object} image        le champ image tel que Sanity le renvoie
+ * @param {string} altSecours   si la cliente n'a pas décrit la photo
+ * @param {number} largeur      en pixels
  */
-function fusionner(defaut, sanity) {
-  if (!sanity) return defaut
-  const resultat = { ...defaut }
-  for (const [champ, valeur] of Object.entries(sanity)) {
-    if (renseignee(valeur)) resultat[champ] = valeur
-  }
-  return resultat
-}
-
-/**
- * Transforme une image Sanity en { src, alt } — la même forme que les
- * images locales. Les composants n'ont donc qu'un cas à traiter.
- */
-function normaliserImage(image, repliAlt, largeur) {
+function normaliserImage(image, altSecours, largeur) {
   const src = urlImage(image, { largeur })
   if (!src) return null
-  return { src, alt: image?.alt?.trim() || repliAlt }
+  return { src, alt: image?.alt?.trim() || altSecours }
 }
 
-/** Les champs image de siteContent, avec la largeur utile à chacun. */
+// Les champs image de « Textes du site » : largeur utile, et description
+// de secours si la cliente n'en a pas écrit (lue aux personnes
+// malvoyantes — mieux vaut une description générale que rien).
 const IMAGES_SITE = {
-  heroImage: 2000,
-  aProposPhoto: 1200,
-  outdoorImage: 1200,
-  bespokeImage: 1200,
-  coachPhoto: 1200,
+  heroImage:    { largeur: 2000, alt: "Une séance de M'GYM" },
+  aProposPhoto: { largeur: 1200, alt: "L'association M'GYM" },
+  outdoorImage: { largeur: 1200, alt: 'Une activité en plein air' },
+  bespokeImage: { largeur: 1200, alt: 'Une prestation sur mesure' },
+  coachPhoto:   { largeur: 1200, alt: "La coach de M'GYM" },
 }
 
 /**
  * Rassemble tout le contenu de la page d'accueil en une fois.
+ *
+ * Un document absent (jamais créé) donne un objet vide plutôt que `null` :
+ * les composants lisent `site.heroTitre`, pas `site?.heroTitre`.
  *
  * @param {boolean} [preview]  true = lire les brouillons
  * @returns {Promise<{site: object, infos: object, seo: object, activites: any[], evenements: any[]}>}
@@ -80,34 +73,19 @@ export async function getContenu(preview = false) {
     getEvenementsAVenir(preview),
   ])
 
-  // Images de siteContent : converties avant fusion, pour que le repli
-  // s'applique aussi à une image absente.
-  const siteNormalise = site ? { ...site } : null
-  if (siteNormalise) {
-    for (const [champ, largeur] of Object.entries(IMAGES_SITE)) {
-      siteNormalise[champ] = normaliserImage(
-        site[champ], contenuDefaut.site[champ]?.alt ?? '', largeur
-      )
-    }
-  }
-
-  const seoNormalise = seo ? { ...seo } : null
-  if (seoNormalise) {
-    seoNormalise.imagePartage = normaliserImage(seo.imagePartage, seo.titre ?? '', 1200)
+  const siteNormalise = { ...(site ?? {}) }
+  for (const [champ, { largeur, alt }] of Object.entries(IMAGES_SITE)) {
+    siteNormalise[champ] = normaliserImage(siteNormalise[champ], alt, largeur)
   }
 
   return {
-    site: fusionner(contenuDefaut.site, siteNormalise),
-    infos: fusionner(contenuDefaut.infos, infos),
-    seo: fusionner(contenuDefaut.seo, seoNormalise),
-    activites: renseignee(activites)
-      ? activites.map((a) => ({
-          ...a,
-          image: normaliserImage(a.image, a.titre ?? '', 800),
-        }))
-      : contenuDefaut.activites,
-    // Pas de repli pour les événements : sans événement à venir, la frise
-    // affiche son message d'attente. Inventer un stage serait pire.
+    site: siteNormalise,
+    infos: infos ?? {},
+    seo: { ...(seo ?? {}), imagePartage: normaliserImage(seo?.imagePartage, seo?.titre ?? '', 1200) },
+    activites: (activites ?? []).map((a) => ({
+      ...a,
+      image: normaliserImage(a.image, a.titre ?? '', 800),
+    })),
     evenements: (evenements ?? []).map(normaliserEvenement),
   }
 }
@@ -128,9 +106,9 @@ export function normaliserEvenement(ev) {
 }
 
 /**
- * Les données du planning, avec le même repli que le reste : sans projet
- * Sanity, ou si aucun créneau n'a encore été saisi, le site affiche le
- * planning actuel plutôt qu'un tableau vide.
+ * Les données du planning : créneaux, annulations et fermetures de la
+ * période. Aucun créneau saisi = un planning vide (le composant l'affiche
+ * proprement), jamais l'ancien planning du code.
  *
  * @param {string} du
  * @param {string} au
@@ -138,9 +116,5 @@ export function normaliserEvenement(ev) {
  */
 export async function getPlanning(du, au, preview = false) {
   const donnees = await getDonneesPlanning(du, au, preview)
-
-  return {
-    ...donnees,
-    creneaux: renseignee(donnees.creneaux) ? donnees.creneaux : contenuDefaut.creneaux,
-  }
+  return { ...donnees, creneaux: donnees.creneaux ?? [] }
 }

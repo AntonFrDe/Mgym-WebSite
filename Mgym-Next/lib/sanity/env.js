@@ -12,12 +12,10 @@
 // lus ailleurs, uniquement côté serveur.
 
 /**
- * Les identifiants sont OPTIONNELS. Tant qu'ils sont absents, le site
- * affiche le contenu par défaut (lib/contenu/defaut.js) : c'est un état
- * de fonctionnement normal, pas une panne.
- *
- * Lever une erreur ici empêcherait le site de se construire avant que le
- * projet Sanity n'existe — exactement l'inverse de ce qu'on veut.
+ * Sans ces identifiants, le site n'a AUCUN texte : il n'y a plus de
+ * contenu de secours dans le code. L'erreur est levée à la première
+ * lecture (clientPour, lib/sanity/client.js), pas ici : les tests et
+ * scripts qui importent ce fichier sans lire Sanity continuent de marcher.
  */
 export const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || ''
 export const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'

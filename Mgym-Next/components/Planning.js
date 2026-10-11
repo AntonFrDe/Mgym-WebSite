@@ -156,7 +156,7 @@ export default async function Planning({ site, enPreview = false }) {
         )}
 
         <div className="planning-cta apparition">
-          <a href="#contact" className="btn-primary">{site.planningBouton}</a>
+          {site.planningBouton && <a href="#contact" className="btn-primary">{site.planningBouton}</a>}
         </div>
 
       </div>

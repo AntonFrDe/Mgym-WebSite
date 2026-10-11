@@ -118,7 +118,7 @@ export function jetonValide(jeton, secret, maintenant = Date.now()) {
  * N'accepte qu'un chemin INTERNE au site.
  *
  * Sans ce contrôle, un lien de prévisualisation deviendrait une
- * redirection ouverte : « /api/preview?chemin=https://site-piege.fr »
+ * redirection ouverte : « /api/draft-mode/enable?sanity-preview-pathname=https://site-piege.fr »
  * enverrait le visiteur ailleurs depuis une adresse de confiance.
  * `//evil.com` est refusé aussi : le navigateur le lit comme une adresse
  * absolue avec le protocole courant.

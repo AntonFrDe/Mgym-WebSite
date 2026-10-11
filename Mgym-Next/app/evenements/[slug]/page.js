@@ -20,19 +20,13 @@ import LienFormulaire from '../../../components/LienFormulaire'
 import LienItineraire from '../../../components/LienItineraire'
 import { Picto } from '../../../components/pictogrammes'
 
-// Combien de temps cette page peut rester figée avant de redemander son
-// contenu au CMS. Voir lib/revalidation.js : c'est ce qui permet de
-// modifier le site depuis Sanity sans le reconstruire.
+// Quand cette page relit le CMS : voir app/layout.js (déclaré une seule fois).
 //
-// Le nombre est écrit en clair parce que Next exige une valeur analysable
-// statiquement — une constante importée est refusée au build. Il est donc
-// répété dans chaque page, et `lib/revalidation.test.mjs` échoue si
-// l'une d'elles s'écarte de la constante partagée.
-export const revalidate = 60
-
-// Même modèle que le blog : un nouvel événement apparaît après la
-// reconstruction déclenchée par « Publier ». Toute autre adresse = 404.
-export const dynamicParams = false
+// Un événement publié APRÈS le build n'a pas de fiche pré-calculée : elle
+// est fabriquée à la première visite, puis gardée en cache. Avant, la
+// fiche restait en 404 tant que le site n'était pas reconstruit — mesuré
+// le 11/10 sur les 4 stages publiés la veille. Une adresse qui ne
+// correspond à aucun événement donne toujours un 404 (notFound plus bas).
 
 export async function generateStaticParams() {
   const slugs = (await getSlugsEvenements()) ?? []
@@ -47,7 +41,7 @@ export async function generateMetadata({ params }) {
   const { seo } = await getContenu()
   const description = `${periodeLisible(ev.dateDebut, ev.dateFin)}${ev.lieu ? ` · ${ev.lieu}` : ''}${ev.prix ? ` · ${ev.prix}` : ''}`
   return {
-    title: `${ev.titre} — ${seo.titre}`,
+    title: [ev.titre, seo.titre].filter(Boolean).join(' — '),
     description,
     alternates: seo.urlCanonique ? { canonical: `/evenements/${slug}` } : undefined,
     openGraph: {
