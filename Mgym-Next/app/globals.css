@@ -553,7 +553,8 @@ body:has(#hero) #nav:not(.scrolled) .ham span { background:var(--creme); }
 .carrousel-indice.est-masque { opacity:0; transform:translateY(-4px); pointer-events:none; }
 /* L'indice parle des flèches à la souris, du doigt sur écran tactile.
    (Il n'évoque plus la molette : elle fait défiler la PAGE, jamais les
-   cartes — voir CarrouselActivites.js.) */
+   cartes — voir CarrouselActivites.js.) Mêmes classes pour la consigne
+   des onglets « Plus d'activités » (PlusActivites.js). */
 .indice-doigt { display:none; }
 @media (hover: none) and (pointer: coarse) {
   .indice-souris { display:none; }
@@ -600,26 +601,46 @@ body:has(#hero) #nav:not(.scrolled) .ham span { background:var(--creme); }
 .plus-entete .divider { margin:1.5rem auto; }
 .plus-entete .lead { max-width:560px; margin:0 auto; }
 
-/* La barre d'onglets : trois boutons de même largeur dans un rail clair.
-   L'onglet actif est une carte blanche en relief — il se distingue par
-   la forme, le fond ET la couleur, pas par la couleur seule. */
+/* La consigne au-dessus des onglets, avec une flèche tournée vers eux. */
+.onglets-consigne {
+  margin:0 0 .9rem; text-align:center; font-family:var(--font-sans),sans-serif;
+  font-size:.95rem; font-weight:600; color:var(--sauge-fonce);
+}
+/* En ligne avec le texte : sur deux lignes (320 px), elle suit le dernier mot. */
+.onglets-consigne svg { display:inline-block; vertical-align:-4px; margin-left:.4rem; transform:rotate(90deg); }
+
+/* La barre d'onglets : des BOUTONS, pas un rail d'étiquettes. Autrefois
+   les onglets non choisis n'étaient qu'un mot sur un fond clair : on ne
+   devinait pas qu'ils se cliquaient. Chacun est maintenant une carte
+   blanche bordée, qui se soulève au survol. L'onglet choisi est plein
+   (vert foncé, texte blanc : 6,3:1) et sa pointe désigne le panneau
+   qu'il ouvre. Forme, fond ET couleur : jamais la couleur seule.
+   grid-auto-columns : la barre s'adapte seule à 2 onglets (sans
+   « Ateliers ») au lieu de laisser une case vide. */
 .onglets {
-  display:grid; grid-template-columns:repeat(3, 1fr); gap:.4rem;
-  max-width:720px; margin:0 auto 1.5rem; padding:.4rem;
-  background:rgba(var(--blanc-rgb), .55); border-radius:1.25rem;
+  display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:.75rem;
+  max-width:720px; margin:0 auto 1.75rem;
 }
 .onglet {
+  position:relative;
   display:flex; align-items:center; justify-content:center; gap:.6rem;
   min-height:56px; padding:.6rem .75rem;
-  border:none; border-radius:.95rem; background:transparent; cursor:pointer;
+  border:2px solid var(--sauge); border-radius:.95rem; background:var(--blanc); cursor:pointer;
   font-family:var(--font-sans),sans-serif; font-size:.95rem; font-weight:700;
   letter-spacing:.03em; color:var(--sauge-fonce);
-  transition:background .25s, box-shadow .25s, color .25s;
+  box-shadow:0 4px 12px rgba(var(--prune-rgb), .06);
+  transition:background .25s, box-shadow .25s, color .25s, border-color .25s, transform .25s;
 }
-.onglet:hover:not(.est-actif) { background:rgba(var(--blanc-rgb), .7); }
-.onglet.est-actif { background:var(--blanc); color:var(--prune); box-shadow:0 6px 18px rgba(var(--prune-rgb), .10); }
-.onglet.est-actif svg { color:var(--sauge-fonce); }
-.onglet:focus-visible { outline:2px solid var(--sauge-fonce); outline-offset:2px; }
+.onglet:hover:not(.est-actif) {
+  border-color:var(--sauge-fonce); transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(var(--prune-rgb), .12);
+}
+.onglet.est-actif { background:var(--sauge-fonce); border-color:var(--sauge-fonce); color:var(--blanc); cursor:default; }
+.onglet.est-actif::after {
+  content:''; position:absolute; left:50%; bottom:-9px; width:14px; height:14px;
+  background:var(--sauge-fonce); transform:translateX(-50%) rotate(45deg); border-radius:0 0 3px 0;
+}
+.onglet:focus-visible { outline:2px solid var(--sauge-fonce); outline-offset:3px; }
 
 /* Le panneau : une carte blanche. Sur grand écran, la photo à gauche et
    le texte à droite ; le titre coiffe le texte (grid-template-areas). */
@@ -1548,7 +1569,7 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
      cibles de 64 px de haut. Le panneau passe sur une colonne, dans
      l'ordre titre → photo → texte : le titre dit tout de suite quel
      onglet on vient d'ouvrir. */
-  .onglets { gap:.3rem; padding:.3rem; }
+  .onglets { gap:.4rem; }
   .onglet { flex-direction:column; gap:.25rem; min-height:64px; padding:.5rem .25rem; font-size:.85rem; letter-spacing:.01em; }
   .panneau {
     grid-template-columns:1fr; grid-template-areas:"titre" "media" "texte";
@@ -1691,4 +1712,7 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
   .carte-act { transition:none; }
   .carte-act:hover { transform:none; }
   .carrousel-jauge { transition:none; }
+  .onglet { transition:none; }
+  .onglet:hover:not(.est-actif) { transform:none; }
+  .panneau:not([hidden]) { animation:none; }
 }

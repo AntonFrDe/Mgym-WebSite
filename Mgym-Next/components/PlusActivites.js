@@ -82,6 +82,19 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
           {site.plusChapo && <p className="lead">{site.plusChapo}</p>}
         </div>
 
+        {/* LA CONSIGNE. Une barre d'onglets ne se devine pas : on ne voyait
+            que le premier panneau, sans comprendre qu'il fallait cliquer
+            « Sur mesure » ou « Plein air » pour voir les autres activités.
+            Même principe que l'indice du carrousel : les deux formulations
+            sont dans le HTML, le CSS montre la bonne (souris ou doigt).
+            aria-hidden : le lecteur d'écran annonce déjà « onglet 1 sur 3 ».
+            Texte d'interface, comme « Lire la suite » : il reste dans le code. */}
+        <p className="onglets-consigne" aria-hidden="true">
+          <span className="indice-souris">Cliquez sur une activité pour la découvrir</span>
+          <span className="indice-doigt">Touchez une activité pour la découvrir</span>
+          <Picto nom="fleche" taille={18} />
+        </p>
+
         <div className="onglets" role="tablist" aria-label={site.plusEtiquette}>
           {onglets.map((o, i) => (
             <button
