@@ -1,17 +1,13 @@
-// EnteteActivites.js — le titre du bloc « Activités », commun aux deux
-// affichages.
+// EnteteActivites.js — le titre du bloc « Activités ».
 //
 // POURQUOI CE FICHIER EXISTE
-// SentierActivites.js et CarrouselActivites.js sont deux présentations des
-// mêmes données. Leur en-tête — étiquette, titre, trait, chapô — était
-// recopiée à l'identique dans les deux : corriger une faute demandait de
-// penser à le faire deux fois, et une seule des deux versions finissait
-// corrigée.
+// Il est isolé pour garder CarrouselActivites.js lisible : l'en-tête
+// — étiquette, titre, trait, chapô — est indépendante du carrousel.
 //
-// Seule la DERNIÈRE PHRASE change d'un affichage à l'autre, parce qu'elle
-// explique comment manipuler ce qui suit (cliquer sur une étape / faire
-// défiler des cartes). Elle est donc passée en paramètre, et reste dans le
-// code : c'est une instruction d'usage liée au dessin, pas du contenu.
+// La DERNIÈRE PHRASE change selon le contexte, parce qu'elle explique comment
+// manipuler ce qui suit (faire défiler des cartes, par exemple). Elle est
+// donc passée en paramètre, et reste dans le code : c'est une instruction
+// d'usage liée au dessin, pas du contenu.
 
 export default function EnteteActivites({ site, instruction }) {
   return (

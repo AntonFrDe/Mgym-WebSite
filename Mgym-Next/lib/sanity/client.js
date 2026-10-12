@@ -76,13 +76,19 @@ export const clientBrouillon = sanityConfigure
  * Le SEUL endroit du projet qui choisit entre les deux clients.
  *
  * @param {boolean} estEnPreview  résultat de draftMode(), jamais un
- *   paramètre d'URL. Voir app/api/preview/route.js.
+ *   paramètre d'URL. Voir app/api/draft-mode/enable/route.js.
  * @returns {import('next-sanity').SanityClient}
  */
 export function clientPour(estEnPreview) {
-  // Projet non configuré : aucun client. L'appelant retombera sur le
-  // contenu par défaut.
-  if (!sanityConfigure) return null
+  // Projet non configuré : le site n'a AUCUN texte en dehors de Sanity
+  // (il n'y a plus de contenu de secours dans le code). Mieux vaut un
+  // build qui s'arrête avec ce message qu'un site publié vide.
+  if (!sanityConfigure) {
+    throw new Error(
+      'Sanity n\'est pas configuré : NEXT_PUBLIC_SANITY_PROJECT_ID et ' +
+      'NEXT_PUBLIC_SANITY_DATASET sont absents (voir .env.example).'
+    )
+  }
 
   if (!estEnPreview) return clientPublie
 

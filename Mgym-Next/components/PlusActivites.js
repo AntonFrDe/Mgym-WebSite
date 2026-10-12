@@ -12,8 +12,7 @@
 // fois. La page raccourcit d'autant.
 //
 // LES TROIS PANNEAUX SONT TOUJOURS DANS LE HTML — seul l'attribut `hidden`
-// les cache. C'est ce qui permet à Google de les lire, et à la copie
-// hors-ligne de fonctionner : build-standalone.js bascule le même attribut.
+// les cache. C'est ce qui permet à Google de les lire.
 //
 // LES ANCIENNES ADRESSES CONTINUENT DE MARCHER. Les boutons d'onglets
 // portent les identifiants des anciennes sections (#bespoke, #outdoor) :
@@ -83,6 +82,19 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
           {site.plusChapo && <p className="lead">{site.plusChapo}</p>}
         </div>
 
+        {/* LA CONSIGNE. Une barre d'onglets ne se devine pas : on ne voyait
+            que le premier panneau, sans comprendre qu'il fallait cliquer
+            « Sur mesure » ou « Plein air » pour voir les autres activités.
+            Même principe que l'indice du carrousel : les deux formulations
+            sont dans le HTML, le CSS montre la bonne (souris ou doigt).
+            aria-hidden : le lecteur d'écran annonce déjà « onglet 1 sur 3 ».
+            Texte d'interface, comme « Lire la suite » : il reste dans le code. */}
+        <p className="onglets-consigne" aria-hidden="true">
+          <span className="indice-souris">Cliquez sur une activité pour la découvrir</span>
+          <span className="indice-doigt">Touchez une activité pour la découvrir</span>
+          <Picto nom="fleche" taille={18} />
+        </p>
+
         <div className="onglets" role="tablist" aria-label={site.plusEtiquette}>
           {onglets.map((o, i) => (
             <button
@@ -122,7 +134,7 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
               <TexteRiche valeur={ateliers.descriptionRiche} className="lead" />
               {(ateliers.motsCles ?? []).length > 0 && (
                 <>
-                  <p className="panneau-sous-titre">Quelques thèmes</p>
+                  {site.ateliersSousTitreThemes && <p className="panneau-sous-titre">{site.ateliersSousTitreThemes}</p>}
                   <ul className="themes">
                     {ateliers.motsCles.map((theme) => (
                       <li key={theme} className="theme"><Picto nom="etoile" taille={18} />{theme}</li>
@@ -194,7 +206,7 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
                 maintenant son sujet. */}
             {plaquettes.length > 0 && (
               <>
-                <p className="panneau-sous-titre">En détail</p>
+                {site.bespokeSousTitrePlaquettes && <p className="panneau-sous-titre">{site.bespokeSousTitrePlaquettes}</p>}
                 <ul className="plaquettes">
                   {plaquettes.map((pl) => (
                     <li key={pl.lien}>
@@ -209,7 +221,7 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
             )}
             {telBrut && (
               <div className="panneau-actions">
-                <a href={`tel:${telBrut}`} className="btn-primary">{site.bespokeBouton}</a>
+                {site.bespokeBouton && <a href={`tel:${telBrut}`} className="btn-primary">{site.bespokeBouton}</a>}
               </div>
             )}
           </div>
@@ -241,7 +253,7 @@ export default function PlusActivites({ site, infos, ateliers, prochainsAteliers
               </div>
             )}
             <div className="panneau-actions">
-              <a href="#evenements" className="btn-primary">{site.outdoorBouton}</a>
+              {site.outdoorBouton && <a href="#evenements" className="btn-primary">{site.outdoorBouton}</a>}
             </div>
           </div>
         </div>

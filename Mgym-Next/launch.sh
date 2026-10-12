@@ -9,10 +9,6 @@
 #   4. Lance le serveur Next (npm start)
 #   5. Attend que le site réponde (health check HTTP) avant de rendre la main
 #
-# Note : `next start` fonctionne à nouveau depuis que l'export statique n'est
-# plus le mode par défaut. Pour servir la COPIE HORS-LIGNE (out/), c'est
-# `npm run export:carousel && npm run start:horsligne`.
-#
 # Usage :
 #   ./launch.sh           # build + lance en production (port 3000)
 #   ./launch.sh --dev     # lance en mode développement (sans build)

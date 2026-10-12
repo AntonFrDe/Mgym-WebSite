@@ -1,0 +1,55 @@
+# sauvegarde-sanity.yml — copie automatique, chaque semaine, du contenu du site.
+#
+# POURQUOI
+# Depuis octobre 2026, le code ne contient plus AUCUN texte du site : tout
+# est dans Sanity. Un champ vidé ou un document supprimé par erreur
+# disparaît donc du site. L'historique gratuit de Sanity ne remonte qu'à
+# 3 jours : passé ce délai, sans cette copie, la perte serait définitive.
+#
+# CE QUE ÇA FAIT
+# Chaque lundi à 3 h (heure de Londres), GitHub télécharge tout le contenu
+# PUBLIÉ (pas les brouillons) et le garde 90 jours, dans l'onglet
+# « Actions » du dépôt → « Sauvegarde du contenu » → l'exécution voulue →
+# « Artifacts ». Aucun secret n'est nécessaire : le contenu publié est déjà
+# public (c'est ce qu'affiche le site).
+#
+# Les photos et PDF ne sont pas copiés : seules les références vers eux
+# le sont, et Sanity les garde même si un document est supprimé.
+#
+# RESTAURER (une personne avec un compte Sanity Administrator) :
+#   1. télécharger l'archive voulue, la décompresser → contenu.ndjson
+#   2. dans Mgym-Next/ :  npx sanity dataset import contenu.ndjson production --replace
+#      (--replace remet chaque document dans l'état de la sauvegarde ;
+#       les documents créés depuis sont gardés.)
+#
+# Pour une sauvegarde complète avec images et brouillons : npm run sauvegarde.
+
+name: Sauvegarde du contenu
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch: # bouton « Run workflow » pour une copie immédiate
+
+permissions: {} # ce travail ne touche ni au dépôt ni à rien d'autre
+
+jobs:
+  sauvegarde:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Exporter le contenu publié de Sanity
+        run: |
+          curl -fsS --retry 3 --max-time 120 \
+            "https://zqxwi6qy.api.sanity.io/v2021-06-07/data/export/production" \
+            -o contenu.ndjson
+          # Une copie vide ou quasi vide signale un problème : on échoue,
+          # GitHub prévient alors le propriétaire du dépôt par e-mail.
+          test "$(wc -l < contenu.ndjson)" -ge 10
+          echo "Documents sauvegardés : $(wc -l < contenu.ndjson)"
+
+      - name: Garder la copie 90 jours
+        uses: actions/upload-artifact@v4
+        with:
+          name: contenu-sanity-${{ github.run_number }}
+          path: contenu.ndjson
+          retention-days: 90

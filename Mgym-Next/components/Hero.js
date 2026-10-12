@@ -3,8 +3,9 @@
 // liste, pas des boutons (rien n'y est cliquable, rien ne doit le laisser
 // croire).
 //
-// Le contenu vient du CMS (ou du contenu par défaut si le CMS n'est pas
-// branché) : voir lib/contenu/index.js. Le composant ne fait qu'afficher.
+// Le contenu vient du CMS : voir lib/contenu/index.js. Le composant ne fait
+// qu'afficher ; un champ vidé dans le back-office n'affiche rien (pas même
+// un bouton vide, qu'un lecteur d'écran annoncerait sans nom).
 
 export default function Hero({ site }) {
   return (
@@ -16,10 +17,6 @@ export default function Hero({ site }) {
       <div
         className="hero-bg"
         style={site.heroImage ? { backgroundImage: `url(${site.heroImage.src})` } : undefined}
-        /* Marque le repli local : le CSS peut alors servir une version
-           allégée sur téléphone. Une image venue du CMS est déjà
-           redimensionnée par le CDN, elle n'en a pas besoin. */
-        data-repli={site.heroImage?.src?.startsWith('/fond1') ? '1' : undefined}
         role="img"
         aria-label={site.heroImage?.alt || ''}
       />
@@ -33,15 +30,19 @@ export default function Hero({ site }) {
           {/* L'espace compte : sans elle, le titre lu par un lecteur
               d'écran (et par Google) était « Bougeonsensemble ». Le
               retour à la ligne, lui, vient du CSS. */}
-          {' '}
-          <em className="hero-anim">{site.heroTitreItalique}</em>
+          {site.heroTitreItalique && (
+            <>
+              {' '}
+              <em className="hero-anim">{site.heroTitreItalique}</em>
+            </>
+          )}
         </h1>
 
         <div className="hero-divider hero-anim" />
 
         <div className="hero-ctas hero-anim">
-          <a href="#activites" className="btn-primary">{site.heroBoutonActivites}</a>
-          <a href="#contact"   className="btn-secondary">{site.heroBoutonContact}</a>
+          {site.heroBoutonActivites && <a href="#activites" className="btn-primary">{site.heroBoutonActivites}</a>}
+          {site.heroBoutonContact && <a href="#contact" className="btn-secondary">{site.heroBoutonContact}</a>}
         </div>
       </div>
 

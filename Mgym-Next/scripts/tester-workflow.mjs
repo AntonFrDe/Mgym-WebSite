@@ -65,12 +65,21 @@ async function page(chemin, cookies = '') {
   return { statut: r.status, texte: await r.text(), entetes: r.headers }
 }
 
+// L'aperçu s'ouvre comme le fait le Studio : un secret à usage court est
+// enregistré dans Sanity, puis présenté à /api/draft-mode/enable.
+const ID_SECRET = 'drafts.test-workflow-secret-apercu'
+const SECRET_APERCU = 'test-' + Date.now().toString(36) + Math.random().toString(36).slice(2)
+const urlApercu = (secretApercu, chemin = '/') =>
+  `${BASE}/api/draft-mode/enable?sanity-preview-secret=${encodeURIComponent(secretApercu)}` +
+  `&sanity-preview-pathname=${encodeURIComponent(chemin)}`
+
 /** Ouvre une session de prévisualisation et rend ses cookies. */
 async function ouvrirPreview() {
-  const r = await fetch(
-    `${BASE}/api/preview?secret=${encodeURIComponent(secret)}&chemin=/`,
-    { redirect: 'manual' }
-  )
+  await client.createOrReplace({
+    _id: ID_SECRET, _type: 'sanity.previewUrlSecret',
+    secret: SECRET_APERCU, source: 'tester-workflow', studioUrl: 'http://localhost:3333',
+  })
+  const r = await fetch(urlApercu(SECRET_APERCU), { redirect: 'manual' })
   const brut = r.headers.getSetCookie?.() ?? []
   return brut.map((c) => c.split(';')[0]).join('; ')
 }
@@ -106,15 +115,13 @@ try {
 
   // ── TEST 3 — la sécurité de la prévisualisation ───────────────
   console.log('\n  TEST 3 — sécurité de la prévisualisation')
-  const sansSecret = await fetch(`${BASE}/api/preview`, { redirect: 'manual' })
+  const sansSecret = await fetch(`${BASE}/api/draft-mode/enable`, { redirect: 'manual' })
   verifier(sansSecret.status === 401, 'sans secret -> 401')
-  const mauvais = await fetch(`${BASE}/api/preview?secret=faux`, { redirect: 'manual' })
+  const mauvais = await fetch(urlApercu('faux'), { redirect: 'manual' })
   verifier(mauvais.status === 401, 'secret faux -> 401')
   verifier(await sansSecret.text() === await mauvais.text(),
            'message identique dans les deux cas (aucun indice donné)')
-  const ouvert = await fetch(
-    `${BASE}/api/preview?secret=${encodeURIComponent(secret)}&chemin=https://site-piege.fr`,
-    { redirect: 'manual' })
+  const ouvert = await fetch(urlApercu(SECRET_APERCU, 'https://site-piege.fr'), { redirect: 'manual' })
   verifier(!(ouvert.headers.get('location') || '').includes('site-piege'),
            'redirection vers un site extérieur refusée')
 
@@ -126,7 +133,7 @@ try {
   await attendre(2000)
   const publie = await client.getDocument(ID)
   verifier(publie?.titre === NOUVEAU, 'le contenu publié porte bien la nouvelle valeur')
-  console.log('    (la production ne changera qu\'après reconstruction du site)')
+  console.log('    (en ligne : à la réception du webhook, ou au plus tard au bout d\'une heure)')
 
   // ── TEST 5 — l'historique conserve la version précédente ──────
   console.log('\n  TEST 5 — historique et restauration')
@@ -166,7 +173,7 @@ try {
 
   // ── TEST 7 — sortie de prévisualisation ───────────────────────
   console.log('\n  TEST 7 — sortie de prévisualisation')
-  const sortie = await fetch(`${BASE}/api/preview-exit`, {
+  const sortie = await fetch(`${BASE}/api/draft-mode/disable`, {
     headers: { cookie: cookies }, redirect: 'manual',
   })
   verifier([302, 307, 308].includes(sortie.status), 'la sortie redirige vers le site public')
@@ -181,6 +188,9 @@ try {
   console.log('\n  TEST 9 — blog et référencement')
   verifier((await page('/blog')).statut === 200, '/blog répond')
   verifier((await page('/blog/adresse-inexistante')).statut === 404, 'une adresse inventée rend un 404')
+  verifier((await page('/evenements/adresse-inexistante')).statut === 404, 'un événement inventé rend un 404')
+  const webhook = await fetch(`${BASE}/api/revalidation`, { method: 'POST', body: '{}' })
+  verifier([401, 503].includes(webhook.status), 'la route de publication refuse un appel non signé')
   verifier((await page('/robots.txt')).statut === 200, 'robots.txt répond')
   verifier((await page('/sitemap.xml')).statut === 200, 'sitemap.xml répond')
 
@@ -190,6 +200,7 @@ try {
 } finally {
   await client.delete(ID).catch(() => {})
   await client.delete(`drafts.${ID}`).catch(() => {})
+  await client.delete(ID_SECRET).catch(() => {})
   console.log('\n  (documents de test supprimés)')
 }
 

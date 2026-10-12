@@ -26,14 +26,31 @@ const montserrat = Montserrat({
   variable: '--font-sans',
 })
 
+// QUAND LE SITE RELIT LE CMS
+//
+// 1. À chaque « Publier » dans le back-office : Sanity prévient le site
+//    (webhook → app/api/revalidation/route.js), qui jette ses pages en
+//    cache. La visite suivante voit la modification, en quelques secondes.
+// 2. Au plus tard toutes les heures, par sécurité : si un appel de Sanity
+//    se perd (Sanity n'essaie que 3 fois), le site se rattrape seul. C'est
+//    aussi ce qui fait disparaître un stage passé ou un cours annulé de la
+//    veille sans que personne ne publie rien.
+//
+// Déclaré ICI, une seule fois : Next applique le plus petit délai trouvé
+// entre la mise en page et la page, donc ce nombre vaut pour tout le site.
+// Il doit rester écrit en chiffres (Next refuse une constante importée).
+// lib/sanity/fetch.js reprend le même nombre pour les réponses de Sanity.
+export const revalidate = 3600
+
 // Les informations de l'onglet du navigateur et des résultats de
 // recherche viennent du back-office, onglet « Référencement ».
 //
 // generateMetadata (et non une constante) parce que ces valeurs sont
 // désormais lues à la construction du site : elles peuvent changer sans
-// qu'on touche au code.
+// qu'on touche au code. En aperçu, ce sont les brouillons qui sont lus,
+// comme pour le reste de la page.
 export async function generateMetadata() {
-  const { seo } = await getContenu()
+  const { seo } = await getContenu(await previewActif())
 
   const partage = seo.imagePartage?.src
     ? [{ url: seo.imagePartage.src, alt: seo.imagePartage.alt }]
@@ -75,23 +92,11 @@ export default async function RootLayout({ children }) {
   // chronomètre. Ce préchargement la demande dès la première ligne du HTML.
   const { site } = await getContenu(enPreview)
   const imageAccueil = site.heroImage?.src
-  // Le repli local a une variante allégée pour téléphone (voir la media
-  // query .hero-bg[data-repli] dans globals.css). Précharger la version
-  // de bureau sur mobile annulerait tout le gain.
-  const replisLocal = imageAccueil?.startsWith('/fond1')
 
   return (
     <html lang="fr" className={`${cormorant.variable} ${montserrat.variable}`}>
       <head>
-        {imageAccueil && replisLocal && (
-          <>
-            <link rel="preload" as="image" href="/fond1-mobile.avif"
-                  media="(max-width: 700px)" fetchPriority="high" />
-            <link rel="preload" as="image" href={imageAccueil}
-                  media="(min-width: 701px)" fetchPriority="high" />
-          </>
-        )}
-        {imageAccueil && !replisLocal && (
+        {imageAccueil && (
           <link rel="preload" as="image" href={imageAccueil} fetchPriority="high" />
         )}
       </head>
@@ -102,7 +107,7 @@ export default async function RootLayout({ children }) {
         {/* L'aperçu du Studio : cadres cliquables et rafraîchissement en
             direct. Jamais rendu sur le site public. */}
         {enPreview && <EditionVisuelle />}
-        <Nav enExport={process.env.MGYM_EXPORT === '1'} />
+        <Nav />
         {/* ClientLayout gère les animations au défilement (IntersectionObserver) */}
         <ClientLayout>
           {children}

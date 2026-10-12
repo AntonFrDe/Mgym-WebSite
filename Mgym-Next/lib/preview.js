@@ -84,12 +84,6 @@ export async function fermerPreview({ cadreTiers = false } = {}) {
  * @returns {Promise<boolean>}
  */
 export async function previewActif() {
-  // Garde-fou pour la copie hors-ligne livrée à la cliente : en mode
-  // export statique il n'y a ni serveur, ni requête, ni cookie. Appeler
-  // draftMode() ferait basculer la page en rendu dynamique et casserait
-  // le build. On répond « pas de prévisualisation » sans rien lire.
-  if (process.env.MGYM_EXPORT === '1') return false
-
   const brouillon = await draftMode()
   if (!brouillon.isEnabled) return false
 

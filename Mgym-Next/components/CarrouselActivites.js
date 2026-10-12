@@ -1,5 +1,5 @@
 'use client'
-// CarrouselActivites.js — VERSION TEST (branche teste-template).
+// CarrouselActivites.js — l'affichage du bloc « Activités ».
 //
 // Les 8 activités sont présentées sous forme de cartes qui défilent à
 // l'HORIZONTALE. On ne voit jamais les 8 cartes en même temps : c'est
@@ -163,9 +163,7 @@ export default function CarrouselActivites({ site, activites = [] }) {
                       {/* Sur téléphone, la description est limitée à quatre
                           lignes : entière, elle rendait la carte plus haute
                           que l'écran (733 px pour 600 visibles). Le texte reste
-                          TOUJOURS dans le HTML — seul le CSS le coupe —, donc
-                          rien n'est perdu pour la copie hors-ligne ni pour
-                          Google. build-standalone.js reproduit ce bouton. */}
+                          TOUJOURS dans le HTML — seul le CSS le coupe. */}
                       <TexteRiche valeur={act.descriptionRiche} className="carte-act-desc" />
                       <button
                         type="button"

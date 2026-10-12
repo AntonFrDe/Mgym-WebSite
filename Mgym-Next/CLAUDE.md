@@ -8,7 +8,7 @@ La lisibilité et la simplicité priment sur l'effet technique.
 
 - **Next.js 15.5** (App Router) + **React 19** (19.2 minimum : exigé par le
   Studio Sanity 5, dont l'outil « Aperçu » s'adapte aux téléphones)
-- **JavaScript pur** — pas de TypeScript, pas de linter. 67 tests via
+- **JavaScript pur** — pas de TypeScript, pas de linter. 87 tests via
   `node --test` (aucune dépendance de test)
 - **CSS global unique** : `app/globals.css` (pas de Tailwind, pas de CSS Modules)
 - Polices via `next/font/google` : Cormorant Garamond (serif) + Montserrat (sans)
@@ -22,32 +22,28 @@ La lisibilité et la simplicité priment sur l'effet technique.
 ```bash
 npm run dev            # développement, http://localhost:3000
 npm run studio:dev     # le back-office,  http://localhost:3333
-npm run verifier       # schémas + requêtes + 67 tests + build
+npm run verifier       # schémas + requêtes + 87 tests + build
+npm run livrer         # verifier, puis redéploie le Studio (sanity deploy)
 npm run build          # build du site hébergé
 npm start              # le sert (next start)
 ./launch.sh            # build + start + vérification qu'il répond
-npm run livraison      # copie hors-ligne (voir « Livraison » plus bas)
 ./launch.sh --dev      # mode dev sans build
 PORT=4000 ./launch.sh  # autre port
-node build-standalone.js   # copie autonome du site (voir « Livraison » plus bas)
 ```
 
 La vérification de référence est `npm run verifier`. Il n'y a pas de linter.
 
-`output: 'export'` **n'est plus le mode par défaut** : la prévisualisation des
-brouillons exige une route serveur, et l'export les interdit — vérifié par un
-build, pas supposé. Le site reste entièrement généré au build et servi par un
-CDN ; seules les deux routes `/api/preview*` sont dynamiques.
+Le site est **pré-calculé** et servi par Netlify. Il se met à jour SANS
+reconstruction (une reconstruction coûte 15 crédits Netlify sur 300/mois) :
 
-La copie hors-ligne survit : `scripts/export-statique.mjs` recopie le projet
-dans un dossier temporaire SANS `app/api/`, y lance un build en mode export et
-rapatrie `out/`. Le projet réel n'est jamais modifié.
+1. à chaque « Publier », Sanity appelle `app/api/revalidation` (webhook
+   signé, secret `SANITY_REVALIDATE_SECRET`), qui jette les pages en cache ;
+2. au plus tard toutes les heures (`revalidate = 3600`, déclaré UNE fois
+   dans `app/layout.js`), si un appel de Sanity se perd.
 
-Ce build a lieu ailleurs que dans le projet : Next n'y trouve donc pas
-`.env.local`. Le script lui transmet les **trois variables publiques** de
-Sanity — jamais les jetons. Sans cette transmission, la copie se
-construisait avec le contenu par défaut et livrait un site périmé, sans la
-moindre erreur.
+Une fiche d'événement ou d'article publiée après le build est fabriquée à
+la première visite (pas de `dynamicParams = false` : c'est ce qui laissait
+les nouveaux stages en 404). Les routes `/api/*` sont dynamiques.
 
 ## Architecture
 
@@ -62,22 +58,18 @@ components/
   Hero.js        # image plein écran + bande d'activités en verre dépoli
   Manifesto.js   # citation sur bandeau sombre
   About.js       # histoire de l'association
-  activitesData.js       # SOURCE UNIQUE des 8 activités
-  EnteteActivites.js     # titre + chapô, partagés par les deux affichages
-  SentierActivites.js    # affichage « sentier » vertical ('use client')
-  CarrouselActivites.js  # affichage « cartes horizontales » ('use client')
+  EnteteActivites.js     # titre + chapô du carrousel
+  CarrouselActivites.js  # affichage des activités en cartes horizontales ('use client')
   PlusActivites.js       # 3 onglets : ateliers · sur mesure · plein air ('use client')
   Evenements.js          # frise des stages & événements (fiches : app/evenements)
   Temoignages.js         # avis, sous la coach ; note Google
   BlogApercu.js          # 3 derniers articles (masqué sans article)
   LienItineraire.js      # ouvre Plans / Google Maps / geo: selon l'appareil ('use client')
   pictogrammes.js        # TOUS les pictogrammes et logos de réseaux
-  liens.js               # adresses des formulaires en ligne (un seul endroit)
   Coach.js Pricing.js Planning.js Reseaux.js Contact.js Footer.js
   ClientLayout.js # IntersectionObserver global pour les classes .apparition
-public/Images/   # toutes les photos, en .avif (sauf CoachPhoto.webp)
-public/fond1.avif # fond du hero
-serve.js         # sert out/ en local, sans dépendance (cf. « Commandes »)
+public/Images/Logo.avif   # le logo ; TOUTES les autres photos sont dans Sanity
+public/documents/         # anciennes plaquettes PDF, gardées pour les liens déjà partagés
 ```
 
 L'accueil se parcourt par ancres (`#about`, `#activites`, `#plus-activites`,
@@ -195,28 +187,12 @@ Toute animation doit être neutralisée dans le bloc
 `@media (prefers-reduced-motion: reduce)`, **placé en dernier dans
 `globals.css`** pour l'emporter sur les media queries de largeur.
 
-## Le bloc « Activités » — deux affichages
+## Le bloc « Activités » — le carrousel
 
-Les 8 activités vivent dans **`components/activitesData.js`**, classées de la
-plus douce à la plus intense (Yin Yoga, Yoga, Yogilates, Pilates, Gym
-Bien-être, Forme & Force), les deux offres sur mesure fermant la marche
-(Ateliers thématiques, Prestations sur mesure). **L'ordre du tableau est
-l'ordre affiché** : déplacer une ligne change le classement partout.
-Deux composants les affichent différemment ; `app/page.js` en choisit un :
-
-| Composant | Principe | `MGYM_VARIANT` |
-|---|---|---|
-| `CarrouselActivites.js` | 8 cartes qui défilent à l'horizontale à la molette, au doigt, aux flèches | *(vide)* — affichage par défaut |
-| `SentierActivites.js` | chemin sinueux vertical tracé au défilement (SVG `stroke-dashoffset`), étapes alternées gauche/droite, panneau dépliable | `sentier` |
-
-Le choix se fait par la variable d'environnement `MGYM_VARIANT` dans
-`app/page.js` (`MGYM_VARIANT=sentier npm run build`), sans toucher au code.
-
-**Ne jamais dupliquer les activités** dans un composant : ni le tableau de
-données (`activitesData.js`), ni l'en-tête de la section
-(`EnteteActivites.js`, dont seule la phrase d'instruction change d'un
-affichage à l'autre). Cette en-tête a longtemps été recopiée dans les deux
-fichiers, et une correction sur deux se perdait.
+Les activités vivent dans Sanity (documents « activite »), classées par
+leur champ « ordre d'affichage » : de la plus douce à la plus intense, les
+deux offres sur mesure fermant la marche. Il n'y a plus de copie dans le
+code.
 
 ### Règles du carrousel horizontal
 
@@ -237,106 +213,43 @@ fichiers, et une correction sur deux se perdait.
 - **Sur téléphone, une carte doit tenir dans l'écran.** La description y est
   coupée à quatre lignes (`-webkit-line-clamp`) avec un bouton « Lire la
   suite » (`.carte-act-suite`, classe `.est-ouverte` sur la carte). Le texte
-  reste entier dans le HTML ; `build-standalone.js` reproduit le bouton.
-  Entière, la plus longue description donnait une carte de 733 px pour
-  600 px visibles.
-
-## Livraison au client — `Site-MGYM-{sentier,carousel}.html`
-
-`build-standalone.js` produit, depuis `out/`, une copie du site qui s'ouvre par
-double-clic sans serveur. **Deux formats**, selon l'usage :
-
-```bash
-# Fichier unique (~1,6 Mo, images en base64) — pratique à envoyer par mail
-npm run build:html:sentier    # Site-MGYM-sentier.html
-npm run build:html:carousel   # Site-MGYM-carousel.html
-npm run build:html:all        # les deux
-
-# Dossier unique (~1,4 Mo, photos en fichiers séparés) — à déposer sur Drive
-npm run livraison             # les deux versions dans Livraison-MGYM/
-npm run livraison:carousel    # n'y dépose que la page « cartes »
-npm run livraison:sentier     # n'y dépose que la page « chemin »
-```
-
-`Livraison-MGYM/` est **un seul dossier** contenant les deux versions du site :
-
-```
-Livraison-MGYM/
-  Site-MGYM-activites-en-cartes.html   # variante carrousel
-  Site-MGYM-activites-en-chemin.html   # variante sentier
-  Images/          # partagé par les deux pages
-  fond1.avif
-  LISEZ-MOI.txt    # écrit pour la cliente, pas pour un développeur
-```
-
-Les photos restent des fichiers visibles : les remplacer par un fichier de
-même nom met à jour les deux pages d'un coup. Le mode `--dossier` **ne vide
-jamais** `Livraison-MGYM/` : les deux variantes s'y écrivent l'une après
-l'autre, un nettoyage effacerait la page du passage précédent.
-
-Les deux formats (fichier unique / dossier) partagent tout le reste — seul le
-traitement des images diffère (`transformeImage` dans `build-standalone.js`).
-
-Pièges à connaître :
-
-- Le script **retire tous les `<script>` de Next**. Aucune interactivité React
-  ne survit. Toute interaction nouvelle doit être **réécrite en JS vanilla**
-  dans la constante `inlineJs` de `build-standalone.js` (c'est déjà le cas pour
-  la nav, le menu mobile, les classes `.apparition`, le carrousel et son
-  « Lire la suite », les onglets « Plus d'activités », le bouton
-  « Itinéraire », et pour le sentier : révélation des étapes, tracé du chemin
-  au défilement, bouton « En savoir plus »). **Renommer une classe utilisée par ce script sans le
-  mettre à jour casse silencieusement le fichier livré, jamais le site Next.**
-- Les liens vers les images doivent rester **absolus** dans le code source
-  (`/Images/xxx`) : c'est ce que `build-standalone.js` détecte pour les
-  transformer, en base64 ou en chemin relatif selon le format.
-- **Un state React invisible à l'export est un contenu perdu.** Un bloc rendu
-  conditionnellement (`{estOuvert && …}`) est simplement absent du HTML
-  produit. C'est ce qui rendait les descriptions d'activités introuvables dans
-  le fichier livré. Règle : rendre le contenu **toujours**, et le masquer avec
-  l'attribut `hidden` que React et le JS inline basculent tous les deux.
-- De même, une classe posée par un state React (`est-visible` sur `.etape`) ne
-  sera jamais posée dans le fichier autonome : il faut son équivalent dans
-  `inlineJs`, sinon la section reste en `opacity:0`.
-- Le script lit le dossier **`out/`**, produit par `npm run export:carousel`
-  ou `export:sentier` — jamais par `npm run build`, qui ne produit plus
-  d'export. Les scripts `livraison:*` enchaînent les deux.
-- **Les photos du CMS sont des URL `cdn.sanity.io`.** Une page ouverte par
-  double-clic, souvent sans Internet, n'en afficherait aucune.
-  `scripts/localiser-images.mjs` les rapatrie dans `out/Images/` et réécrit
-  les liens en `/Images/…` avant que `build-standalone.js` ne passe : c'est
-  la seule forme qu'il sait traiter. Il en profite pour **supprimer les
-  photos devenues orphelines** — celles de `public/Images/` que plus aucune
-  page ne cite une fois le CMS branché. Sans ce ménage, elles partaient
-  chez la cliente alors que les remplacer n'aurait rien changé.
+  reste entier dans le HTML. Entière, la plus longue description donnait une
+  carte de 733 px pour 600 px visibles.
 
 ## Le CMS — ce qu'il faut savoir avant d'y toucher
 
-Le contenu vient de Sanity, avec un **repli** sur `lib/contenu/defaut.js`.
-Sans projet configuré, le site affiche exactement ce qu'il affichait avant :
-c'est l'état initial. **En production, une panne de Sanity n'utilise PAS ce
-repli** (`lib/sanity/fetch.js` lève l'erreur) : le build échoue et Netlify
-garde la version précédente, ou la régénération échoue et Next garde la
-dernière page bonne. Le repli mis en cache affichait sinon d'anciens tarifs
-sans la moindre erreur.
+**Sanity est la seule source du texte.** Le code ne contient plus aucun
+texte « par défaut » (repli supprimé en octobre 2026 : il faisait revenir
+l'ancien texte quand la cliente vidait un champ, et cachait vingt champs
+vides). Conséquences :
 
-**Trois fichiers décrivent les mêmes champs** et rien ne les relie
-automatiquement :
-
-```
-sanity/schemaTypes/siteContent.js   ce que la cliente peut remplir
-lib/sanity/queries/groq.js          ce que le site va chercher
-lib/contenu/source-historique.mjs   ce qu'il affiche à défaut
-```
-
-Ajouter un champ dans l'un sans les autres donne un champ rempli pour rien,
-ou un texte non modifiable. `npm test` le détecte — l'oubli s'est produit
-deux fois pendant le développement.
+- **Un champ vide n'affiche rien.** Chaque composant teste la valeur avant
+  de l'afficher (`{site.x && …}`). Un document unique absent donne `{}`
+  (`lib/contenu/index.js`), jamais `null`.
+- **Sans Sanity configuré, le build s'arrête** avec un message clair
+  (`clientPour`, `lib/sanity/client.js`). En production, une panne de Sanity
+  LÈVE une erreur (`lib/sanity/fetch.js`) : Next garde la dernière page
+  bonne lors de la relecture horaire. Seule exception : une panne dans les
+  secondes qui suivent un « Publier » donne une page d'erreur jusqu'au rendu
+  suivant réussi.
+- **Les trois documents uniques sont lus EN ENTIER** (`*[_id == "siteContent"][0]`,
+  sans liste de champs, `lib/sanity/queries/groq.js`). Le schéma
+  (`sanity/schemaTypes/`) est leur seule description. Ajouter un texte =
+  ajouter le champ au schéma + le lire dans le composant, rien d'autre.
+  `lib/contenu/champs.test.mjs` échoue si un composant lit un champ qui
+  n'existe pas, ou si un champ du schéma n'est lu nulle part.
+- **Ne jamais valider en `error()` un champ de « Textes du site »** : un
+  seul champ en erreur bloque la publication des 112. Utiliser `warning()`
+  (seule exception : refuser une adresse de lien dangereuse ou mal formée).
+- **Sauvegarde** : chaque lundi, GitHub copie le contenu publié
+  (`.github/workflows/sauvegarde-sanity.yml`, onglet « Actions »). L'historique
+  gratuit de Sanity ne remonte qu'à 3 jours. `npm run sauvegarde` fait une
+  copie complète (images, brouillons) avant toute intervention.
 
 Vérifications avant de livrer :
 
 ```bash
-npm run verifier   # schémas + requêtes + 67 tests + build
+npm run verifier   # schémas + requêtes + 87 tests + build
 ```
 
 Documentation complète dans `docs/` : SECURITY, ROLLBACK, SANITY-SCHEMAS,
@@ -377,15 +290,11 @@ publier ses événements.
 
 ## Hygiène du dépôt
 
-Rien de ce que produit une commande ne doit être commité. `out/`,
-`Livraison-MGYM/` et les `Site-MGYM*.html` sont dans `.gitignore` : ils se
-régénèrent en une commande et pèsent plusieurs mégaoctets chacun. Avant de
-committer, vérifier que `git status` ne liste que des fichiers écrits à la
-main.
+Avant de committer, vérifier que `git status` ne liste que des fichiers
+écrits à la main — les produits de build sont dans `.gitignore`.
 
-Les photos non référencées sont à supprimer : `build-standalone.js` copie
-**tout** `public/Images/` dans le dossier de livraison, une image inutilisée
-part donc chez la cliente. Pour lister les orphelines :
+Les photos non référencées alourdissent le dépôt pour rien. Pour lister les
+orphelines :
 
 ```bash
 for img in public/Images/*; do

@@ -11,10 +11,35 @@
 
 import { SINGLETONS } from '../schemaTypes/index.js'
 
+// Les types que la cliente modifie (les documents techniques de Sanity,
+// comme les secrets de l'aperçu, sont exclus).
+const TYPES_CONTENU = [
+  'activite', 'creneau', 'exception', 'fermeture', 'evenement', 'article',
+  'siteContent', 'infosPratiques', 'seoGlobal',
+]
+
 export const structure = (S) =>
   S.list()
     .title('Administration du site')
     .items([
+      // ── À PUBLIER ───────────────────────────────────────────
+      // Tout ce qui a été modifié mais PAS ENCORE PUBLIÉ. Le site public
+      // ne montre que le publié : une modification visible dans l'Aperçu
+      // mais restée dans cette liste n'est pas en ligne. Constaté le
+      // 11/10 : quatre fiches d'activités oubliées en brouillon, dont une
+      // nouvelle activité que la cliente croyait en ligne.
+      S.listItem()
+        .title('À publier')
+        .icon(() => '📝')
+        .child(
+          S.documentList()
+            .title('Modifications pas encore publiées')
+            .apiVersion('2024-10-01')
+            .filter('_id in path("drafts.**") && _type in $types')
+            .params({ types: TYPES_CONTENU })
+        ),
+      S.divider(),
+
       // ── PLANNING ────────────────────────────────────────────
       S.listItem()
         .title('Planning des cours')

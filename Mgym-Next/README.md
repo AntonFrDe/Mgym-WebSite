@@ -64,9 +64,9 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 > **Le site n'écrit jamais dans Sanity.** Aucun token d'écriture ne doit
 > exister sur l'hébergeur. Voir [docs/SECURITY.md](docs/SECURITY.md).
 
-**Le site fonctionne sans Sanity configuré** : il affiche alors le contenu par
-défaut (`lib/contenu/defaut.js`), c'est-à-dire le site tel qu'il était avant
-l'ajout du CMS. Ce n'est pas une panne, c'est l'état initial.
+**Sanity est la seule source du texte** : sans projet configuré, le build
+s'arrête avec un message clair. Il n'y a plus de contenu de secours dans le
+code (voir CLAUDE.md, « Le CMS »).
 
 ---
 
@@ -84,12 +84,6 @@ npm run build && npm start        # le site hébergé
 ./launch.sh                       # build + start + vérification qu'il répond
 ```
 
-Pour relire la copie hors-ligne telle que la cliente la recevra :
-
-```bash
-npm run export:carousel && npm run start:horsligne
-```
-
 ---
 
 ## Vérifier
@@ -102,7 +96,7 @@ npm run verifier       # enchaîne les quatre commandes ci-dessous
 |---|---|
 | `npm run schemas:check` | les schémas compilent, chaque document a un aperçu lisible, chaque champ une description française |
 | `npm run groq:check` | les 13 requêtes compilent, aucune valeur variable n'est concaténée, aucune ne vise `drafts.` |
-| `npm test` | 67 tests : moteur de planning, sécurité de la prévisualisation, idempotence de la migration, cohérence schéma / requête / contenu |
+| `npm test` | 87 tests : moteur de planning, sécurité de la prévisualisation, chaque champ du back-office lu par le site (et inversement) |
 | `npm run build` | le site se construit |
 
 Il n'y a **pas de linter** dans ce projet : `npm run verifier` en tient lieu.
@@ -112,28 +106,21 @@ Dernière mesure Lighthouse sur le build de production, émulation mobile :
 
 ---
 
-## Migrer le contenu existant
-
-```bash
-npm run migrer          # simulation, n'écrit rien
-npm run migrer:ecrire   # applique
-```
-
-Le script est **idempotent** : chaque document a un identifiant déduit de son
-contenu, une seconde exécution remplace au lieu de dupliquer.
-
----
 
 ## Prévisualisation
 
-```
-/api/preview?secret=LE_SECRET&chemin=/     ouvre une session d'une heure
-/api/preview-exit                           la ferme
-```
+Elle s'ouvre depuis l'outil **Aperçu** du back-office, qui appelle
+`/api/draft-mode/enable` avec un secret à usage court, créé par le Studio et
+vérifié auprès de Sanity. Le bouton « Revenir au site publié » appelle
+`/api/draft-mode/disable`. Une session vérifie le secret **et** une date
+limite signée ; un cookie modifié à la main est refusé.
 
-Une session vérifie le secret **et** une date limite signée. Un cookie
-modifié à la main est refusé, un secret faux renvoie exactement le même
-message qu'un secret absent.
+## Publication
+
+« Publier » dans le back-office appelle `/api/revalidation` (webhook Sanity
+signé par `SANITY_REVALIDATE_SECRET`) : le site jette ses pages en cache, la
+visite suivante voit la modification. Aucune reconstruction. Par sécurité,
+le site relit aussi Sanity toutes les heures.
 
 ---
 
@@ -154,26 +141,6 @@ suffit et évite d'exposer une route publique à sécuriser.
 > les 21 contrôles de `scripts/tester-workflow.mjs` passent. Restent à faire :
 > déployer le Studio, choisir l'hébergeur, brancher le Deploy Hook. La marche
 > à suivre est dans [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md).
-
----
-
-## Livrer une copie hors-ligne
-
-Le site peut aussi être remis sous forme de fichiers qui s'ouvrent par
-double-clic, sans serveur ni Internet.
-
-```bash
-npm run livraison       # dossier Livraison-MGYM/ (~1,3 Mo)
-npm run build:html:all  # deux fichiers .html autonomes (~1,6 Mo)
-```
-
-`scripts/export-statique.mjs` recopie le projet dans un dossier temporaire
-**sans `app/api/`**, y lance un build en mode export, et rapatrie `out/`. Le
-projet réel n'est jamais modifié : rien à réparer si le build échoue.
-
-C'est nécessaire parce que `output: 'export'` interdit toute route serveur, et
-que la prévisualisation en exige une. Les deux ne peuvent pas coexister dans
-une même configuration — vérifié par un build, pas supposé.
 
 ---
 
@@ -210,7 +177,6 @@ npm run studio:deploy   # puis brancher admin.mgym.fr
 | `ERR_REQUIRE_ESM` sur une commande `sanity` | Node < 20.19 — voir `.nvmrc` |
 | Le site affiche l'ancien contenu | Sanity non configuré : c'est le repli, il fonctionne |
 | Une section a disparu | Champ vidé dans le CMS **et** absent du contenu par défaut |
-| `npm run build` échoue sur `/api/preview` | `MGYM_EXPORT=1` est actif : les routes serveur sont incompatibles avec l'export |
 | La prévisualisation montre le contenu publié | `SANITY_API_READ_TOKEN` absent — repli volontaire, avertissement dans les journaux |
 | Le planning est vide | Aucun créneau saisi **et** repli désactivé |
 
@@ -222,8 +188,8 @@ npm run studio:deploy   # puis brancher admin.mgym.fr
 app/
   layout.js            metadata dynamiques, bandeau de prévisualisation
   page.js              récupère le contenu UNE fois et le distribue
-  api/preview/         entrée du mode prévisualisation
-  api/preview-exit/    sortie
+  api/draft-mode/      entrée et sortie de l'aperçu des brouillons
+  api/revalidation/    appelée par Sanity à chaque « Publier »
   sitemap.js robots.js générés depuis le contenu
   globals.css          100 % du style, organisé par section
 components/            des afficheurs : ils reçoivent des props, rien d'autre
@@ -234,7 +200,7 @@ lib/
   preview.js           session de prévisualisation
   preview-jeton.js     sa cryptographie, isolée pour être testable
 sanity/                schémas et structure du back-office
-scripts/               migration, export hors-ligne, vérifications
+scripts/               migration, sauvegarde, vérifications
 ```
 
 **Aucun composant n'appelle Sanity.** Ils reçoivent des données déjà prêtes et

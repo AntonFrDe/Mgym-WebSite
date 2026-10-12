@@ -31,11 +31,14 @@ export const activite = defineType({
       title: 'Adresse web',
       type: 'slug',
       description:
-        'Généré automatiquement à partir du nom. Ne le modifiez qu\'en cas ' +
-        'de nécessité : une adresse déjà partagée cesserait de fonctionner.',
+        'Remplie automatiquement à partir du nom quand vous cliquez sur ' +
+        '« Publier ». Ne la modifiez qu\'en cas de nécessité : une adresse ' +
+        'déjà partagée cesserait de fonctionner.',
       options: { source: 'titre', maxLength: 60 },
+      // Avertissement seulement : une erreur grisait le bouton « Publier »,
+      // qui est justement ce qui remplit l'adresse (sanity/lib/actions.jsx).
       validation: (Rule) =>
-        Rule.required().error('Cliquez sur « Generate » pour créer l\'adresse.'),
+        Rule.required().warning('L\'adresse sera créée à la publication.'),
     }),
 
     defineField({

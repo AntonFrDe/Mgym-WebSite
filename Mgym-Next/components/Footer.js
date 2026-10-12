@@ -7,10 +7,6 @@
 
 import { LogoReseau, NOMS_RESEAUX } from './pictogrammes'
 
-// La copie hors-ligne est un document d'une seule page : le blog n'y est
-// pas exporté. Y laisser son lien donnerait un lien mort à la cliente.
-const enExport = process.env.MGYM_EXPORT === '1'
-
 const navLinks = [
   { href: '/#about',     label: 'À propos'  },
   { href: '/#activites', label: 'Activités' },
@@ -21,7 +17,7 @@ const navLinks = [
   { href: '/#evenements', label: 'Stages'   },
   { href: '/#reseaux',   label: 'Réseaux'   },
   { href: '/#contact',   label: 'Contact'   },
-  ...(enExport ? [] : [{ href: '/blog', label: 'Blog' }]),
+  { href: '/blog',      label: 'Blog'      },
 ]
 
 export default function Footer({ site, infos }) {
@@ -91,7 +87,8 @@ export default function Footer({ site, infos }) {
 
       <div className="footer-bottom">
         {/* L'année se met à jour seule (la page est régénérée en continu). */}
-        © {new Date().getFullYear()} M&apos;GYM Association · {adresseSurUneLigne}
+        © {new Date().getFullYear()}{site.footerNom && ` ${site.footerNom}`}
+        {adresseSurUneLigne && ` · ${adresseSurUneLigne}`}
         {infos.telephone && ` · ${infos.telephone}`}
         {infos.email && ` · ${infos.email}`}
       </div>

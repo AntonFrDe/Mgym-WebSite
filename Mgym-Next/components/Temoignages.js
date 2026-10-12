@@ -96,10 +96,10 @@ export default function Temoignages({ site }) {
           </p>
         )}
 
-        {lien && (
+        {lien && site.avisBoutonGoogle && (
           <p className="temoignages-actions apparition">
             <a href={lien} className="btn-outline" target="_blank" rel="noopener noreferrer">
-              Tous les avis sur Google
+              {site.avisBoutonGoogle}
               <span className="visuellement-masque"> (s&apos;ouvre dans un nouvel onglet)</span>
             </a>
           </p>

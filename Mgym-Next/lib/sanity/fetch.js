@@ -12,16 +12,27 @@
 //    injection SQL.
 //
 // 2. LE SITE NE TOMBE PAS SI SANITY TOMBE — mais il ne MENT pas non plus.
-//    En production, une panne LÈVE une erreur : Next garde alors la
-//    dernière page bonne et réessaie plus tard. Avant, la panne renvoyait
-//    le contenu par défaut, que Next mettait en cache comme une page
-//    normale : dix secondes d'incident chez Sanity, et le site affichait
-//    les anciens tarifs ou l'ancienne adresse, sans erreur visible.
-//    En développement et en aperçu, on garde le repli.
+//    En production, une panne LÈVE une erreur : lors de la relecture
+//    horaire, Next garde alors la dernière page bonne et réessaie plus
+//    tard. (Seul cas visible : une panne dans les secondes qui suivent un
+//    « Publier », la page jetée ne peut pas être refaite — le visiteur
+//    voit une erreur jusqu'au rendu suivant réussi.) Avant, la panne
+//    renvoyait le contenu par défaut, que Next mettait en cache comme une
+//    page normale : le site affichait les anciens tarifs, sans erreur.
+//    En développement et en aperçu, une panne rend `siEchec` (une valeur
+//    vide) : la page s'affiche sans la section concernée.
 
 import 'server-only'
 import { clientPour } from './client.js'
-import { DELAI_REVALIDATION } from '../revalidation.js'
+
+// Au plus tard au bout de ce délai (en secondes), une réponse de Sanity
+// gardée en cache est redemandée. MÊME NOMBRE que `revalidate` dans
+// app/layout.js : la page et ses données vieillissent ensemble.
+const DELAI_FILET = 3600
+
+// Étiquette posée sur chaque réponse de Sanity : la route de publication
+// (app/api/revalidation) jette toutes les réponses qui la portent.
+export const ETIQUETTE_SANITY = 'sanity'
 
 // Au-delà, on considère que Sanity ne répondra pas. Sans cette borne, un
 // build peut rester bloqué indéfiniment sur une requête.
@@ -44,10 +55,6 @@ export async function interroger({
 }) {
   const client = clientPour(preview)
 
-  // Sanity pas encore branché : on rend la valeur de repli sans bruit.
-  // Ce n'est pas une erreur, c'est l'état du projet avant migration.
-  if (!client) return siEchec
-
   try {
     return await client.fetch(requete, parametres, {
       signal: AbortSignal.timeout(DELAI_MAX_MS),
@@ -59,11 +66,10 @@ export async function interroger({
       // le layout demandent tous deux le contenu du site, Sanity n'est
       // interrogé qu'une fois.
       //
-      // Après le build : le même délai fait expirer la réponse, ce qui
-      // permet à la page de redemander son contenu au CMS sans qu'on
-      // reconstruise quoi que ce soit. Sans cela, une page régénérée
-      // relirait une réponse mise en cache pour toujours et n'afficherait
-      // jamais la modification.
+      // Après le build : la réponse est jetée à chaque « Publier » (grâce
+      // à l'étiquette) et, au pire, au bout de DELAI_FILET. Sans délai, une
+      // page régénérée relirait une réponse mise en cache pour toujours et
+      // n'afficherait jamais la modification.
       //
       // Attention, ce cache est écrit sur disque et SURVIT d'un build à
       // l'autre : pendant `next build`, une entrée existante est
@@ -72,7 +78,7 @@ export async function interroger({
       // du contenu réellement publié.
       ...(preview
         ? { cache: 'no-store' }
-        : { next: { revalidate: DELAI_REVALIDATION } }),
+        : { next: { revalidate: DELAI_FILET, tags: [ETIQUETTE_SANITY] } }),
     })
   } catch (erreur) {
     // Le message part dans les journaux du serveur, jamais vers le

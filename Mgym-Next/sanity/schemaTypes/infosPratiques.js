@@ -32,10 +32,6 @@ export const infosPratiques = defineType({
         Rule.required().email().error('Vérifiez l\'adresse e-mail : elle doit contenir une arobase et un point.'),
     }),
     defineField({
-      name: 'horairesAccueil', title: 'Horaires d\'accueil', type: 'text', rows: 3,
-      description: 'Facultatif. Quand peut-on vous joindre ? Laissez vide si cela ne s\'applique pas.',
-    }),
-    defineField({
       name: 'reseauxSociaux', title: 'Réseaux sociaux', type: 'array', of: [{ type: 'reseauSocial' }],
       description: 'Les pages que vous animez. Chacune apparaîtra dans le pied de page et dans la section « Suivez-nous ».',
     }),
@@ -47,7 +43,8 @@ export const infosPratiques = defineType({
     }),
     defineField({
       name: 'lienStages', title: 'Formulaire d\'inscription aux stages', type: 'url',
-      description: 'Facultatif, et différent de celui de l\'adhésion. Laissez vide si vous n\'en avez pas.',
+      description: 'Facultatif, et différent de celui de l\'adhésion. Sert aux stages qui n\'ont pas ' +
+        'leur propre « Lien d\'inscription ». Laissez vide si vous n\'en avez pas.',
       validation: (Rule) =>
         Rule.uri({ scheme: ['https'] }).error('L\'adresse doit commencer par https://'),
     }),

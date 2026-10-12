@@ -12,31 +12,33 @@
 // toutes les largeurs : une frise horizontale obligerait à la faire défiler
 // de côté, ce qu'un public senior fait mal.
 //
-// TOUTE LA CARTE EST UN LIEN vers la fiche de l'événement, qui a sa propre
-// adresse (/evenements/…) : elle se partage sur Facebook, le bouton
-// « retour » du téléphone y ramène, et Google peut la trouver.
+// DEUX LIENS PAR CARTE :
+//   - la carte (date, titre, photo) mène à la fiche de l'événement, qui a
+//     sa propre adresse (/evenements/…) : elle se partage sur Facebook, le
+//     bouton « retour » du téléphone y ramène, et Google peut la trouver ;
+//   - la FLÈCHE, à droite, ouvre directement le formulaire d'inscription
+//     saisi dans le back-office (« Lien d'inscription » du stage). Pas de
+//     lien, stage complet ou annulé : pas de flèche (voir lienInscription).
+// Côte à côte et non l'un dans l'autre : le HTML interdit un lien dans un
+// lien, et le navigateur casserait la carte en morceaux.
 //
 // JAMAIS DE FRISE VIDE : sans événement à venir, un message d'attente et un
 // renvoi vers les réseaux prennent sa place.
 
-import { grouperParMois, pastilleDate, periodeLisible, statutAffiche } from '../lib/evenements/format.js'
+import { grouperParMois, lienInscription, pastilleDate, periodeLisible, statutAffiche } from '../lib/evenements/format.js'
+import LienFormulaire from './LienFormulaire'
 import { Picto } from './pictogrammes'
-
-// La copie hors-ligne ne contient pas les fiches d'événements (voir
-// scripts/export-statique.mjs) : ses cartes pointent vers le site en ligne.
-const enExport = process.env.MGYM_EXPORT === '1'
 
 /**
  * L'adresse de la fiche, ou le contact si l'événement n'a pas d'adresse web.
  * Exportée : l'onglet « Ateliers » renvoie vers les mêmes fiches.
  */
-export function lienEvenement(ev, urlSite) {
+export function lienEvenement(ev) {
   if (!ev.slug) return '#contact'
-  if (!enExport) return `/evenements/${ev.slug}`
-  return urlSite ? `${urlSite}/evenements/${ev.slug}` : '#contact'
+  return `/evenements/${ev.slug}`
 }
 
-export default function Evenements({ site, evenements = [], urlSite }) {
+export default function Evenements({ site, infos = {}, evenements = [] }) {
   const groupes = grouperParMois(evenements)
 
   return (
@@ -66,36 +68,48 @@ export default function Evenements({ site, evenements = [], urlSite }) {
                   {groupe.evenements.map((ev) => {
                     const date = pastilleDate(ev.dateDebut)
                     const statut = statutAffiche(ev.statut)
+                    const inscription = lienInscription(ev, infos.lienStages)
                     return (
                       <li key={ev._id} className={`frise-item est-${statut.classe}`}>
-                        <a href={lienEvenement(ev, urlSite)} className="frise-carte">
-                          {/* La pastille répète la date écrite en toutes
-                              lettres juste à côté : masquée au lecteur
-                              d'écran, qui l'entendrait deux fois. */}
-                          <span className="frise-date" aria-hidden="true">
-                            <span>{date.jour}</span>
-                            <strong>{date.numero}</strong>
-                            <span>{date.mois}</span>
-                          </span>
-                          <span className="frise-corps">
-                            <span className="frise-titre">{ev.titre}</span>
-                            <span className="frise-quand">{periodeLisible(ev.dateDebut, ev.dateFin)}</span>
-                            {(ev.lieu || ev.prix) && (
-                              <span className="frise-infos">
-                                {ev.lieu && <span><Picto nom="lieu" taille={16} />{ev.lieu}</span>}
-                                {ev.prix && <span><Picto nom="prix" taille={16} />{ev.prix}</span>}
-                              </span>
+                        <div className="frise-carte">
+                          <a href={lienEvenement(ev)} className="frise-lien">
+                            {/* La pastille répète la date écrite en toutes
+                                lettres juste à côté : masquée au lecteur
+                                d'écran, qui l'entendrait deux fois. */}
+                            <span className="frise-date" aria-hidden="true">
+                              <span>{date.jour}</span>
+                              <strong>{date.numero}</strong>
+                              <span>{date.mois}</span>
+                            </span>
+                            <span className="frise-corps">
+                              <span className="frise-titre">{ev.titre}</span>
+                              <span className="frise-quand">{periodeLisible(ev.dateDebut, ev.dateFin)}</span>
+                              {(ev.lieu || ev.prix) && (
+                                <span className="frise-infos">
+                                  {ev.lieu && <span><Picto nom="lieu" taille={16} />{ev.lieu}</span>}
+                                  {ev.prix && <span><Picto nom="prix" taille={16} />{ev.prix}</span>}
+                                </span>
+                              )}
+                              <span className={`frise-statut est-${statut.classe}`}>{statut.texte}</span>
+                            </span>
+                            {/* La photo du stage, saisie avec l'événement. alt
+                                vide : le titre est écrit juste à côté, dans le
+                                même lien — la décrire le ferait lire deux fois. */}
+                            {ev.vignette?.src && (
+                              <img className="frise-photo" src={ev.vignette.src} alt="" loading="lazy" />
                             )}
-                            <span className={`frise-statut est-${statut.classe}`}>{statut.texte}</span>
-                          </span>
-                          {/* La photo du stage, saisie avec l'événement. alt
-                              vide : le titre est écrit juste à côté, dans le
-                              même lien — la décrire le ferait lire deux fois. */}
-                          {ev.vignette?.src && (
-                            <img className="frise-photo" src={ev.vignette.src} alt="" loading="lazy" />
+                          </a>
+                          {/* LienFormulaire : nouvel onglet, et le lecteur
+                              d'écran entend « S'inscrire à … (formulaire
+                              d'inscription, s'ouvre dans un nouvel onglet) ». */}
+                          {inscription && (
+                            <LienFormulaire lien={inscription} className="frise-fleche"
+                              precision="formulaire d'inscription" title="S'inscrire (nouvel onglet)">
+                              <span className="visuellement-masque">S&apos;inscrire à {ev.titre}</span>
+                              <Picto nom="fleche" taille={20} />
+                            </LienFormulaire>
                           )}
-                          <span className="frise-fleche"><Picto nom="fleche" taille={20} /></span>
-                        </a>
+                        </div>
                       </li>
                     )
                   })}

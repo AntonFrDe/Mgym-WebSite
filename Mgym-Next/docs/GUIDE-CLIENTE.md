@@ -16,6 +16,17 @@ change pas.
 Je modifie  →  J'enregistre (brouillon)  →  Je regarde  →  Je publie
 ```
 
+**Ce que vous voyez dans l'administration est exactement ce qu'affiche le
+site.** Si vous videz un champ, le texte disparaît du site. Pour changer un
+texte, remplacez-le ; pour le retirer, videz le champ.
+
+**Vos modifications pas encore publiées** sont toutes rassemblées dans le
+menu **📝 À publier**, tout en haut à gauche. Un coup d'œil avant de partir :
+si la liste n'est pas vide, quelque chose attend votre clic sur « Publier ».
+
+**L'Aperçu montre vos brouillons, pas le site en ligne.** Une modification
+visible dans l'Aperçu mais pas publiée n'est pas sur le site.
+
 **Vous ne pouvez rien casser.** Les couleurs, les polices et la mise en page
 ne sont pas modifiables : elles ne vous sont même pas proposées. Vous ne
 touchez qu'aux textes, aux photos et aux horaires.
@@ -24,8 +35,9 @@ touchez qu'aux textes, aux photos et aux horaires.
 
 ## Se connecter
 
-Rendez-vous sur **admin.mgym.fr** et connectez-vous avec l'adresse e-mail sur
-laquelle vous avez reçu l'invitation.
+Rendez-vous sur **mgym.sanity.studio** et connectez-vous avec l'adresse
+e-mail sur laquelle vous avez reçu l'invitation. (Ajoutez cette page à vos
+favoris.)
 
 Vous arrivez sur un menu à gauche :
 
@@ -94,8 +106,13 @@ une seule saisie masque tous les cours de la période.
 3. **Activité rattachée** : choisissez « Ateliers thématiques » pour un
    atelier. Il apparaîtra alors AUSSI dans l'onglet *Ateliers* de la section
    « Plus d'activités », sous « Prochaines dates ».
-4. Le reste est facultatif : lieu, tarif, nombre de places, photo, description
-5. **Publier**. Deux à trois minutes plus tard, le stage apparaît dans la
+4. **Lien d'inscription** : collez l'adresse de votre formulaire
+   (`https://forms.gle/…`). Sur l'accueil, la **flèche ronde** à droite du
+   stage ouvre ce formulaire ; un clic ailleurs sur le stage ouvre sa page.
+   Sans lien, pas de flèche. Un stage « Complet » ou « Annulé » n'a pas de
+   flèche non plus.
+5. Le reste est facultatif : lieu, tarif, nombre de places, photo, description
+6. **Publier**. Quelques secondes plus tard (rechargez la page), le stage apparaît dans la
    frise **Stages & événements** de la page d'accueil, avec sa propre page
    que vous pouvez partager sur Facebook ou Instagram.
 

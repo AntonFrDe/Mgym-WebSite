@@ -7,7 +7,7 @@
 // code du Studio, qui est public : c'est ce qui rendait dangereux un simple
 // bouton « Voir le site ».
 //
-// Différences avec /api/preview (le lien secret, toujours disponible) :
+// Particularités :
 //   · la session dure une journée de travail (DUREE_STUDIO_MS) ;
 //   · les cookies sont PARTITIONNÉS quand la demande vient du cadre du
 //     Studio — sans quoi Safari, donc tout iPhone, les jette.
@@ -40,6 +40,6 @@ export async function GET(requete) {
 
   await ouvrirPreview({ dureeMs: DUREE_STUDIO_MS, cadreTiers: depuisCadreTiers(requete.headers) })
 
-  // Même garde-fou que /api/preview : on ne redirige que vers une page du site.
+  // Garde-fou : on ne redirige que vers une page du site (cheminInterne).
   return NextResponse.redirect(new URL(cheminInterne(redirectTo), requete.url))
 }

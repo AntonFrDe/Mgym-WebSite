@@ -100,15 +100,6 @@ export const creneau = defineType({
     }),
 
     defineField({
-      name: 'lieu',
-      title: 'Lieu',
-      type: 'string',
-      description:
-        'Laissez vide si le cours a lieu à l\'adresse habituelle. ' +
-        'Ne remplissez que pour une salle différente.',
-    }),
-
-    defineField({
       name: 'placesMax',
       title: 'Nombre de places',
       type: 'number',

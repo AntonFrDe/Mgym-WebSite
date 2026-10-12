@@ -15,25 +15,23 @@
 /**
  * Efface le secret de l'adresse affichée.
  *
- * `/api/preview` redirige vers un chemin PROPRE : vérifié en local, le
- * `Location` vaut « /tarifs », sans rien d'autre. Mais le runtime Next de
- * Netlify recolle la requête d'origine, et le secret réapparaît dans la
- * barre d'adresse :
+ * /api/draft-mode/enable redirige vers un chemin PROPRE. Mais le runtime
+ * Next de Netlify recolle la requête d'origine (constaté avec l'ancien
+ * lien secret), et le secret peut réapparaître dans la barre d'adresse :
  *
- *   https://…/tarifs?secret=b2037c…&chemin=%2Ftarifs
+ *   https://…/?sanity-preview-secret=b2037c…&sanity-preview-pathname=%2F
  *
- * Or ce secret est PARTAGÉ et DURABLE — ce n'est pas un jeton de session.
- * Il finit dans l'historique du navigateur, et une adresse recopiée à un
- * tiers lui ouvre les brouillons jusqu'à ce qu'on le change.
+ * Il finirait dans l'historique du navigateur, et une adresse recopiée à
+ * un tiers lui ouvrirait les brouillons tant que le secret est valide.
  *
  * replaceState n'ajoute pas d'entrée d'historique et ne recharge rien :
  * la session de prévisualisation vit dans un cookie, pas dans l'URL.
  */
 function nettoyerAdresse() {
   const url = new URL(window.location.href)
-  if (!url.searchParams.has('secret')) return
-  url.searchParams.delete('secret')
-  url.searchParams.delete('chemin')
+  const aEffacer = [...url.searchParams.keys()].filter((cle) => cle.startsWith('sanity-preview-'))
+  if (!aEffacer.length) return
+  aEffacer.forEach((cle) => url.searchParams.delete(cle))
   window.history.replaceState(null, '', url.pathname + url.search + url.hash)
 }
 
@@ -62,7 +60,7 @@ export default function BandeauPreview() {
         <strong>Mode prévisualisation</strong> — cette page contient des
         modifications qui ne sont pas encore publiées.
       </span>
-      <a href="/api/preview-exit" className="bandeau-preview-sortie">
+      <a href="/api/draft-mode/disable" className="bandeau-preview-sortie">
         Revenir au site publié
       </a>
     </div>

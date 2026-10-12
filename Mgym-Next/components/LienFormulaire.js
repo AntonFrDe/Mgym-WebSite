@@ -23,9 +23,11 @@
  *   défaut, qu'il s'agit d'un formulaire Google ; pour une plaquette,
  *   « plaquette PDF ». Même composant : la règle « annoncer qu'on quitte
  *   le site » vaut pour tous les liens sortants.
+ *   `title` : la bulle au survol de la souris, pour un bouton sans texte
+ *   visible (la flèche d'inscription de la frise des événements).
  */
 export default function LienFormulaire({
-  lien, className = 'btn-primary', precision = 'formulaire Google', children,
+  lien, className = 'btn-primary', precision = 'formulaire Google', title, children,
 }) {
   const destination = lien || '#contact'
   const externe = Boolean(lien)
@@ -34,6 +36,7 @@ export default function LienFormulaire({
     <a
       href={destination}
       className={className}
+      title={title}
       {...(externe ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
     >
       {children}
