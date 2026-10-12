@@ -96,7 +96,7 @@ npm run verifier       # enchaîne les quatre commandes ci-dessous
 |---|---|
 | `npm run schemas:check` | les schémas compilent, chaque document a un aperçu lisible, chaque champ une description française |
 | `npm run groq:check` | les 13 requêtes compilent, aucune valeur variable n'est concaténée, aucune ne vise `drafts.` |
-| `npm test` | 86 tests : moteur de planning, sécurité de la prévisualisation, chaque champ du back-office lu par le site (et inversement) |
+| `npm test` | 87 tests : moteur de planning, sécurité de la prévisualisation, chaque champ du back-office lu par le site (et inversement) |
 | `npm run build` | le site se construit |
 
 Il n'y a **pas de linter** dans ce projet : `npm run verifier` en tient lieu.

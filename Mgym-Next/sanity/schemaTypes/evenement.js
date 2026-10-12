@@ -132,8 +132,10 @@ export const evenement = defineType({
       title: 'Lien d\'inscription',
       type: 'url',
       description:
-        'Adresse du formulaire d\'inscription à ce stage. Laissez vide ' +
-        'pour renvoyer vers la page Contact.',
+        'Adresse du formulaire d\'inscription à ce stage (https://forms.gle/…). ' +
+        'Sur l\'accueil, la flèche ronde à droite du stage y mène ; la fiche ' +
+        'du stage affiche un bouton « S\'inscrire ». Vide : pas de flèche ' +
+        '(sauf si un formulaire général des stages est saisi dans Infos pratiques).',
       validation: (Rule) =>
         Rule.uri({ scheme: ['http', 'https'] }).error(
           'L\'adresse doit commencer par https://'

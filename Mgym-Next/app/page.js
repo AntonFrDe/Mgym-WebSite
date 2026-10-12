@@ -70,7 +70,7 @@ export default async function Home() {
       <Temoignages site={site} />
       <Pricing site={site} infos={infos} />
       <Planning site={site} enPreview={enPreview} />
-      <Evenements site={site} evenements={evenements} />
+      <Evenements site={site} infos={infos} evenements={evenements} />
       <BlogApercu articles={articles} />
       <Reseaux site={site} infos={infos} />
       <Contact site={site} infos={infos} />

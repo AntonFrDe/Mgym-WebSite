@@ -981,16 +981,22 @@ a[href^="tel:"] { white-space:nowrap; }
   width:1rem; height:1rem; border-radius:50%;
   background:var(--blanc); border:3px solid var(--lavande-fonce);
 }
-/* La carte ENTIÈRE est le lien : une grande cible, facile à toucher. */
+/* La carte porte DEUX liens côte à côte : le grand (date, titre, photo)
+   ouvre la fiche, une grande cible facile à toucher ; la flèche ronde, à
+   droite, ouvre le formulaire d'inscription. */
 .frise-carte {
-  display:grid; grid-template-columns:auto 1fr auto auto; align-items:center; gap:1.1rem;
+  display:flex; align-items:center; gap:1.1rem;
   background:var(--blanc); border-radius:1.25rem; padding:1rem 1.25rem 1rem 1rem;
-  color:var(--prune); text-decoration:none;
   box-shadow:0 8px 24px rgba(var(--prune-rgb), .07);
   transition:transform .25s, box-shadow .25s;
 }
 .frise-carte:hover { transform:translateY(-2px); box-shadow:0 14px 34px rgba(var(--prune-rgb), .12); }
-.frise-carte:focus-visible { outline:2px solid var(--lavande-fonce); outline-offset:3px; }
+.frise-lien {
+  flex:1; min-width:0;
+  display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:1.1rem;
+  color:var(--prune); text-decoration:none; border-radius:1rem;
+}
+.frise-lien:focus-visible, .frise-fleche:focus-visible { outline:2px solid var(--lavande-fonce); outline-offset:3px; }
 .frise-date {
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   width:4.5rem; min-height:4.75rem; border-radius:1rem; padding:.4rem;
@@ -1000,7 +1006,8 @@ a[href^="tel:"] { white-space:nowrap; }
 }
 .frise-date strong { font-family:var(--font-serif),serif; font-size:2rem; font-weight:500; letter-spacing:0; line-height:1; }
 .frise-corps { display:flex; flex-direction:column; gap:.3rem; min-width:0; }
-.frise-titre { font-family:var(--font-serif),serif; font-size:1.35rem; font-weight:500; line-height:1.2; }
+/* Césure : à 320 px, « Approfondissement » dépassait de la carte. */
+.frise-titre { font-family:var(--font-serif),serif; font-size:1.35rem; font-weight:500; line-height:1.2; hyphens:auto; overflow-wrap:break-word; }
 .frise-quand { font-family:var(--font-sans),sans-serif; font-size:.95rem; font-weight:600; color:var(--lavande-fonce); }
 .frise-infos {
   display:flex; flex-wrap:wrap; gap:.3rem 1rem;
@@ -1008,7 +1015,17 @@ a[href^="tel:"] { white-space:nowrap; }
 }
 .frise-infos > span { display:inline-flex; align-items:center; gap:.35rem; }
 .frise-infos svg { color:var(--lavande-fonce); flex-shrink:0; }
-.frise-fleche { color:var(--lavande-fonce); }
+/* 2,75rem = 44 px : la cible tactile minimale. La ↗ de LienFormulaire
+   est masquée, la flèche suffit ; le lecteur d'écran, lui, entend bien
+   « s'ouvre dans un nouvel onglet ». */
+.frise-fleche {
+  flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  width:2.75rem; height:2.75rem; border-radius:50%;
+  background:var(--lavande-clair); color:var(--lavande-fonce);
+  transition:background .2s, color .2s;
+}
+.frise-fleche:hover { background:var(--lavande-fonce); color:var(--blanc); }
+.frise-fleche .icone-externe { display:none; }
 /* La photo du stage : petite, à droite, à ses proportions (16:9, fixées
    par Sanity). Sans photo, la colonne se replie d'elle-même. */
 .frise-photo { width:8rem; height:auto; aspect-ratio:16 / 9; object-fit:cover; border-radius:.75rem; display:block; }
@@ -1601,11 +1618,14 @@ footer { background:var(--prune); padding:3.5rem 5rem; }
   .frise-liste { padding-left:1.6rem; gap:.75rem; }
   .frise-liste::before { left:.45rem; }
   .frise-item::before { left:-1.45rem; top:1.6rem; width:.85rem; height:.85rem; }
-  .frise-carte { grid-template-columns:auto 1fr; gap:.85rem; padding:.9rem .9rem .9rem .8rem; }
+  /* La flèche passe SOUS la carte, à droite : à côté, elle laissait
+     moins de 100 px au titre à 320 px de large. */
+  .frise-carte { flex-wrap:wrap; gap:.6rem; padding:.9rem .9rem .9rem .8rem; }
+  .frise-lien { flex-basis:100%; grid-template-columns:auto 1fr; gap:.85rem; }
+  .frise-fleche { margin-left:auto; }
   .frise-date { width:3.9rem; min-height:4.25rem; }
   .frise-date strong { font-size:1.75rem; }
   .frise-titre { font-size:1.2rem; }
-  .frise-fleche { display:none; }
   /* Téléphone : la photo passe en bandeau au-dessus de la carte, sur toute
      sa largeur — à droite, elle écrasait le titre à 320 px. */
   .frise-photo { grid-column:1 / -1; order:-1; width:100%; aspect-ratio:5 / 2; }

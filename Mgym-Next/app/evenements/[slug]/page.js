@@ -14,7 +14,7 @@ import { notFound } from 'next/navigation'
 import { previewActif } from '../../../lib/preview'
 import { getContenu, normaliserEvenement } from '../../../lib/contenu'
 import { getEvenementParSlug, getSlugsEvenements } from '../../../lib/sanity/queries/index.js'
-import { periodeLisible, statutAffiche } from '../../../lib/evenements/format.js'
+import { lienInscription, periodeLisible, statutAffiche } from '../../../lib/evenements/format.js'
 import TexteRiche from '../../../components/TexteRiche'
 import LienFormulaire from '../../../components/LienFormulaire'
 import LienItineraire from '../../../components/LienItineraire'
@@ -93,7 +93,7 @@ export default async function FicheEvenement({ params }) {
   const statut = statutAffiche(ev.statut)
   const passe = new Date(ev.dateFin || ev.dateDebut) < new Date()
   const telBrut = (infos.telephone ?? '').replace(/[ .]/g, '')
-  const lienInscription = ev.lienInscription || infos.lienStages
+  const inscription = lienInscription(ev, infos.lienStages)
   const sujet = encodeURIComponent(`${ev.titre} — ${periodeLisible(ev.dateDebut, ev.dateFin)}`)
 
   return (
@@ -168,8 +168,8 @@ export default async function FicheEvenement({ params }) {
                   : 'Inscrivez-vous en ligne, ou appelez-nous : nous répondons à toutes les questions.'}
               </p>
               <div className="cta-btns">
-                {ev.statut !== 'complet' && lienInscription && (
-                  <LienFormulaire lien={lienInscription} className="cta-btn-rose">S&apos;inscrire</LienFormulaire>
+                {inscription && (
+                  <LienFormulaire lien={inscription} className="cta-btn-rose">S&apos;inscrire</LienFormulaire>
                 )}
                 {telBrut && <a href={`tel:${telBrut}`} className="cta-btn-rose">Appeler</a>}
                 {infos.email && (

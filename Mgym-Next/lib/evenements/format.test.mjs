@@ -3,7 +3,7 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { heure, pastilleDate, periodeLisible, grouperParMois, statutAffiche } from './format.js'
+import { heure, pastilleDate, periodeLisible, grouperParMois, statutAffiche, lienInscription } from './format.js'
 
 test('l\'heure est celle de Paris, en été (UTC+2) comme en hiver (UTC+1)', () => {
   assert.equal(heure('2026-10-02T17:00:00.000Z'), '19h00')
@@ -59,4 +59,13 @@ test('statuts : complet et annulé distincts, tout le reste est ouvert', () => {
   assert.equal(statutAffiche('complet').classe, 'complet')
   assert.equal(statutAffiche('annule').classe, 'annule')
   assert.equal(statutAffiche(undefined).classe, 'ouvert')
+})
+
+test('inscription : le lien du stage, sinon le formulaire général, jamais si complet ou annulé', () => {
+  const lien = 'https://forms.gle/stage'
+  assert.equal(lienInscription({ statut: 'ouvert', lienInscription: lien }, 'https://general'), lien)
+  assert.equal(lienInscription({ statut: 'ouvert' }, 'https://general'), 'https://general')
+  assert.equal(lienInscription({ statut: 'ouvert' }, undefined), null)
+  assert.equal(lienInscription({ statut: 'complet', lienInscription: lien }), null)
+  assert.equal(lienInscription({ statut: 'annule', lienInscription: lien }), null)
 })

@@ -8,7 +8,7 @@ La lisibilité et la simplicité priment sur l'effet technique.
 
 - **Next.js 15.5** (App Router) + **React 19** (19.2 minimum : exigé par le
   Studio Sanity 5, dont l'outil « Aperçu » s'adapte aux téléphones)
-- **JavaScript pur** — pas de TypeScript, pas de linter. 86 tests via
+- **JavaScript pur** — pas de TypeScript, pas de linter. 87 tests via
   `node --test` (aucune dépendance de test)
 - **CSS global unique** : `app/globals.css` (pas de Tailwind, pas de CSS Modules)
 - Polices via `next/font/google` : Cormorant Garamond (serif) + Montserrat (sans)
@@ -22,7 +22,7 @@ La lisibilité et la simplicité priment sur l'effet technique.
 ```bash
 npm run dev            # développement, http://localhost:3000
 npm run studio:dev     # le back-office,  http://localhost:3333
-npm run verifier       # schémas + requêtes + 86 tests + build
+npm run verifier       # schémas + requêtes + 87 tests + build
 npm run livrer         # verifier, puis redéploie le Studio (sanity deploy)
 npm run build          # build du site hébergé
 npm start              # le sert (next start)
@@ -249,7 +249,7 @@ vides). Conséquences :
 Vérifications avant de livrer :
 
 ```bash
-npm run verifier   # schémas + requêtes + 86 tests + build
+npm run verifier   # schémas + requêtes + 87 tests + build
 ```
 
 Documentation complète dans `docs/` : SECURITY, ROLLBACK, SANITY-SCHEMAS,

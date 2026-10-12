@@ -83,3 +83,15 @@ export function statutAffiche(statut) {
   if (statut === 'annule') return { texte: 'Annulé', classe: 'annule' }
   return { texte: 'Inscriptions ouvertes', classe: 'ouvert' }
 }
+
+/**
+ * Le formulaire où s'inscrire à un stage, ou null s'il n'y en a pas.
+ * Le « Lien d'inscription » du stage passe en premier ; à défaut, le
+ * formulaire général des stages (« Infos pratiques »). Complet ou annulé :
+ * null, on ne propose pas de s'inscrire à un stage qui n'a plus de place.
+ * Une seule règle pour la flèche de la frise ET le bouton de la fiche.
+ */
+export function lienInscription(ev, lienStages) {
+  if (statutAffiche(ev.statut).classe !== 'ouvert') return null
+  return ev.lienInscription || lienStages || null
+}

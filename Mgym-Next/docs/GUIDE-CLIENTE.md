@@ -106,8 +106,13 @@ une seule saisie masque tous les cours de la période.
 3. **Activité rattachée** : choisissez « Ateliers thématiques » pour un
    atelier. Il apparaîtra alors AUSSI dans l'onglet *Ateliers* de la section
    « Plus d'activités », sous « Prochaines dates ».
-4. Le reste est facultatif : lieu, tarif, nombre de places, photo, description
-5. **Publier**. Quelques secondes plus tard (rechargez la page), le stage apparaît dans la
+4. **Lien d'inscription** : collez l'adresse de votre formulaire
+   (`https://forms.gle/…`). Sur l'accueil, la **flèche ronde** à droite du
+   stage ouvre ce formulaire ; un clic ailleurs sur le stage ouvre sa page.
+   Sans lien, pas de flèche. Un stage « Complet » ou « Annulé » n'a pas de
+   flèche non plus.
+5. Le reste est facultatif : lieu, tarif, nombre de places, photo, description
+6. **Publier**. Quelques secondes plus tard (rechargez la page), le stage apparaît dans la
    frise **Stages & événements** de la page d'accueil, avec sa propre page
    que vous pouvez partager sur Facebook ou Instagram.
 

@@ -43,7 +43,8 @@ export const infosPratiques = defineType({
     }),
     defineField({
       name: 'lienStages', title: 'Formulaire d\'inscription aux stages', type: 'url',
-      description: 'Facultatif, et différent de celui de l\'adhésion. Laissez vide si vous n\'en avez pas.',
+      description: 'Facultatif, et différent de celui de l\'adhésion. Sert aux stages qui n\'ont pas ' +
+        'leur propre « Lien d\'inscription ». Laissez vide si vous n\'en avez pas.',
       validation: (Rule) =>
         Rule.uri({ scheme: ['https'] }).error('L\'adresse doit commencer par https://'),
     }),
