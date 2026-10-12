@@ -1,7 +1,7 @@
 # Passation — site M'GYM
 
 > À coller (ou faire lire) au début d'une nouvelle conversation Claude.
-> Mis à jour le **7 octobre 2026**. **Le dépôt est public : aucun secret ici.**
+> Mis à jour le **12 octobre 2026**. **Le dépôt est public : aucun secret ici.**
 > Les conventions du code sont dans `Mgym-Next/CLAUDE.md` — à lire aussi.
 
 ---
@@ -11,7 +11,9 @@
 Site vitrine Next.js 15 d'une association sport-santé de Mirepoix-sur-Tarn,
 alimenté par Sanity, hébergé chez Netlify sur `mgym.fr`. **En ligne et à
 jour depuis le 7/10** : `main` est publié par le projet `mgym-site` (compte
-« Anton »), qui porte le domaine. Reste les finitions de la « Priorité 1 ».
+« Anton »), qui porte le domaine. **Depuis le 12/10**, Sanity est la seule
+source du texte et « Publier » met le site à jour en ≈ 8 s sans
+reconstruction (0 crédit). Reste les finitions de la « Priorité 1 ».
 
 ---
 
@@ -102,12 +104,27 @@ Fait le 7/10 :
    sur la cible du CNAME), mais il cassera quand l'ancien projet sera
    supprimé.
 2. Tester l'**Aperçu** du Studio (il dépend de `/api/draft-mode/enable`).
+   Testé le 11/10 avec l'ANCIEN code ; le bouton « Quitter » du bandeau a
+   changé depuis (`/api/draft-mode/disable`) : à revérifier une fois.
 3. Ensuite seulement : révoquer l'ancien jeton Sanity `mgym-viewer`
    (`npx sanity tokens list` / `delete`), et laisser l'ancien projet
    s'éteindre.
-4. L'aperçu de PR de `9cf2a55` a échoué au build (code 2) pendant une
-   panne GitHub ; la production du même code est passée. À surveiller sur
-   la prochaine PR.
+
+Fait le 12/10 (PR #5, fusion `961ab49`, 1 déploiement = 15 crédits) :
+- sauvegarde complète (`npm run sauvegarde`), puis 39 champs VIDES remplis
+  dans Sanity avec le texte que le code affichait (aucune saisie écrasée)
+  et les 2 plaquettes PDF téléversées — AVANT le déploiement du code ;
+- `SANITY_REVALIDATE_SECRET` posé en secret chez Netlify (production,
+  deploy-preview, branch-deploy). La valeur n'est écrite nulle part
+  ailleurs que dans le webhook Sanity : pour la changer, en générer une
+  nouvelle et la poser DES DEUX CÔTÉS ;
+- Studio redéployé ; valeurs des 3 champs retirés effacées ;
+- webhook Sanity « Publier → site (mgym.fr) » → `https://mgym.fr/api/revalidation`
+  (create/update/delete, sans brouillons). C'est le SEUL webhook ;
+- recette en ligne : fiches de stage en 200 (elles étaient en 404), texte
+  identique à avant, appel non signé refusé (401) ; test réel : une
+  publication visible en 8 s, sans build ;
+- sauvegarde GitHub hebdomadaire lancée une fois à la main : verte.
 
 > Les actions de production (fusion vers `main`, `updateSite`, validation
 > DNS chez OVH) sont refusées par le mode auto de Claude Code tant que
@@ -200,20 +217,19 @@ design : `Vault/30-Decisions/adr-006-mgym-elements-generes-par-ia.md`.
 
 Par ordre d'intérêt (détail : critique dans `Mgym-Next/.impeccable/`, non
 versionnée) :
-- **Deux systèmes d'aperçu** (`/api/preview?secret=` et
-  `/api/draft-mode/*`) + un jeton HMAC maison (`lib/preview-jeton.js`)
-  par-dessus le cookie de Next. Garder draft-mode seul.
-- Code mort en production : variante « sentier » et copie hors-ligne
-  (`build-standalone.js`, `export-statique.mjs`, `localiser-images.mjs`,
-  ~740 lignes qui réécrivent chaque interaction en JS vanilla). À retirer
-  maintenant que le site est en ligne — sinon toute modif est à faire deux fois.
 - CSS : 16 rayons et 25 ombres différents → 3 rayons, 2 ombres en variables.
 - Sections maigres : Témoignages (1 avis) et Réseaux (2 liens) ; nav à 9 entrées.
 - Documentation pléthorique (~3 100 lignes) : supprimer les audits
   (`docs/AUDIT-*`, `FINAL-BACKEND-AUDIT.md`) qui affirment « 21/21 » sans
   avoir testé le Studio ; `docs/DEPLOIEMENT.md` est périmé.
 - Scripts obsolètes : `scripts/heberger-tour.sh`, `adresse-tour.sh`,
-  `arreter-tour.sh` (tunnel, remplacé par Netlify), `migrer.mjs` (fait).
+  `arreter-tour.sh` (tunnel, remplacé par Netlify).
+- Les cartes « Particulier · Association · Entreprise · Massage » de
+  l'onglet Sur mesure ressemblent à des boutons sans mener nulle part.
+
+Fait le 12/10 : `/api/preview` retiré (draft-mode seul), variante
+« sentier » et copie hors-ligne supprimées, `migrer.mjs` supprimé (il
+aurait écrasé les saisies de la cliente).
 - Textes génériques de la cliente (« Formes & Bien-être », triades
   d'impératifs) : à proposer, l'utilisateur a choisi « code seulement ».
 
@@ -225,9 +241,11 @@ versionnée) :
 - **Les crédits** : 15 par déploiement de production, 300/mois en gratuit.
   Ne jamais brancher un webhook Sanity sur un **build hook** Netlify : le seul
   webhook autorisé vise `https://mgym.fr/api/revalidation` (0 crédit).
-- **Les aperçus de PR sont protégés** (HTTP 401) : impossible de les tester
-  par `curl`. Le statut GitHub « Deploy Preview ready » prouve seulement
-  que le build passe.
+- **Les aperçus de PR sont accessibles** (`deploy-preview-N--mgym-site.netlify.app`,
+  vérifié le 12/10 : 200) et gratuits : y faire la recette AVANT de
+  fusionner, la fusion seule coûte 15 crédits. L'ancien projet
+  `frolicking-babka-da04a6` construit lui aussi un aperçu de chaque PR :
+  l'ignorer.
 - **`publish` et `[[plugins]]` doivent rester explicites** dans
   `netlify.toml`, sinon « 0 new function(s) » : pas de route serveur.
 - **Variables publiques Sanity dans `netlify.toml`** : une variable saisie
